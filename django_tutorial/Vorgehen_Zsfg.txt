@@ -112,8 +112,25 @@ class Choice(models.Model):
 python manage.py sqlmigrate polls 0001
 
 ##
+##
+##
+##
 
+Für den Docker Container braucht man anfangs nur Dockerfile, dockker-compose.yml und requirements.txt
 
+git übersicht
+
+git status
+git checkout .
+git add /ordner/*.bla
+git status
+git push origin mybranch
+git log origin/master..mybranch
+
+##
+##
+##
+##
 
 
 

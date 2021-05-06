@@ -19,8 +19,3 @@ class Choice(models.Model):
     votes = models.IntegerField(default=0)
     def __str__(self):
         return self.choice_text	
-
-
-Question.objects.all()
-q1 = Question(question_text="Diese Question steht in polls/models.py", pub_date=timezone.now())
-q1.save()
