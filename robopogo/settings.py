@@ -37,9 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'roboserv.apps.RoboservConfig',
     'rest_framework',
     'django_extensions',
-    'roboserv'
 ]
 
 MIDDLEWARE = [
