@@ -26,7 +26,6 @@ class Game(models.Model):
     
     
     def deal(self):
-        print("hello")
         
         for player in self.player_set.all():
             
@@ -41,16 +40,13 @@ class Game(models.Model):
                 # random card out of movements
                 card = list(movements.keys())[n]
                 
-                print(card)
                 # append in list till 10 cards for 
                 liste.append(card)
-                print(liste)
                 
             
                 
             player.cards = "".join(liste)
-            print(player.cards)
-            #player.save()
+            player.save()
             
 
 class Player(models.Model):
