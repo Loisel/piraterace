@@ -1,6 +1,0 @@
-*.pyc
-*.bak
-*.html.py
-/data
-/django_tutorial/data
-*.sqlite3
