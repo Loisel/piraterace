@@ -23,9 +23,11 @@ movements = {
 
 
 class Game(models.Model):
-    
+
+    gamename = models.CharField(max_length=200, default='gamename')
     
     def deal(self):
+    
         
         for player in self.player_set.all():
             
@@ -42,18 +44,19 @@ class Game(models.Model):
                 
                 # append in list till 10 cards for 
                 liste.append(card)
-                
             
-                
             player.cards = "".join(liste)
             player.save()
-            
+    def __str__(self):
+        return self.gamename
+
+
 
 class Player(models.Model):
-
+    
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, default='Name')
     
     moves = models.CharField(max_length=5, blank=True)
     
