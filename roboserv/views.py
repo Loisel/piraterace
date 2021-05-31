@@ -13,6 +13,11 @@ def index(request):
 def serviert(request, game_id, player_id):
     game = Game.objects.get(id=game_id)
     player = Player.objects.get(id=player_id)
-    game.deal()
     response = "You're looking at the cards of " + player.name + " : " + player.cards
+    return HttpResponse(response)
+
+def deal(request, game_id):
+    game = Game.objects.get(id=game_id)
+    game.deal()
+    response = "The cards are dealt "
     return HttpResponse(response)
