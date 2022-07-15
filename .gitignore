@@ -1,3 +1,4 @@
+data/db
 *.pyc
 *.bak
 *.html.py

@@ -1,21 +1,18 @@
 from django.db import models
 from django.contrib.auth.models import User, Group
+from django.contrib.postgres.fields import ArrayField
+from annoying.fields import AutoOneToOneField
 
-from pigame.models import BaseGame, GameConfig
+from pigame.models import BaseGame
 
 class Account(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    game_lobby = models.ForeignKey(GameConfig)
-
-class Player(models.Model):
-    account = models.OneToOneField(Account, on_delete=models.CASCADE)
-    loc_x = models.PositiveSmallIntegerField(null=True, blank=True)
-    loc_y = models.PositiveSmallIntegerField(null=True, blank=True)
-    direction = models.PositiveIntegerField(null=True, blank=True)
-    game = models.OneToOneField(BaseGame, on_delete=models.CASCADE)
-    nslots = models.PositiveSmallIntegerField(default=5)
-    cards = models.CharField()
-    deck = models.CharField()
+    start_loc_x = models.PositiveSmallIntegerField(null=True, blank=True)
+    start_loc_y = models.PositiveSmallIntegerField(null=True, blank=True)
+    start_direction = models.PositiveIntegerField(null=True, blank=True)
+    #game_lobby = models.ForeignKey(GameConfig, on_delete=models.CASCADE)
+    game = models.ForeignKey(BaseGame, on_delete=models.CASCADE, null=True, blank=True)
+    deck = ArrayField(models.IntegerField(null=True, blank=True), null=True, blank=True)
 
     next_card = models.PositiveSmallIntegerField(default=0)
     lives = models.PositiveSmallIntegerField(default=3)
