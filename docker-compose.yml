@@ -21,8 +21,10 @@ services:
 
   frontend:
     build: frontend
-    command: ionic serve --external
+    command: ionic serve --external --lab --lab-host=0.0.0.0
+
     volumes:
       - ./frontend:/code
     ports:
       - "8100:8100"
+      - "8200:8200"
