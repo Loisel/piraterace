@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker-compose run --rm web ./manage.py shell_plus
+docker-compose run --rm backend ./manage.py shell_plus

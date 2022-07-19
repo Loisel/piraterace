@@ -1,5 +1,5 @@
 #!/bin/bash
-docker-compose run --rm web ./manage.py shell -c "
+docker-compose run --rm backend ./manage.py shell -c "
 from django.contrib.auth.models import User;
 from piplayer.models import Account
 
