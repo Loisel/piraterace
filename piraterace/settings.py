@@ -73,6 +73,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'piraterace.wsgi.application'
 
+MAPSDIR = '/code/maps'
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases

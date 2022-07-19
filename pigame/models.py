@@ -2,6 +2,22 @@ from django.db import models
 from polymorphic.models import PolymorphicModel
 from django.contrib.postgres.fields import ArrayField
 
+DIRID2NAME = {
+    0: "up",
+    1: "right",
+    2: "down",
+    3: "left"
+}
+
+DIRNAME2ID = {v: k for k,v in DIRID2NAME.items()}
+
+DIRID2MOVE = {
+    0: [0, 1],
+    1: [1, 0],
+    2: [0, -1],
+    3: [-1, 0]
+}
+
 CARDS = {
         1: dict(
             descr = "forward move",
@@ -51,7 +67,7 @@ class BaseGame(PolymorphicModel):
     mode = models.CharField(max_length=1, choices=GAME_MODES, default="c")
     # nplayers = models.PositiveSmallIntegerField(null=True, blank=True)
     # playerlist ist ein account set, oder?
-    # map = models.OneToOneField()
+    mapfile = models.CharField(max_length=256)
     nlives = models.PositiveSmallIntegerField(default=3)
     damage_on_hit = models.PositiveSmallIntegerField(default=10)
     npause_on_repair = models.PositiveSmallIntegerField(default=1)

@@ -1,0 +1,41 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "untitled.tmx",
+    "expandedProjectPaths": [
+    ],
+    "fileStates": {
+        "": {
+            "scaleInDock": 1
+        },
+        "untitled.tmx": {
+            "scale": 3,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 27.166666666666686,
+                "y": 76.16666666666666
+            }
+        },
+        "untitled.tmx#water": {
+            "scaleInDock": 1
+        }
+    },
+    "last.exportedFilePath": "/home/alois/git/piraterace/maps",
+    "last.imagePath": "/home/alois/git/piraterace/maps/tiles",
+    "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
+    "map.lastUsedFormat": "tmx",
+    "openFiles": [
+        "untitled.tmx"
+    ],
+    "project": "prace.tiled-project",
+    "recentFiles": [
+        "untitled.tmx"
+    ],
+    "tileset.embedInMap": true,
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    }
+}
