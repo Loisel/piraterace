@@ -19,3 +19,10 @@ services:
     depends_on:
       - db
 
+  frontend:
+    build: frontend
+    command: ionic serve --external
+    volumes:
+      - ./frontend:/code
+    ports:
+      - "8100:8100"
