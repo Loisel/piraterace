@@ -5,7 +5,7 @@ data/db
 
 
 
-# Following from ionic
+# Following from ionic Vue
 *~
 *.sw[mnpcod]
 .tmp
@@ -22,6 +22,39 @@ $RECYCLE.BIN/
 log.txt
 npm-debug.log*
 
+frontend/.idea
+frontend/.ionic
+frontend/.sass-cache
+frontend/.sourcemaps
+frontend/.versions
+frontend/.vscode
+frontend/coverage
+frontend/dist
+frontend/node_modules
+frontend/platforms
+frontend/plugins
+frontend/www
+# Specifies intentionally untracked files to ignore when using Git
+# http://git-scm.com/docs/gitignore
+
+# Following from ionic Angular
+*~
+*.sw[mnpcod]
+.tmp
+*.tmp
+*.tmp.*
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+UserInterfaceState.xcuserstate
+$RECYCLE.BIN/
+
+*.log
+log.txt
+npm-debug.log*
+
+frontend/.angular
 frontend/.idea
 frontend/.ionic
 frontend/.sass-cache
