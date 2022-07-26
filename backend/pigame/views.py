@@ -1,6 +1,12 @@
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-from pigame.models import BaseGame, ClassicGame, DEFAULT_DECK, DIRID2NAME, DIRNAME2ID, CARDS, DIRID2MOVE
+from django.forms.models import model_to_dict
+from django.shortcuts import redirect
+from django.urls import reverse
+from django.core import serializers
+from pigame.models import (
+    BaseGame, ClassicGame, DEFAULT_DECK, DIRID2NAME, DIRNAME2ID, CARDS, DIRID2MOVE,
+    GameMaker)
 from piplayer.models import Account
 from piraterace.settings import MAPSDIR
 import datetime
@@ -99,10 +105,11 @@ def game(request, game_id, **kwargs):
         )
     return JsonResponse(payload)
 
+
 def create_debug_game(request, **kwargs):
     players = [
-            get_object_or_404(Account, user__username='root'),
-            ]
+        get_object_or_404(Account, user__username='root'),
+    ]
     game = ClassicGame(creator_userid=players[0].pk, mapfile="map1.json")
     game.save()
 
@@ -125,6 +132,29 @@ def create_debug_game(request, **kwargs):
             )
     return JsonResponse(payload)
 
+def view_gamemaker(request, gamemaker_id):
+    return JsonResponse(model_to_dict(get_object_or_404(GameMaker, pk=gamemaker_id)))
+
+def list_gamemakers(request):
+    makers = GameMaker.objects.all()
+    return JsonResponse(list(makers.values()), safe=False)
+
+def join_gamemaker(request, gamemaker_id, **kwargs):
+    maker = get_object_or_404(GameMaker, pk=gamemaker_id)
+    player = get_object_or_404(Account, user__username='al')
+    maker.add_player(player)
+    maker.save()
+    return redirect(reverse("pigame:view_gamemaker", kwargs={"gamemaker_id": maker.pk}))
+
+def create_gamemaker(request, **kwargs):
+    player = get_object_or_404(Account, user__username='root')
+
+    maker = GameMaker(creator_userid=player.pk, mapfile="map1.json", player_ids=[])
+    maker.add_player(player)
+    maker.save()
+
+    payload = model_to_dict(maker)
+    return redirect(reverse("pigame:view_gamemaker", kwargs={"gamemaker_id": maker.pk}))
 
 def load_inital_map(fname):
     with open(os.path.join(MAPSDIR, fname)) as fh:

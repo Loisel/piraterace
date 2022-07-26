@@ -4,4 +4,5 @@ djangorestframework
 django-extensions
 django-polymorphic
 django-annoying
+django-cors-headers
 Werkzeug
