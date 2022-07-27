@@ -1,7 +1,7 @@
 <h2>Games</h2>
 <ul class="games">
   <li *ngFor="let game of gameMakers">
-    <button type="button">
+    <button type="button" (click)="joinGameMaker(game.id)">
       <span>{{game.id}}</span>
       <span class="badge">{{game.mode}}</span>
       <span class="name">{{game.mapfile}}</span>

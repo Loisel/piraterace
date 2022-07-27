@@ -33,7 +33,16 @@ export class GamelistComponent implements OnInit {
       console.log(gameMaker);
       this.router.navigate(['view_gamemaker', gameMaker.id], {relativeTo: this.route});
     });
-    
+
   }
+
+  joinGameMaker(id: number): void {
+    console.log("Join");
+    this.httpService.joinGameMaker(id).subscribe(gameMaker => {
+      console.log(gameMaker);
+      this.router.navigate(['view_gamemaker', gameMaker.id], {relativeTo: this.route});
+    });
+  }
+
 
 }

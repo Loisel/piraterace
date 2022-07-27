@@ -10,6 +10,7 @@ export class HttpService {
   gamesURL = `${environment.API_URL}/pigame/list_gamemakers`
   view_gameMakerURL = `${environment.API_URL}/pigame/view_gamemaker`
   create_gameMakerURL = `${environment.API_URL}/pigame/create_gamemaker`
+  join_gameMakerURL = `${environment.API_URL}/pigame/join_gamemaker`
   constructor(private httpClient: HttpClient) { }
   getGamesList() {
     return this.httpClient.get<GameMaker[]>(this.gamesURL);
@@ -19,5 +20,8 @@ export class HttpService {
   }
   createGameMaker(){
     return this.httpClient.get<GameMaker>(`${this.create_gameMakerURL}`);    
+  }
+  joinGameMaker(id: number){
+    return this.httpClient.get<GameMaker>(`${this.join_gameMakerURL}/${id}`);    
   }
 }
