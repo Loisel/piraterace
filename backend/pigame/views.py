@@ -110,7 +110,7 @@ def create_debug_game(request, **kwargs):
     players = [
         get_object_or_404(Account, user__username='root'),
     ]
-    game = ClassicGame(creator_userid=players[0].pk, mapfile="map1.json")
+    game = ClassicGame(mapfile="map1.json")
     game.save()
 
     initmap = load_inital_map(game.mapfile)
@@ -131,6 +131,44 @@ def create_debug_game(request, **kwargs):
             url=f"http://localhost:8000/pigame/game/{game.pk}",
             )
     return JsonResponse(payload)
+
+def create_game(request, gamemaker_id, **kwargs):
+    maker = get_object_or_404(GameMaker, pk=gamemaker_id)
+    players = Account.objects.filter(user__pk__in=maker.player_ids)
+    game = ClassicGame(mapfile=maker.mapfile,
+                       mode = maker.mode,
+                       nlives = maker.nlives,
+                       damage_on_hit = maker.damage_on_hit,
+                       npause_on_repair = maker.npause_on_repair,
+                       npause_on_destroy = maker.npause_on_destroy,
+                       ncardslots = maker.ncardslots,
+                       ncardsavail = maker.ncardsavail,
+                       allow_transfer = maker.allow_transfer,
+                       countdown_mode = maker.countdown_mode,
+                       countdown = maker.countdown,
+                       round_time = maker.round_time
+    )
+    game.save()
+
+    initmap = load_inital_map(game.mapfile)
+    players = determine_starting_locations(initmap, players)
+
+    for p in players:
+        p.game = game
+        p.deck = DEFAULT_DECK
+        p.next_card = 0
+        p.lives = game.nlives
+        p.damage = 0
+        p.save()
+
+    payload = dict(
+            text='game created',
+            game_id=game.pk,
+            time_started = game.time_started,
+            url=f"http://localhost:8000/pigame/game/{game.pk}",
+    )
+    return JsonResponse(payload)
+
 
 def view_gamemaker(request, gamemaker_id):
     return JsonResponse(model_to_dict(get_object_or_404(GameMaker, pk=gamemaker_id)))

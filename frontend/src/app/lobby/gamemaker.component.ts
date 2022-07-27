@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { GameMaker } from '../gamemaker';
-import { HttpService } from '../http.service'
+import { HttpService } from '../http.service';
 import { environment } from '../../environments/environment';
-import { ActivatedRoute } from '@angular/router'
+import { Router, ActivatedRoute } from '@angular/router';
 
 
 @Component({
@@ -13,10 +13,10 @@ import { ActivatedRoute } from '@angular/router'
 })
 export class GameMakerComponent implements OnInit {
   gameMaker: GameMaker;
-  start_game_url = `${environment.API_URL}/pigame/create_game`;
   constructor(
     private httpService: HttpService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router
   ) {
   }
 
@@ -27,6 +27,15 @@ export class GameMakerComponent implements OnInit {
       console.log(gamemaker);
       this.gameMaker = gamemaker;
     });
+  }
+
+  createGame(){
+    this.httpService.createGame(this.gameMaker.id).subscribe(payload => {
+      console.log(payload);
+      this.router.navigate(['game', this.gameMaker.id]);
+
+    });
+    
   }
 
 }
