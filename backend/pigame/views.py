@@ -75,6 +75,7 @@ def game(request, game_id, **kwargs):
         time_started = game.time_started,
         cards_played = game.cards_played,
         map = initmap,
+        mapfile = game.mapfile
     )
 
     if datetime.datetime.now(pytz.utc) > game.timestamp + datetime.timedelta(seconds=game.round_time):

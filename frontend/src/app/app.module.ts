@@ -8,10 +8,8 @@ import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { HttpClientModule } from '@angular/common/http';
 
-import { GameComponent } from './game/game.component';
-
 @NgModule({
-  declarations: [AppComponent, GameComponent],
+  declarations: [AppComponent],
   imports: [BrowserModule,
             IonicModule.forRoot(),
             AppRoutingModule,

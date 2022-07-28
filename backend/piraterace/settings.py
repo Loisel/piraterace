@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -27,8 +26,21 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+# workaround for the CORS problem with static exports
+from django.contrib.staticfiles import handlers
 
-# Application definition
+# extend StaticFilesHandler to add "Access-Control-Allow-Origin" to every response
+class CORSStaticFilesHandler(handlers.StaticFilesHandler):
+    def serve(self, request):
+        response = super().serve(request)
+        response['Access-Control-Allow-Origin'] = '*'
+        return response
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8100",
+    "http://localhost:8200",
+]
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -45,20 +57,15 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     
-]
-
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8100",
-    "http://localhost:8200",
 ]
 
 ROOT_URLCONF = 'piraterace.urls'
@@ -134,7 +141,18 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
+# monkeypatch handlers to use our class instead of the original StaticFilesHandler
+handlers.StaticFilesHandler = CORSStaticFilesHandler
+
+STATIC_ROOT = '/collectstatic'
 STATIC_URL = '/static/'
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder'
+)
+STATICFILES_DIRS = [
+    '/code/static'
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
