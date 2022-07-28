@@ -4,6 +4,7 @@
 
 export const environment = {
   API_URL: 'http://localhost:8000',
+  STATIC_URL: 'http://localhost:1337/static/',
   production: false
 };
 

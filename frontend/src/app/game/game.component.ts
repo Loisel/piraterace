@@ -31,7 +31,6 @@ export class GameComponent implements OnInit {
     };
 
     this.config.scene = new GameScene(this.config, this)
-    
   }
 
   ngOnInit() {
@@ -55,8 +54,8 @@ class GameScene extends Phaser.Scene {
 
   preload() {
     console.log("Component", this.component);
-    this.load.image('tileset', `${environment.API_URL}/static/maps/wateru.png`);
-    this.load.tilemapTiledJSON('tilemap', `${environment.API_URL}/static/maps/${this.component.game.mapfile}`);
+    this.load.image('tileset', `${environment.STATIC_URL}/maps/wateru.png`);
+    this.load.tilemapTiledJSON('tilemap', `${environment.STATIC_URL}/maps/${this.component.game.mapfile}`);
     this.add.text(0.5,0.5,"Huhu");
   }
 
@@ -66,7 +65,7 @@ class GameScene extends Phaser.Scene {
 
     // add the tileset image we are using
     const tileset = map.addTilesetImage('tileset1', 'tileset')
-	
+
     // create the layers we want in the right order
     map.createLayer('Background', tileset, 0, 0);
 

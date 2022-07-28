@@ -26,16 +26,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-# workaround for the CORS problem with static exports
-from django.contrib.staticfiles import handlers
-
-# extend StaticFilesHandler to add "Access-Control-Allow-Origin" to every response
-class CORSStaticFilesHandler(handlers.StaticFilesHandler):
-    def serve(self, request):
-        response = super().serve(request)
-        response['Access-Control-Allow-Origin'] = '*'
-        return response
-
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8100",
     "http://localhost:8200",
@@ -57,15 +47,14 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
 ]
 
 ROOT_URLCONF = 'piraterace.urls'
@@ -138,13 +127,7 @@ USE_L10N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/3.2/howto/static-files/
-
-# monkeypatch handlers to use our class instead of the original StaticFilesHandler
-handlers.StaticFilesHandler = CORSStaticFilesHandler
-
-STATIC_ROOT = '/collectstatic'
+STATIC_ROOT = '/static_volume'
 STATIC_URL = '/static/'
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -153,6 +136,11 @@ STATICFILES_FINDERS = (
 STATICFILES_DIRS = [
     '/code/static'
 ]
+
+
+MEDIA_ROOT = '/media_volume'
+MEDIA_URL = '/media/'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
