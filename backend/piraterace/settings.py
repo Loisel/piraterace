@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -77,8 +77,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'piraterace.wsgi.application'
 
-MAPSDIR = '/code/maps'
-
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
@@ -141,6 +139,7 @@ STATICFILES_DIRS = [
 MEDIA_ROOT = '/media_volume'
 MEDIA_URL = '/media/'
 
+MAPSDIR = os.path.join(STATIC_ROOT, 'maps')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

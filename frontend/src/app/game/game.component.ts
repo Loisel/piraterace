@@ -16,29 +16,32 @@ import { environment } from '../../environments/environment';
 export class GameComponent implements OnInit {
   phaserGame: Phaser.Game;
   config: Phaser.Types.Core.GameConfig;
-  game: any = null;
+  gameinfo: any = null;
   constructor(
     private httpService: HttpService,
     private route: ActivatedRoute,
     private router: Router
   ) {
-    this.config = {
-      type: Phaser.AUTO,
-      width: 800,
-      height: 600,
-      physics: {},
-      parent: 'game'
-    };
-
-    this.config.scene = new GameScene(this.config, this)
   }
 
   ngOnInit() {
     let id = +this.route.snapshot.paramMap.get("game_id");
 
-    this.httpService.getGame(id).subscribe(game => {
-      console.log("Game:", game);
-      this.game = game;
+    this.httpService.getGame(id).subscribe(gameinfo => {
+      console.log("Game:", gameinfo);
+      this.gameinfo = gameinfo;
+      this.config = {
+        type: Phaser.AUTO,
+        physics: {},
+        scale: {
+          mode: Phaser.Scale.FIT,
+          parent: 'game',
+          width: this.gameinfo.map.width * this.gameinfo.map.tilewidth,
+          height: this.gameinfo.map.height * this.gameinfo.map.tileheight,
+        },
+      };
+
+      this.config.scene = new GameScene(this.config, this)
       this.phaserGame = new Phaser.Game(this.config);
     });
   }
@@ -46,7 +49,8 @@ export class GameComponent implements OnInit {
 }
 
 class GameScene extends Phaser.Scene {
-  component:any = null;
+  boats: any = {};
+  component: any = null;
   constructor(config, component) {
     super(config);
     this.component = component;
@@ -55,12 +59,38 @@ class GameScene extends Phaser.Scene {
   preload() {
     console.log("Component", this.component);
     this.load.image('tileset', `${environment.STATIC_URL}/maps/wateru.png`);
-    this.load.tilemapTiledJSON('tilemap', `${environment.STATIC_URL}/maps/${this.component.game.mapfile}`);
-    this.add.text(0.5,0.5,"Huhu");
+    this.load.tilemapTiledJSON('tilemap', `${environment.STATIC_URL}/maps/${this.component.gameinfo.mapfile}`);
+    this.load.spritesheet('boat',
+        `${environment.STATIC_URL}/sprites/boat.png`,
+        { frameWidth: 24, frameHeight: 72 }
+    );
+  }
+
+  play_actionstack() {
+    let GI = this.component.gameinfo;
+    let actionstack = this.component.gameinfo.actionstack;
+    actionstack.forEach( (action) => {
+      console.log(action);
+      if (action.target > 0) {
+        let boat = this.boats[action.target];
+        if (action.key === "rotate") {
+          boat.angle += 90 * action.val;
+        }
+        if (action.key === "move_x") {
+          boat.x += action.val * GI.map.tilewidth;
+        }
+        if (action.key === "move_y") {
+          boat.y += action.val * GI.map.tileheight;
+        }
+      }
+
+    });
   }
 
   create() {
-  // create the Tilemap
+    let GI = this.component.gameinfo;
+
+    // create the Tilemap
     const map = this.make.tilemap({ key: 'tilemap', tileWidth: 16, tileHeight: 16})
 
     // add the tileset image we are using
@@ -69,6 +99,23 @@ class GameScene extends Phaser.Scene {
     // create the layers we want in the right order
     map.createLayer('Background', tileset, 0, 0);
 
+    Object.entries(GI.players).forEach( ([playerid, player]) => {
+        console.log(playerid, player);
+        var boat = this.add.sprite(
+          (player['start_pos_x']-.5) * GI.map.tilewidth,
+          (player['start_pos_y']-.5) * GI.map.tileheight,
+          "boat");
+          //set the width of the sprite
+          boat.displayHeight = GI.map.tileheight;
+          //scale evenly
+          boat.scaleX = boat.scaleY;
+          boat.angle = player['start_direction'] * 90;
+        this.boats[playerid] = boat;
+      }
+    );
+
+
+    this.play_actionstack();
   }
 
   update() {

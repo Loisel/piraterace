@@ -45,24 +45,62 @@ def determine_starting_locations(initmap, players):
 def play_stack(game):
     initial_map = load_inital_map(game.mapfile)
     stack = game.cards_played
+    Nrounds = len(game.cards_played) // game.ncardslots
     players = {p.pk: p for p in list(game.account_set.all())}
-    
+
     for pk, player in players.items():
         player.direction = player.start_direction
         player.xpos = player.start_loc_x
         player.ypos = player.start_loc_y
 
-    stack = zip(stack[::2], stack[1::2])
-    for playerid, card in stack:
-        player = players[playerid]
-        player.direction = (player.direction + CARDS[card]["rot"]) % 4
-        player.xpos += DIRID2MOVE[player.direction][0]
-        player.ypos += DIRID2MOVE[player.direction][1]
+    stack = list(zip(stack[::2], stack[1::2]))
+    #for playerid, card in stack:
+    #    player = players[playerid]
+    #    player.direction = (player.direction + CARDS[card]["rot"]) % 4
+    #    player.xpos += DIRID2MOVE[player.direction][0]
+    #    player.ypos += DIRID2MOVE[player.direction][1]
 
-    return players
-        
-        
 
+
+    actionstack = []
+    for rnd in range(Nrounds):
+
+        stack_start = rnd * game.ncardslots * len(players)
+        stack_end = (rnd+1) * game.ncardslots * len(players)
+        this_round_cards = stack[stack_start:stack_end]
+
+        for playerid, card in this_round_cards:
+            player = players[playerid]
+            actions = get_actions_for_card(game, players, playerid, card)
+            actionstack.extend(actions)
+
+    return players, actionstack
+
+
+def get_actions_for_card(game, players, playerid, card):
+    player = players[playerid]
+
+    actions = []
+    rot = CARDS[card]['rot']
+    if rot != 0:
+        actions.append(dict(key="rotate", target=playerid, val=rot))
+        player.direction = (player.direction + rot) % 4
+
+    for mov in range(abs(CARDS[card]['move'])):
+        # here collisions have to happen
+        inc = CARDS[card]['move'] / abs(CARDS[card]['move'])
+
+        xinc = DIRID2MOVE[player.direction][0] * inc
+        yinc = DIRID2MOVE[player.direction][1] * inc
+
+        if xinc != 0:
+            actions.append(dict(key="move_x", target=playerid, val=xinc))
+            player.xpos += xinc
+        if yinc != 0:
+            actions.append(dict(key="move_y", target=playerid, val=yinc))
+            player.ypos += yinc
+
+    return actions
 
 def game(request, game_id, **kwargs):
     game = get_object_or_404(BaseGame, pk=game_id)
@@ -94,12 +132,15 @@ def game(request, game_id, **kwargs):
 
         payload['text'] = "game increment"
 
-    players = play_stack(game)
+    players, actionstack = play_stack(game)
 
+    payload["actionstack"] = actionstack
+    payload["players"] = {}
     for p in players.values():
-        payload[f"player{p.pk}"] = dict(
+        payload["players"][p.pk] = dict(
             start_pos_x = p.start_loc_x,
             start_pos_y = p.start_loc_y,
+            start_direction = p.start_direction,
             pos_x = p.xpos,
             pos_y = p.ypos,
             direction = p.direction

@@ -31,7 +31,7 @@ CARDS = {
             ),
         10: dict(
             descr = "back move 1",
-            move = 1,
+            move = -1,
             rot = 0,
             ),
         20: dict(
