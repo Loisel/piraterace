@@ -3,10 +3,22 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "",
+    "activeFile": "map1.json",
     "expandedProjectPaths": [
+        "."
     ],
     "fileStates": {
+        "map1.json": {
+            "scale": 0.9618749999999999,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 202.20922677063032,
+                "y": 160.10396361273553
+            }
+        },
+        "map1.json#tileset1": {
+            "scaleInDock": 1
+        },
         "tilemap1.tmx": {
             "scale": 2.396375,
             "selectedLayer": 0,
@@ -20,17 +32,19 @@
             "scaleInEditor": 1
         }
     },
-    "last.exportedFilePath": "/home/alois/git/piraterace/tiled",
+    "last.exportedFilePath": "/home/fabian/piraterace/backend/static/maps",
     "last.imagePath": "/home/alois/git/piraterace/backend/maps/tiles",
-    "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
+    "map.lastUsedExportFilter": "Alle Dateien (*)",
     "map.lastUsedFormat": "tmx",
     "map.tileHeight": 16,
     "map.tileWidth": 16,
     "map.width": 25,
     "openFiles": [
+        "map1.json"
     ],
     "project": "piraterace.tiled-project",
     "recentFiles": [
+        "map1.json",
         "tileset1.tsx",
         "tilemap1.tmx"
     ],
