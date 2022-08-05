@@ -9,8 +9,8 @@ describe('GamelistComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ GamelistComponent ],
-      imports: [IonicModule.forRoot()]
+      declarations: [GamelistComponent],
+      imports: [IonicModule.forRoot()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(GamelistComponent);

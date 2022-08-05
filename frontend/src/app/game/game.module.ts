@@ -6,13 +6,7 @@ import { GameComponent } from './game.component';
 import { GameRoutingModule } from './game-routing.module';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    FormsModule,
-    IonicModule,
-    GameRoutingModule,
-  ],
-  declarations: [GameComponent]
+  imports: [CommonModule, FormsModule, IonicModule, GameRoutingModule],
+  declarations: [GameComponent],
 })
-
-export class GameModule { }
+export class GameModule {}

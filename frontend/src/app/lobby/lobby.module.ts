@@ -8,10 +8,6 @@ import { LobbyRoutingModule } from './lobby-routing.module';
 
 @NgModule({
   declarations: [GamelistComponent, GameMakerComponent],
-  imports: [
-    CommonModule,
-    IonicModule,
-    LobbyRoutingModule
-  ]
+  imports: [CommonModule, IonicModule, LobbyRoutingModule],
 })
-export class LobbyModule { }
+export class LobbyModule {}

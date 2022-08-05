@@ -5,12 +5,12 @@ import { GameComponent } from './game.component';
 const routes: Routes = [
   {
     path: ':game_id',
-    component: GameComponent
-  }
+    component: GameComponent,
+  },
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
 export class GameRoutingModule {}

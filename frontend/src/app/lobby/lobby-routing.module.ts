@@ -11,11 +11,11 @@ const routes: Routes = [
   {
     path: 'view_gamemaker/:id',
     component: GameMakerComponent,
-  }
+  },
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
 export class LobbyRoutingModule {}
