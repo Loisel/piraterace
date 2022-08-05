@@ -54,9 +54,14 @@ export class GameComponent implements OnInit {
 
 class GameScene extends Phaser.Scene {
   updateTimer: Phaser.Time.TimerEvent;
+  animationTimer: Phaser.Time.TimerEvent;
   boats: any = {};
   last_played_action: number = 0;
   component: any = null;
+  // animation config
+  move_frames: number = 3;
+  anim_frac: number = 0.5;
+  anim_cutoff: number = 10; // below this duration we just skip animations
   constructor(config, component) {
     super(config);
     this.component = component;
@@ -76,9 +81,44 @@ class GameScene extends Phaser.Scene {
     );
   }
 
-  async delay(ms: number) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+  rotate_boat(boat_id: number, angle: number, time: number){
+    time *= this.anim_frac;
+    let frame_delay = time/this.move_frames;
+    let boat = this.boats[boat_id];
+    if(frame_delay < this.anim_cutoff){
+      boat.angle += angle;
+    }else{
+      this.animationTimer = this.time.addEvent({
+        callback: () => {
+          boat.angle += angle/this.move_frames;
+        },
+        callbackScope: this,
+        delay: frame_delay, // 1000 = 1 second
+        repeat: this.move_frames - 1,
+      });
+    }
   }
+
+  move_boat(boat_id: number, move_x: number, move_y: number, time: number){
+    time *= this.anim_frac;
+    let frame_delay = time/this.move_frames;
+    let boat = this.boats[boat_id];
+    if(frame_delay < this.anim_cutoff){
+      boat.x += move_x;
+      boat.y += move_y;
+    }else{
+      this.animationTimer = this.time.addEvent({
+        callback: () => {
+          boat.x += move_x/this.move_frames;
+          boat.y += move_y/this.move_frames;
+        },
+        callbackScope: this,
+        delay: frame_delay, // 1000 = 1 second
+        repeat: this.move_frames - 1,
+      });
+    }
+  }
+
 
   play_actionstack(animation_time_ms: number) {
     let GI = this.component.gameinfo;
@@ -92,24 +132,29 @@ class GameScene extends Phaser.Scene {
 
     for (let i = this.last_played_action; i < actionstack.length; i++) {
       let action = actionstack[i];
-      this.delay((i - this.last_played_action) * animation_time_ms).then(
-        (any) => {
+      this.animationTimer = this.time.addEvent({
+        callback: () => {
           console.log(action);
 
           if (action.target > 0) {
             let boat = this.boats[action.target];
             if (action.key === 'rotate') {
-              boat.angle += 90 * action.val;
+              // boat.angle += 90 * action.val;
+              this.rotate_boat(action.target, 90 * action.val, animation_time_ms);
             }
             if (action.key === 'move_x') {
-              boat.x += action.val * GI.map.tilewidth;
+              // boat.x += action.val * GI.map.tilewidth;
+              this.move_boat(action.target, action.val * GI.map.tilewidth, 0, animation_time_ms);
             }
             if (action.key === 'move_y') {
-              boat.y += action.val * GI.map.tileheight;
+              // boat.y += action.val * GI.map.tileheight;
+              this.move_boat(action.target, 0, action.val * GI.map.tilewidth, animation_time_ms);
             }
           }
-        }
-      );
+        },
+        callbackScope: this,
+        delay: (i - this.last_played_action) * animation_time_ms, // 1000 = 1 second
+      });
     }
     this.last_played_action = actionstack.length;
   }
@@ -145,7 +190,7 @@ class GameScene extends Phaser.Scene {
       this.boats[playerid] = boat;
     });
 
-    this.play_actionstack(5); // play the first action stack really quickly in case user does a reload
+    this.play_actionstack(0); // play the first action stack really quickly in case user does a reload
 
     this.updateTimer = this.time.addEvent({
       callback: this.updateEvent,
@@ -159,7 +204,7 @@ class GameScene extends Phaser.Scene {
     this.component.load_gameinfo().subscribe((gameinfo) => {
       console.log('UpdateEvent:', gameinfo);
       this.component.gameinfo = gameinfo;
-      this.play_actionstack(500);
+      this.play_actionstack(1000);
     });
   }
 
