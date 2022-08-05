@@ -32,8 +32,7 @@ export class GameMakerComponent implements OnInit {
   createGame(){
     this.httpService.createGame(this.gameMaker.id).subscribe(payload => {
       console.log(payload);
-      this.router.navigate(['game', this.gameMaker.id]);
-
+      this.router.navigate(['game', payload['game_id']]);
     });
     
   }
