@@ -36,6 +36,10 @@ export class GameComponent implements OnInit {
             width: this.gameinfo.map.width * this.gameinfo.map.tilewidth,
             height: this.gameinfo.map.height * this.gameinfo.map.tileheight,
           },
+          fps: {
+            target: 24,
+            forceSetTimeOut: true,
+          },
         };
 
         this.config.scene = new GameScene(this.config, this);
