@@ -81,16 +81,16 @@ class GameScene extends Phaser.Scene {
     );
   }
 
-  rotate_boat(boat_id: number, angle: number, time: number){
+  rotate_boat(boat_id: number, angle: number, time: number) {
     time *= this.anim_frac;
-    let frame_delay = time/this.move_frames;
+    let frame_delay = time / this.move_frames;
     let boat = this.boats[boat_id];
-    if(frame_delay < this.anim_cutoff){
+    if (frame_delay < this.anim_cutoff) {
       boat.angle += angle;
-    }else{
+    } else {
       this.animationTimer = this.time.addEvent({
         callback: () => {
-          boat.angle += angle/this.move_frames;
+          boat.angle += angle / this.move_frames;
         },
         callbackScope: this,
         delay: frame_delay, // 1000 = 1 second
@@ -99,18 +99,18 @@ class GameScene extends Phaser.Scene {
     }
   }
 
-  move_boat(boat_id: number, move_x: number, move_y: number, time: number){
+  move_boat(boat_id: number, move_x: number, move_y: number, time: number) {
     time *= this.anim_frac;
-    let frame_delay = time/this.move_frames;
+    let frame_delay = time / this.move_frames;
     let boat = this.boats[boat_id];
-    if(frame_delay < this.anim_cutoff){
+    if (frame_delay < this.anim_cutoff) {
       boat.x += move_x;
       boat.y += move_y;
-    }else{
+    } else {
       this.animationTimer = this.time.addEvent({
         callback: () => {
-          boat.x += move_x/this.move_frames;
-          boat.y += move_y/this.move_frames;
+          boat.x += move_x / this.move_frames;
+          boat.y += move_y / this.move_frames;
         },
         callbackScope: this,
         delay: frame_delay, // 1000 = 1 second
@@ -118,7 +118,6 @@ class GameScene extends Phaser.Scene {
       });
     }
   }
-
 
   play_actionstack(animation_time_ms: number) {
     let GI = this.component.gameinfo;
@@ -140,15 +139,29 @@ class GameScene extends Phaser.Scene {
             let boat = this.boats[action.target];
             if (action.key === 'rotate') {
               // boat.angle += 90 * action.val;
-              this.rotate_boat(action.target, 90 * action.val, animation_time_ms);
+              this.rotate_boat(
+                action.target,
+                90 * action.val,
+                animation_time_ms
+              );
             }
             if (action.key === 'move_x') {
               // boat.x += action.val * GI.map.tilewidth;
-              this.move_boat(action.target, action.val * GI.map.tilewidth, 0, animation_time_ms);
+              this.move_boat(
+                action.target,
+                action.val * GI.map.tilewidth,
+                0,
+                animation_time_ms
+              );
             }
             if (action.key === 'move_y') {
               // boat.y += action.val * GI.map.tileheight;
-              this.move_boat(action.target, 0, action.val * GI.map.tilewidth, animation_time_ms);
+              this.move_boat(
+                action.target,
+                0,
+                action.val * GI.map.tilewidth,
+                animation_time_ms
+              );
             }
           }
         },
