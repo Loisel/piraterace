@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { GameMaker } from '../gamemaker';
-import { HttpService } from '../http.service';
+import { GameMaker } from '../model/gamemaker';
+import { HttpService } from '../services/http.service';
 import { environment } from '../../environments/environment';
 import { Router, ActivatedRoute } from '@angular/router';
 

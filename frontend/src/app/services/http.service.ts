@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { GameMaker } from './gamemaker';
-import { environment } from '../environments/environment';
+import { GameMaker } from '../model/gamemaker';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',

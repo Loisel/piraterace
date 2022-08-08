@@ -1,6 +1,6 @@
 import { IonicModule } from '@ionic/angular';
 import { Component, OnInit } from '@angular/core';
-import { HttpService } from '../http.service';
+import { HttpService } from '../services/http.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { interval } from 'rxjs';
 import Phaser from 'phaser';
