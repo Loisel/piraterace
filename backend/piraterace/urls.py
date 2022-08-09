@@ -19,6 +19,8 @@ from django.urls import re_path, path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('pigame/', include('pigame.urls')),
+    path('auth/', include('djoser.urls')),
+    path('auth/', include('djoser.urls.jwt')),
 ]
 
 

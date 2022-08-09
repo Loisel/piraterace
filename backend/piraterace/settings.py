@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
+    'djoser',
     'django_extensions',
     'pigame',
     'piplayer',
@@ -110,6 +111,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+SIMPLE_JWT = { 'BLACKLIST_AFTER_ROTATION': False, }
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/

@@ -1,8 +1,11 @@
-Django
-psycopg2-binary
-djangorestframework
-django-extensions
-django-polymorphic
+Django==4.0.7
 django-annoying
 django-cors-headers
+django-extensions
+django-polymorphic
+djangorestframework
+djangorestframework
+djangorestframework_simplejwt
+djoser
+psycopg2-binary
 Werkzeug
