@@ -33,4 +33,14 @@ export class HttpService {
   getGame(id: number) {
     return this.httpClient.get(`${this.get_gameURL}/${id}`);
   }
+
+  // Auth
+  registerUserURL = `${environment.API_URL}/auth/users/`;
+  registerUser(username, password, email) {
+    return this.httpClient.post(this.registerUserURL, {
+      username: username,
+      password: password,
+      email: email,
+    });
+  }
 }
