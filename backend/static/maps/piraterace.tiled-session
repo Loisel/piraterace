@@ -7,13 +7,31 @@
     "expandedProjectPaths": [
         "."
     ],
+    "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
+        "": {
+            "scaleInDock": 1
+        },
+        "/home/alois/Downloads/48x48/pipo-map001.tsx": {
+            "scaleInDock": 1
+        },
+        "/home/alois/Downloads/48x48/pipo-map001_at.tsx": {
+            "scaleInDock": 1
+        },
+        "/home/alois/Downloads/48x48/sample.tmx": {
+            "scale": 0.92921875,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 492.34908357154865,
+                "y": 480.5111821086262
+            }
+        },
         "map1.json": {
             "scale": 0.9618749999999999,
             "selectedLayer": 0,
             "viewCenter": {
                 "x": 202.20922677063032,
-                "y": 160.10396361273553
+                "y": 160.62378167641322
             }
         },
         "map1.json#tileset1": {
@@ -32,18 +50,20 @@
             "scaleInEditor": 1
         }
     },
-    "last.exportedFilePath": "/home/fabian/piraterace/backend/static/maps",
-    "last.imagePath": "/home/alois/git/piraterace/backend/maps/tiles",
-    "map.lastUsedExportFilter": "Alle Dateien (*)",
+    "last.exportedFilePath": "/home/alois/git/piraterace/backend/static/maps",
+    "last.imagePath": "/home/alois/git/piraterace/backend/static/maps/pipoya/48x48",
+    "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
     "map.lastUsedFormat": "tmx",
-    "map.tileHeight": 16,
-    "map.tileWidth": 16,
+    "map.tileHeight": 48,
+    "map.tileWidth": 48,
     "map.width": 25,
     "openFiles": [
         "map1.json"
     ],
     "project": "piraterace.tiled-project",
+    "property.type": "int",
     "recentFiles": [
+        "/home/alois/Downloads/48x48/sample.tmx",
         "map1.json",
         "tileset1.tsx",
         "tilemap1.tmx"
@@ -51,7 +71,7 @@
     "tileset.embedInMap": true,
     "tileset.lastUsedFormat": "tsx",
     "tileset.tileSize": {
-        "height": 16,
-        "width": 16
+        "height": 48,
+        "width": 48
     }
 }

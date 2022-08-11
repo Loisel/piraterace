@@ -73,7 +73,7 @@ class GameScene extends Phaser.Scene {
 
   preload() {
     console.log('Component', this.component);
-    this.load.image('tileset', `${environment.STATIC_URL}/maps/wateru.png`);
+    this.load.image('tileset', `${environment.STATIC_URL}/maps/${this.component.gameinfo.map.tilesets[0].image}`);
     this.load.tilemapTiledJSON(
       'tilemap',
       `${environment.STATIC_URL}/maps/${this.component.gameinfo.mapfile}`
@@ -149,7 +149,7 @@ class GameScene extends Phaser.Scene {
                 animation_time_ms
               );
             }
-            if (action.key === 'move_x') {
+            else if (action.key === 'move_x') {
               // boat.x += action.val * GI.map.tilewidth;
               this.move_boat(
                 action.target,
@@ -158,14 +158,16 @@ class GameScene extends Phaser.Scene {
                 animation_time_ms
               );
             }
-            if (action.key === 'move_y') {
+            else if (action.key === 'move_y') {
               // boat.y += action.val * GI.map.tileheight;
               this.move_boat(
                 action.target,
                 0,
-                action.val * GI.map.tilewidth,
+                action.val * GI.map.tileheight,
                 animation_time_ms
               );
+            } else {
+              console.log("Error, key not found.");
             }
           }
         },
@@ -182,21 +184,21 @@ class GameScene extends Phaser.Scene {
     // create the Tilemap
     const map = this.make.tilemap({
       key: 'tilemap',
-      tileWidth: 16,
-      tileHeight: 16,
+      tileWidth: GI.map.tilewidth,
+      tileHeight: GI.map.tileheight,
     });
 
     // add the tileset image we are using
-    const tileset = map.addTilesetImage('tileset1', 'tileset');
+    const tileset = map.addTilesetImage(GI.map.tilesets[0].name, 'tileset');
 
     // create the layers we want in the right order
-    map.createLayer('Background', tileset, 0, 0);
+    map.createLayer(GI.map.layers[0].name, tileset, 0, 0);
 
     Object.entries(GI.players).forEach(([playerid, player]) => {
       console.log(playerid, player);
       var boat = this.add.sprite(
-        (player['start_pos_x'] - 0.5) * GI.map.tilewidth,
-        (player['start_pos_y'] - 0.5) * GI.map.tileheight,
+        (player['start_pos_x'] + 0.5) * GI.map.tilewidth,
+        (player['start_pos_y'] + 0.5) * GI.map.tileheight,
         'boat'
       );
       //set the width of the sprite
@@ -207,7 +209,7 @@ class GameScene extends Phaser.Scene {
       this.boats[playerid] = boat;
     });
 
-    this.play_actionstack(0); // play the first action stack really quickly in case user does a reload
+    this.play_actionstack(1000); // play the first action stack really quickly in case user does a reload
 
     this.updateTimer = this.time.addEvent({
       callback: this.updateEvent,

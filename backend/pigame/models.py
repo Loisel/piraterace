@@ -12,9 +12,9 @@ DIRID2NAME = {
 DIRNAME2ID = {v: k for k,v in DIRID2NAME.items()}
 
 DIRID2MOVE = {
-    0: [0, 1],
+    0: [0, -1],
     1: [1, 0],
-    2: [0, -1],
+    2: [0, 1],
     3: [-1, 0]
 }
 

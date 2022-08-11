@@ -71,13 +71,13 @@ def play_stack(game):
 
         for playerid, card in this_round_cards:
             player = players[playerid]
-            actions = get_actions_for_card(game, players, playerid, card)
+            actions = get_actions_for_card(game, initial_map, players, playerid, card)
             actionstack.extend(actions)
 
     return players, actionstack
 
 
-def get_actions_for_card(game, players, playerid, card):
+def get_actions_for_card(game, gmap, players, playerid, card):
     player = players[playerid]
 
     actions = []
@@ -88,18 +88,56 @@ def get_actions_for_card(game, players, playerid, card):
 
     for mov in range(abs(CARDS[card]['move'])):
         # here collisions have to happen
-        inc = CARDS[card]['move'] / abs(CARDS[card]['move'])
+        inc = int(CARDS[card]['move'] / abs(CARDS[card]['move']))
 
         xinc = DIRID2MOVE[player.direction][0] * inc
         yinc = DIRID2MOVE[player.direction][1] * inc
 
         if xinc != 0:
-            actions.append(dict(key="move_x", target=playerid, val=xinc))
-            player.xpos += xinc
+            actions.extend(move_player_x(game, gmap, players, player, xinc))
         if yinc != 0:
-            actions.append(dict(key="move_y", target=playerid, val=yinc))
-            player.ypos += yinc
+            actions.extend(move_player_y(game, gmap, players, player, yinc))
+    return actions
 
+
+def move_player_x(game, gmap, players, player, inc):
+    actions = []
+    bg = list(filter(lambda l: l["name"] == "background", gmap["layers"]))[0]
+    tile_id = bg["data"][player.ypos * bg["width"] + player.xpos + inc]
+    tile_props = gmap["tilesets"][0]["tiles"]
+    tile_prop = next(filter(lambda p: p["id"] == tile_id, tile_props))
+    if next(filter(lambda p: p["name"] == "collision", tile_prop["properties"]))["value"] == True:
+        damage = next(filter(lambda p: p["name"] == "damage", tile_prop["properties"]))["value"]
+        actions.append(dict(key="collision_x", target=player.pk, val=inc, damage=damage))
+        return actions
+    for pid, p in players.items():
+        if (p.xpos == player.xpos + inc) and (p.ypos == player.ypos):
+            actions.extend(move_player_x(game, gmap, players, p, inc))
+            if (p.xpos == player.xpos + inc) and (p.ypos == player.ypos):
+                return actions
+            break
+    player.xpos += inc
+    actions.append(dict(key="move_x", target=player.pk, val=inc))
+    return actions
+
+def move_player_y(game, gmap, players, player, inc):
+    actions = []
+    bg = list(filter(lambda l: l["name"] == "background", gmap["layers"]))[0]
+    tile_id = bg["data"][(player.ypos + inc) * bg["width"] + player.xpos]
+    tile_props = gmap["tilesets"][0]["tiles"]
+    tile_prop = next(filter(lambda p: p["id"] == tile_id, tile_props))
+    if next(filter(lambda p: p["name"] == "collision", tile_prop["properties"]))["value"] == True:
+        damage = next(filter(lambda p: p["name"] == "damage", tile_prop["properties"]))["value"]
+        actions.append(dict(key="collision_y", target=player.pk, val=inc, damage=damage))
+        return actions
+    for pid, p in players.items():
+        if (p.xpos == player.xpos) and (p.ypos == player.ypos + inc):
+            actions.extend(move_player_y(game, gmap, players, p, inc))
+            if (p.xpos == player.xpos) and (p.ypos == player.ypos + inc):
+                return actions
+            break
+    player.ypos += inc
+    actions.append(dict(key="move_y", target=player.pk, val=inc))
     return actions
 
 def game(request, game_id, **kwargs):
@@ -228,8 +266,13 @@ def join_gamemaker(request, gamemaker_id, **kwargs):
 
 def create_gamemaker(request, **kwargs):
     player = get_object_or_404(Account, user__username='root')
-
-    maker = GameMaker(creator_userid=player.pk, mapfile="map1.json", player_ids=[])
+    mapfile="map2.json"
+    
+    initmap = load_inital_map(mapfile)
+    errs = verify_map(initmap)
+    if errs:
+        return JsonResponse(errs, status=404, safe=False)
+    maker = GameMaker(creator_userid=player.pk, mapfile=mapfile, player_ids=[])
     maker.add_player(player)
     maker.save()
 
@@ -239,4 +282,22 @@ def create_gamemaker(request, **kwargs):
 def load_inital_map(fname):
     with open(os.path.join(MAPSDIR, fname)) as fh:
         dt = json.load(fh)
+    # tl = dt.layers[0].data
+    # colliding = []
     return dt
+
+def verify_map(mapobj):
+    layer_names = [l["name"] for l in mapobj["layers"]]
+    err_msg = []
+    if not "background" in layer_names:
+        err_msg.append("No background layer in map.")
+    if not "startinglocs" in layer_names:
+        err_msg.append("No startinglocs layer in map.")
+    else:
+        slayer = list(filter(lambda l: l["name"] == "startinglocs", mapobj["layers"]))[0]
+        if len(slayer["objects"]) < 1:
+            err_msg.append(f"startinglocs layer has only {len(slayer['objects'])} entries.")
+    tilesets = mapobj["tilesets"]
+    if len(tilesets) != 1:
+        err_msg.append(f"{len(tilesets)} tilesets found. Only supporting 1 tileset.")
+    return err_msg

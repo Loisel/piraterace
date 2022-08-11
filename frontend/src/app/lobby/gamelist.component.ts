@@ -28,12 +28,17 @@ export class GamelistComponent implements OnInit {
 
   createGameMaker(): void {
     console.log('Ping');
-    this.httpService.createGameMaker().subscribe((gameMaker) => {
-      console.log(gameMaker);
-      this.router.navigate(['view_gamemaker', gameMaker.id], {
-        relativeTo: this.route,
-      });
-    });
+    this.httpService.createGameMaker().subscribe(
+      (gameMaker) => {
+        console.log(gameMaker);
+        this.router.navigate(['view_gamemaker', gameMaker.id], {
+          relativeTo: this.route,
+        });
+      },
+      (err) => {
+        console.log(err);
+      }
+    );
   }
 
   joinGameMaker(id: number): void {
