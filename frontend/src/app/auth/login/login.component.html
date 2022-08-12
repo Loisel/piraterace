@@ -1,0 +1,44 @@
+<ion-content class="content">
+  <h1>Login</h1>
+
+  <form
+    class="form div-item"
+    [formGroup]="validations_form"
+    (ngSubmit)="onSubmit(validations_form.value)"
+  >
+    <ion-list>
+      <ion-item class="item-input">
+        <ion-icon slot="start" name="person-outline"></ion-icon>
+        <ion-input
+          inputmode="text"
+          autofocus="true"
+          formControlName="username"
+          placeholder="{{ 'username' }}"
+        ></ion-input>
+      </ion-item>
+      <ion-item class="item-input">
+        <ion-icon slot="start" name="lock-closed-outline"></ion-icon>
+        <ion-input
+          [type]="passwordType"
+          formControlName="password"
+          placeholder="{{ 'password' }}"
+        ></ion-input>
+        <ion-icon
+          [name]="passwordIcon"
+          item-end
+          (click)="showPassword()"
+        ></ion-icon>
+      </ion-item>
+    </ion-list>
+
+    <ion-button
+      class="btn-reg"
+      type="submit"
+      [disabled]="!validations_form.valid"
+    >
+      {{ "Register" }}
+    </ion-button>
+  </form>
+
+  <p>token {{ authService.token | async }}</p>
+</ion-content>

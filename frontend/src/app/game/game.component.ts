@@ -73,7 +73,10 @@ class GameScene extends Phaser.Scene {
 
   preload() {
     console.log('Component', this.component);
-    this.load.image('tileset', `${environment.STATIC_URL}/maps/${this.component.gameinfo.map.tilesets[0].image}`);
+    this.load.image(
+      'tileset',
+      `${environment.STATIC_URL}/maps/${this.component.gameinfo.map.tilesets[0].image}`
+    );
     this.load.tilemapTiledJSON(
       'tilemap',
       `${environment.STATIC_URL}/maps/${this.component.gameinfo.mapfile}`
@@ -148,8 +151,7 @@ class GameScene extends Phaser.Scene {
                 90 * action.val,
                 animation_time_ms
               );
-            }
-            else if (action.key === 'move_x') {
+            } else if (action.key === 'move_x') {
               // boat.x += action.val * GI.map.tilewidth;
               this.move_boat(
                 action.target,
@@ -157,8 +159,7 @@ class GameScene extends Phaser.Scene {
                 0,
                 animation_time_ms
               );
-            }
-            else if (action.key === 'move_y') {
+            } else if (action.key === 'move_y') {
               // boat.y += action.val * GI.map.tileheight;
               this.move_boat(
                 action.target,
@@ -167,7 +168,7 @@ class GameScene extends Phaser.Scene {
                 animation_time_ms
               );
             } else {
-              console.log("Error, key not found.");
+              console.log('Error, key not found.');
             }
           }
         },

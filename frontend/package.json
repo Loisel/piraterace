@@ -22,6 +22,7 @@
     "@ionic/angular": "^6.1.9",
     "@ionic/cli": "^6.20.1",
     "@ionic/lab": "^3.2.13",
+    "@ionic/storage-angular": "^3.0.6",
     "phaser": "^3.55.2",
     "rxjs": "~6.6.0",
     "tslib": "^2.2.0",

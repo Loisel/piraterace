@@ -7,13 +7,13 @@ import {
   Validators,
 } from '@angular/forms';
 
-import { HttpService } from '../../services/http.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-register',
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss'],
-  providers: [HttpService],
+  providers: [AuthService],
 })
 export class RegisterComponent implements OnInit {
   title = 'Angular Form Validation Tutorial';
@@ -25,7 +25,7 @@ export class RegisterComponent implements OnInit {
   constructor(
     public toastController: ToastController,
     private formBuilder: FormBuilder,
-    private httpService: HttpService
+    private authService: AuthService
   ) {
     this.createForm();
   }
@@ -58,31 +58,22 @@ export class RegisterComponent implements OnInit {
   }
 
   async onSubmit(values) {
-    let email = values['email'];
-    let password = values['password'];
-    let confirmpassword = values['confirmpassword'];
-    let username = values['username'];
-
-    let params = {
-      email: email,
-      password: password,
-      username: username,
-    };
-    console.log(params);
-    this.httpService.registerUser(username, password, email).subscribe(
-      (ret) => {
-        console.log('register return', ret);
-        this.presentToast('User registered', 'success');
-      },
-      (error) => {
-        console.log('register returned with error', error);
-        let errmsg = 'Error registering user!\n';
-        Object.entries(error.error).forEach(
-          ([key, value]) => (errmsg += '* ' + key + ' : ' + value + '\n')
-        );
-        this.presentToast(errmsg, 'danger');
-      }
-    );
+    this.authService
+      .registerUser(values['username'], values['password'], values['email'])
+      .subscribe(
+        (ret) => {
+          console.log('register return', ret);
+          this.presentToast('User registered', 'success');
+        },
+        (error) => {
+          console.log('register returned with error', error);
+          let errmsg = 'Error registering user!\n';
+          Object.entries(error.error).forEach(
+            ([key, value]) => (errmsg += '* ' + key + ' : ' + value + '\n')
+          );
+          this.presentToast(errmsg, 'danger');
+        }
+      );
   }
 
   async presentToast(msg, color = 'primary') {

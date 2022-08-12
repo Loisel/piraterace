@@ -4,17 +4,18 @@ import { IonicModule } from '@ionic/angular';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { RegisterComponent } from './register/register.component';
+import { LoginComponent } from './login/login.component';
 
-import { AuthmoduleRoutingModule } from './authmodule-routing.module';
+import { AuthRoutingModule } from './auth-routing.module';
 
 @NgModule({
-  declarations: [RegisterComponent],
+  declarations: [RegisterComponent, LoginComponent],
   imports: [
     CommonModule,
     IonicModule,
-    AuthmoduleRoutingModule,
+    AuthRoutingModule,
     FormsModule,
     ReactiveFormsModule,
   ],
 })
-export class AuthmoduleModule {}
+export class AuthModule {}
