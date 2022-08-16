@@ -1,0 +1,9 @@
+<ion-content class="content">
+  <h1>Logout</h1>
+
+  Token: {{ authService.token | async }}
+
+  <ion-button class="btn-reg" (click)="logout()">
+    {{ "Logout" }}
+  </ion-button>
+</ion-content>

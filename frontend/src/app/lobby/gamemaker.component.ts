@@ -7,7 +7,6 @@ import { Router, ActivatedRoute } from '@angular/router';
 @Component({
   selector: 'app-gamemaker',
   templateUrl: './gamemaker.component.html',
-  providers: [HttpService],
   styleUrls: ['./gamemaker.component.scss'],
 })
 export class GameMakerComponent implements OnInit {

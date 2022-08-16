@@ -6,6 +6,7 @@ import {
   HttpErrorResponse,
 } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { tap, filter, take, shareReplay } from 'rxjs/operators';
 
 import { environment } from '../../environments/environment';
 import { StorageService } from './storage.service';
@@ -16,12 +17,14 @@ import { StorageService } from './storage.service';
 export class AuthService {
   registerUserURL = `${environment.API_URL}/auth/users/`;
   loginUserURL = `${environment.API_URL}/auth/jwt/create`;
+  refreshUserURL = `${environment.API_URL}/auth/jwt/refresh`;
+  userDetailURL = `${environment.API_URL}/auth/users/me`;
 
   isAuthenticated: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
     null
   );
-  token: BehaviorSubject<string> = new BehaviorSubject<string>('loadingtoken');
-  refresh = '';
+  private token: BehaviorSubject<string> = new BehaviorSubject<string>(null);
+  private refresh: BehaviorSubject<string> = new BehaviorSubject<string>(null);
 
   constructor(
     private httpClient: HttpClient,
@@ -39,55 +42,76 @@ export class AuthService {
   }
 
   login(username, password) {
-    return new Observable((observer) => {
-      this.httpClient
-        .post(this.loginUserURL, { username: username, password: password })
-        .subscribe((ret) => {
-          console.log('authService: ', ret);
+    return this.httpClient
+      .post(this.loginUserURL, { username: username, password: password })
+      .pipe(
+        tap((ret) => {
+          console.log('authService Login:', ret);
           if (ret) {
             let accessToken = ret['access'];
             let refreshToken = ret['refresh'];
             this.storageService.set('access', accessToken);
             this.storageService.set('refresh', refreshToken);
             this.token.next(accessToken);
-            this.refresh = refreshToken;
+            this.refresh.next(refreshToken);
             this.isAuthenticated.next(true);
-
-            observer.next(ret);
-            observer.complete();
-          } else {
-            observer.next();
-            observer.complete();
           }
-        });
-    });
+        })
+      );
   }
 
-  async load_token() {
-    this.storageService.get('access').then((val: string) => {
-      console.log('auth service - access token: ', val);
+  load_token() {
+    return this.storageService.get('access').then((val: string) => {
+      //console.log('auth service - access token: ', val);
       if (val) {
         this.token.next(val);
         this.storageService.get('refresh').then((val: string) => {
-          this.refresh = val;
+          this.refresh.next(val);
           this.isAuthenticated.next(true);
         });
       } else {
+        this.token.next('no_token_in_storage');
         console.log('no token in storage');
       }
     });
-    //.then((value: string) => {
-    //  if (value) {
-    //    console.log('load token: ', value);
-    //    this.token = value;
-    //    this.storageService.get('refresh').then((value: string) => {
-    //      this.refresh = value;
-    //      this.isAuthenticated.next(true);
-    //    });
-    //  } else {
-    //    console.log('no token in storage');
-    //    this.isAuthenticated.next(false);
-    //  }
-    //});
+  }
+
+  logout(): Promise<void> {
+    this.isAuthenticated.next(false);
+    this.token.next(null);
+    this.refresh.next(null);
+    return new Promise(async (resolve) => {
+      this.storageService.set('access', null);
+      this.storageService.set('refresh', null);
+    });
+  }
+
+  refreshToken() {
+    console.log('Asking for a token refresh with : ', this.refresh.getValue());
+    return this.httpClient
+      .post(this.refreshUserURL, { refresh: this.refresh.getValue() })
+      .pipe(
+        tap((ret) => {
+          console.log('authService: refresh', ret);
+          let accessToken = ret['access'];
+          let refreshToken = ret['refresh'];
+          this.storageService.set('access', accessToken);
+          this.storageService.set('refresh', refreshToken);
+          this.token.next(accessToken);
+          this.refresh.next(refreshToken);
+        })
+      );
+  }
+
+  getUserDetail() {
+    return this.httpClient.get(this.userDetailURL).pipe(shareReplay());
+  }
+
+  getToken() {
+    return this.token;
+  }
+
+  getRefresh() {
+    return this.refresh;
   }
 }

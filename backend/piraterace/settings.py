@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 import os
+from datetime import timedelta
+
 from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -111,7 +113,20 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-SIMPLE_JWT = { 'BLACKLIST_AFTER_ROTATION': False, }
+SIMPLE_JWT = {
+        'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60, seconds=0),
+        'REFRESH_TOKEN_LIFETIME': timedelta(days=30, seconds=0),
+        'ROTATE_REFRESH_TOKENS': True,
+        'AUTH_HEADER_TYPES': ('JWT',),
+        'BLACKLIST_AFTER_ROTATION': False,
+        }
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/

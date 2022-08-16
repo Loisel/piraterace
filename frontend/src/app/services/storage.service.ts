@@ -17,7 +17,7 @@ export class StorageService {
     const storage = await this.storage.create();
     this._storage = storage;
     console.log('Storage is up');
-    storage.forEach((key, value, index) => {
+    storage.forEach((value, key, index) => {
       console.log('InStorage', index, key, value);
     });
   }
@@ -26,26 +26,7 @@ export class StorageService {
     return this._storage?.set(key, value);
   }
 
-  //public get(key: string) {
-  //  return this._storage?.get(key);
-  //}
-  //public get(key: string) {
-  //  return new Observable((observer) => {
-  //    let val = this._storage?.get(key);
-  //    console.log('retrieve from storage key <', key, '> val: ', val);
-  //    observer.next(val);
-  //    observer.complete();
-  //  });
-  //}
-  //
-  public get(key) {
-    return new Promise(async (resolve) => {
-      let ret = await this._storage?.get(key);
-      if (ret) {
-        resolve(ret);
-      } else {
-        resolve(null);
-      }
-    });
+  public async get(key) {
+    return await this._storage?.get(key);
   }
 }

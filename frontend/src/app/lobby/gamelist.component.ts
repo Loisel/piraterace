@@ -7,7 +7,6 @@ import { Router, ActivatedRoute } from '@angular/router';
 @Component({
   selector: 'app-gamelist',
   templateUrl: './gamelist.component.html',
-  providers: [HttpService],
   styleUrls: ['./gamelist.component.scss'],
 })
 export class GamelistComponent implements OnInit {
