@@ -9,10 +9,7 @@ import { AuthService } from './services/auth.service';
   styleUrls: ['app.component.scss'],
 })
 export class AppComponent {
-  constructor(
-    private menu: MenuController,
-    private storageService: StorageService // storage service instantiated here in root app to make it comes up as one of the first
-  ) {}
+  constructor(private menu: MenuController, private authService: AuthService) {}
 
   ngOnInit() {}
 }

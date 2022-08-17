@@ -7,10 +7,33 @@
 
       <ion-title> PirateRace </ion-title>
 
-      <ion-buttons slot="end">
-        <ion-menu-button menu="usermenu" color="dark">
-          <ion-icon name="person-circle"></ion-icon>
-        </ion-menu-button>
+      <ion-buttons id="usermenu-button" slot="end">
+        <div *ngIf="!(authService.isAuthenticated | async)">
+          <ion-button routerLink="/auth/login">
+            <ion-icon name="log-in-outline"></ion-icon>
+            Login
+          </ion-button>
+        </div>
+
+        <div *ngIf="authService.isAuthenticated | async">
+          <ion-icon name="person-circle" size="large"></ion-icon>
+          <ion-popover trigger="usermenu-button" [dismissOnSelect]="true">
+            <ng-template>
+              <ion-content>
+                <ion-list>
+                  <ion-item [button]="true" routerLink="/auth/userdetail">
+                    <ion-icon name="settings-outline" slot="end"></ion-icon>
+                    Settings
+                  </ion-item>
+                  <ion-item [button]="true" (click)="authService.logout()">
+                    <ion-icon name="log-out-outline" slot="end"></ion-icon>
+                    Logout
+                  </ion-item>
+                </ion-list>
+              </ion-content>
+            </ng-template>
+          </ion-popover>
+        </div>
       </ion-buttons>
     </ion-toolbar>
   </ion-header>
@@ -28,30 +51,6 @@
         </ion-menu-toggle>
         <ion-menu-toggle auto-hide="true">
           <ion-item><a routerLink="lobby">Lobby</a></ion-item>
-        </ion-menu-toggle>
-      </ion-list>
-    </ion-content>
-  </ion-menu>
-
-  <ion-menu side="end" menuId="usermenu" contentId="main" class="user-menu">
-    <ion-header>
-      <ion-toolbar color="tertiary">
-        <ion-title>User Services</ion-title>
-      </ion-toolbar>
-    </ion-header>
-    <ion-content>
-      <ion-list>
-        <ion-menu-toggle auto-hide="true">
-          <ion-item><a routerLink="auth/register">Register</a></ion-item>
-        </ion-menu-toggle>
-        <ion-menu-toggle auto-hide="true">
-          <ion-item><a routerLink="auth/login">Login</a></ion-item>
-        </ion-menu-toggle>
-        <ion-menu-toggle auto-hide="true">
-          <ion-item><a routerLink="auth/logout">Logout</a></ion-item>
-        </ion-menu-toggle>
-        <ion-menu-toggle auto-hide="true">
-          <ion-item><a routerLink="auth/userdetail">MyAccount</a></ion-item>
         </ion-menu-toggle>
       </ion-list>
     </ion-content>

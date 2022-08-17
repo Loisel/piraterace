@@ -61,25 +61,28 @@ export class AuthService {
   }
 
   load_token() {
-    return this.storageService.get('access').then((val: string) => {
-      //console.log('auth service - access token: ', val);
-      if (val) {
-        this.token.next(val);
-        this.storageService.get('refresh').then((val: string) => {
-          this.refresh.next(val);
-          this.isAuthenticated.next(true);
-        });
-      } else {
-        this.token.next('no_token_in_storage');
-        console.log('no token in storage');
-      }
+    return this.storageService.init().then(() => {
+      // make sure that storage is already there
+      this.storageService.get('access').then((val: string) => {
+        //console.log('auth service - access token: ', val);
+        if (val) {
+          this.token.next(val);
+          this.storageService.get('refresh').then((val: string) => {
+            this.refresh.next(val);
+            this.isAuthenticated.next(true);
+          });
+        } else {
+          this.token.next('no_token_in_storage');
+          console.log('no token in storage');
+        }
+      });
     });
   }
 
   logout(): Promise<void> {
     this.isAuthenticated.next(false);
-    this.token.next(null);
-    this.refresh.next(null);
+    this.token.next('logged_out');
+    this.refresh.next('logged_out');
     return new Promise(async (resolve) => {
       this.storageService.set('access', null);
       this.storageService.set('refresh', null);
