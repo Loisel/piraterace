@@ -1,5 +1,5 @@
 import { IonicModule } from '@ionic/angular';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpService } from '../services/http.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { interval } from 'rxjs';
@@ -11,7 +11,7 @@ import { environment } from '../../environments/environment';
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.scss'],
 })
-export class GameComponent implements OnInit {
+export class GameComponent implements OnInit, OnDestroy {
   phaserGame: Phaser.Game;
   config: Phaser.Types.Core.GameConfig;
   gameinfo: any = null;
@@ -48,6 +48,8 @@ export class GameComponent implements OnInit {
       () => console.log('observable complete')
     );
   }
+
+  ngOnDestroy() {}
 
   load_gameinfo() {
     let id = +this.route.snapshot.paramMap.get('game_id');
@@ -209,7 +211,7 @@ class GameScene extends Phaser.Scene {
       this.boats[playerid] = boat;
     });
 
-    this.play_actionstack(1000); // play the first action stack really quickly in case user does a reload
+    this.play_actionstack(100); // play the first action stack really quickly in case user does a reload
 
     this.updateTimer = this.time.addEvent({
       callback: this.updateEvent,

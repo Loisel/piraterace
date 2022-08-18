@@ -23,8 +23,12 @@ export class AuthService {
   isAuthenticated: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
     null
   );
-  private token: BehaviorSubject<string> = new BehaviorSubject<string>(null);
-  private refresh: BehaviorSubject<string> = new BehaviorSubject<string>(null);
+  private token: BehaviorSubject<string> = new BehaviorSubject<string>(
+    'uninitialized'
+  );
+  private refresh: BehaviorSubject<string> = new BehaviorSubject<string>(
+    'uninitialized'
+  );
 
   constructor(
     private httpClient: HttpClient,
@@ -72,7 +76,8 @@ export class AuthService {
             this.isAuthenticated.next(true);
           });
         } else {
-          this.token.next('no_token_in_storage');
+          this.token.next(null);
+          this.refresh.next(null);
           this.isAuthenticated.next(false);
           console.log('no token in storage');
         }

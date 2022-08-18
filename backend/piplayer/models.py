@@ -1,7 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User, Group
 from django.contrib.postgres.fields import ArrayField
-from annoying.fields import AutoOneToOneField
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 from pigame.models import BaseGame
 
@@ -20,3 +21,8 @@ class Account(models.Model):
 
     # avatar =
     time_submitted = models.DateTimeField(blank=True, null=True)
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Account.objects.create(user=instance)

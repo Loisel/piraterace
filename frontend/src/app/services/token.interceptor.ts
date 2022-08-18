@@ -32,13 +32,15 @@ export class TokenInterceptor implements HttpInterceptor {
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
     return from(this.authService.getToken()).pipe(
-      filter((token) => token !== null),
-      take(1), // filter null value to actually wait until auth module may have loaded a token from storage
+      filter((token) => token !== 'uninitialized'),
+      take(1), // filter 'uninitialized' value to actually wait until auth module may have loaded a token from storage
       switchMap((token) => {
         console.log('TokenInterceptor token : ', token);
-        request = request.clone({
-          setHeaders: { Authorization: 'JWT ' + token },
-        });
+        if (token) {
+          request = request.clone({
+            setHeaders: { Authorization: 'JWT ' + token },
+          });
+        }
 
         return next.handle(request).pipe(
           catchError((error: HttpErrorResponse) => {
@@ -110,7 +112,7 @@ export class TokenInterceptor implements HttpInterceptor {
         this.refreshingInProgress
       );
       return this.accessTokenSubject.pipe(
-        filter((token) => token !== null),
+        filter((token) => token !== 'uninitialized'),
         take(1),
         switchMap((token) => {
           // repeat failed request with new token

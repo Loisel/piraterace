@@ -8,7 +8,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
 from pigame.models import (
-    BaseGame, ClassicGame, DEFAULT_DECK, DIRID2NAME, DIRNAME2ID, CARDS, DIRID2MOVE,
+    BaseGame, ClassicGame, DEFAULT_DECK,
     GameMaker)
 from piplayer.models import Account
 import datetime

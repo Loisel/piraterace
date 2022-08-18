@@ -3,6 +3,9 @@ import os
 import random
 
 from piraterace.settings import MAPSDIR
+from pigame.models import (
+    DIRID2NAME, CARDS, DIRID2MOVE,
+    )
 
 def determine_next_cards_played(players, ncardslots):
     r = []
