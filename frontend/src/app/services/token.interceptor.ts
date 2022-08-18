@@ -31,7 +31,6 @@ export class TokenInterceptor implements HttpInterceptor {
     request: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
-    console.log('Interceptor request', request);
     return from(this.authService.getToken()).pipe(
       filter((token) => token !== null),
       take(1), // filter null value to actually wait until auth module may have loaded a token from storage
@@ -51,11 +50,11 @@ export class TokenInterceptor implements HttpInterceptor {
             if (error instanceof HttpErrorResponse && error.status === 401) {
               if (request.url.indexOf('/refresh') > 0) {
                 console.log('==== 401 error for a refresh url -> LOGOUT ERROR');
-                return this.logoutAndRedirect(error);
+                return this.logoutAndRedirect(error, '/');
               }
 
               if (!this.authService.getRefresh().getValue()) {
-                return this.logoutAndRedirect(error);
+                return this.logoutAndRedirect(error, '/');
               } else {
                 return this.refreshToken(request, next);
               }
@@ -67,38 +66,6 @@ export class TokenInterceptor implements HttpInterceptor {
       })
     );
   }
-
-  //  intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-  //    console.log("Interceptor request", request);
-  //    const token = this.authService.getToken().getValue();
-  //    const refreshtoken = this.authService.getRefresh().getValue();
-  //    console.log("TokenInterceptor token : ", token, ' refresh ', refreshtoken);
-  //    request = request.clone({ setHeaders: { Authorization: 'JWT '+token } });
-  //
-  //    return next.handle(request).pipe(
-  //      catchError((error: HttpErrorResponse) => {
-  //        const status =  error.status;
-  //        const reason = error && error.error.reason ? error.error.reason : '';
-  //        console.log("Interceptor Error", error, status, reason);
-  //
-  //        if (error instanceof HttpErrorResponse && error.status === 401) {
-  //
-  //          if (request.url.indexOf("/refresh")>0){
-  //            console.log("==== 401 error for a refresh url -> LOGOUT ERROR")
-  //            return this.logoutAndRedirect(error);
-  //          }
-  //
-  //          if (!refreshtoken) {
-  //            return this.logoutAndRedirect(error);
-  //          } else {
-  //            return this.refreshToken(request, next);
-  //          }
-  //        }
-  //
-  //        return throwError(error);
-  //      })
-  //    );
-  //  }
 
   private refreshToken(
     request: HttpRequest<any>,
@@ -162,9 +129,11 @@ export class TokenInterceptor implements HttpInterceptor {
     }
   }
 
-  private logoutAndRedirect(err): Observable<HttpEvent<any>> {
+  private logoutAndRedirect(err, nextURL): Observable<HttpEvent<any>> {
     this.authService.logout();
-    this.router.navigateByUrl('/auth/login');
+    this.router.navigate(['/auth/login'], {
+      queryParams: { nextURL: nextURL },
+    });
     return throwError(err);
   }
 }

@@ -19,7 +19,6 @@ export class AuthGuard implements CanLoad {
     | Promise<boolean | UrlTree>
     | boolean
     | UrlTree {
-    console.log('AuthGuard: canLoad', route);
     return this.authService.isAuthenticated.pipe(
       filter((val) => val !== null), // Filter out initial Behaviour subject value
       take(1), // Otherwise the Observable doesn't complete!
@@ -28,7 +27,10 @@ export class AuthGuard implements CanLoad {
         if (isAuthenticated) {
           return true;
         } else {
-          //this.router.navigateByUrl('/auth/login')
+          const nextURL = '/' + segments.join('/');
+          this.router.navigate(['/auth/login'], {
+            queryParams: { nextURL: nextURL },
+          });
           return false;
         }
       })

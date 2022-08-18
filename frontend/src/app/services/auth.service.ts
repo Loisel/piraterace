@@ -73,6 +73,7 @@ export class AuthService {
           });
         } else {
           this.token.next('no_token_in_storage');
+          this.isAuthenticated.next(false);
           console.log('no token in storage');
         }
       });

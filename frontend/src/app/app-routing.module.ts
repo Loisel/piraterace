@@ -8,14 +8,15 @@ const routes: Routes = [
     loadChildren: () => import('./auth/auth.module').then((m) => m.AuthModule),
   },
   {
-    path: 'lobby',
-    loadChildren: () =>
-      import('./lobby/lobby.module').then((m) => m.LobbyModule),
-  },
-  {
     path: 'home',
     loadChildren: () =>
       import('./home/home.module').then((m) => m.HomePageModule),
+  },
+  {
+    path: 'lobby',
+    loadChildren: () =>
+      import('./lobby/lobby.module').then((m) => m.LobbyModule),
+    canLoad: [AuthGuard],
   },
   {
     path: 'game',
@@ -24,7 +25,7 @@ const routes: Routes = [
   },
   {
     path: '',
-    redirectTo: 'lobby',
+    redirectTo: 'home',
     pathMatch: 'full',
   },
 ];
@@ -36,6 +37,7 @@ const routes: Routes = [
       preloadingStrategy: PreloadAllModules,
     }),
   ],
+  providers: [AuthGuard],
   exports: [RouterModule],
 })
 export class AppRoutingModule {}

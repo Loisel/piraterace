@@ -6,7 +6,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { ToastController } from '@ionic/angular';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { AuthService } from '../../services/auth.service';
 
@@ -20,14 +20,18 @@ export class LoginComponent implements OnInit {
   passwordType = 'password';
   passwordIcon = 'eye-outline';
   errormsg: string = '';
+  nextURL: string;
 
   constructor(
+    private route: ActivatedRoute,
     private router: Router,
     private toastController: ToastController,
     private formBuilder: FormBuilder,
     private authService: AuthService
   ) {
     this.createForm();
+    this.nextURL = this.route.snapshot.queryParams['nextURL'] || '/';
+    console.log('this.nextURL', this.nextURL);
   }
 
   createForm() {
@@ -45,7 +49,7 @@ export class LoginComponent implements OnInit {
     this.authService.login(values['username'], values['password']).subscribe(
       (ret) => {
         console.log('login return', ret);
-        this.router.navigateByUrl('/auth/userdetail');
+        this.router.navigateByUrl(this.nextURL);
       },
       (error) => {
         console.log('login returned with error', error);
