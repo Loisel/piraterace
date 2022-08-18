@@ -74,7 +74,11 @@ def game(request, game_id, **kwargs):
 @permission_classes((IsAuthenticated, ))
 def create_game(request, gamemaker_id, **kwargs):
     maker = get_object_or_404(GameMaker, pk=gamemaker_id)
+    if request.user.pk != maker.creator_userid:
+        return JsonResponse(f'Only the user who opened the game may start it', status=404, safe=False)
+
     players = Account.objects.filter(user__pk__in=maker.player_ids)
+    print(f"Players in Game: {players}")
     game = ClassicGame(mapfile=maker.mapfile,
                        mode = maker.mode,
                        nlives = maker.nlives,
