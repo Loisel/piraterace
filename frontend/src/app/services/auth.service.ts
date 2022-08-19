@@ -87,8 +87,8 @@ export class AuthService {
 
   logout(): Promise<void> {
     this.isAuthenticated.next(false);
-    this.token.next('logged_out');
-    this.refresh.next('logged_out');
+    this.token.next(null);
+    this.refresh.next(null);
     return new Promise(async (resolve) => {
       this.storageService.set('access', null);
       this.storageService.set('refresh', null);
