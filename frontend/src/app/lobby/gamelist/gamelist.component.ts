@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { GameMaker } from '../model/gamemaker';
-import { HttpService } from '../services/http.service';
-import { environment } from '../../environments/environment';
+import { GameMaker } from '../../model/gamemaker';
+import { HttpService } from '../../services/http.service';
+import { environment } from '../../../environments/environment';
 import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
@@ -25,20 +25,20 @@ export class GamelistComponent implements OnInit {
     });
   }
 
-  createGameMaker(): void {
-    console.log('Ping');
-    this.httpService.createGameMaker().subscribe(
-      (gameMaker) => {
-        console.log(gameMaker);
-        this.router.navigate(['view_gamemaker', gameMaker.id], {
-          relativeTo: this.route,
-        });
-      },
-      (err) => {
-        console.log(err);
-      }
-    );
-  }
+  //createGameMaker(): void {
+  //  console.log('Ping');
+  //  this.httpService.createGameMaker().subscribe(
+  //    (gameMaker) => {
+  //      console.log(gameMaker);
+  //      this.router.navigate(['view_gamemaker', gameMaker.id], {
+  //        relativeTo: this.route,
+  //      });
+  //    },
+  //    (err) => {
+  //      console.log(err);
+  //    }
+  //  );
+  //}
 
   joinGameMaker(id: number): void {
     console.log('Join');

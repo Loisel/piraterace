@@ -7,6 +7,10 @@ from django.core import serializers
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
+import os
+import glob
+from piraterace.settings import MAPSDIR
+
 from pigame.models import (
     BaseGame, ClassicGame, DEFAULT_DECK,
     GameMaker)
@@ -77,6 +81,7 @@ def create_game(request, gamemaker_id, **kwargs):
     if request.user.pk != maker.creator_userid:
         return JsonResponse(f'Only the user who opened the game may start it', status=404, safe=False)
 
+    print(f"Maker player ids: {maker.player_ids}")
     players = Account.objects.filter(user__pk__in=maker.player_ids)
     print(f"Players in Game: {players}")
     game = ClassicGame(mapfile=maker.mapfile,
@@ -128,16 +133,20 @@ def join_gamemaker(request, gamemaker_id, **kwargs):
     maker.save()
     return redirect(reverse("pigame:view_gamemaker", kwargs={"gamemaker_id": maker.pk}))
 
-@api_view(['GET'])
+@api_view(['POST'])
 @permission_classes((IsAuthenticated, ))
 def create_gamemaker(request, **kwargs):
     player = request.user
-    mapfile="map2.json"
+
+    data = request.data
+
+    mapfile = data['selected_map']
 
     initmap = load_inital_map(mapfile)
     errs = verify_map(initmap)
     if errs:
         return JsonResponse(errs, status=404, safe=False)
+
     maker = GameMaker(creator_userid=player.pk, mapfile=mapfile, player_ids=[])
     maker.add_player(player)
     maker.save()
@@ -145,7 +154,34 @@ def create_gamemaker(request, **kwargs):
     payload = model_to_dict(maker)
     return redirect(reverse("pigame:view_gamemaker", kwargs={"gamemaker_id": maker.pk}))
 
+
+@api_view(['GET', 'POST'])
+@permission_classes((IsAuthenticated, ))
+def create_new_gamemaker(request, **kwargs):
+    player = request.user
+
+    available_maps = [ os.path.basename(f) for f in glob.glob(os.path.join(MAPSDIR, '*.json')) ]
+
+    ret = dict(
+            available_maps = available_maps,
+            selected_map = None,
+            map_info = None,
+            Nmaxplayers = None,
+            )
+
+    if request.method == 'POST':
+        ret.update(**request.data)
+
+    if ret['selected_map']:
+        ret['map_info'] = load_inital_map(ret['selected_map'])
+        startinglocslayer = list(filter(lambda l: l["name"] == "startinglocs", ret['map_info']["layers"]))[0]
+        ret['Nmaxplayers'] = len(startinglocslayer["objects"])
+        ret['startinglocs'] = startinglocslayer
+
+
+    return JsonResponse(ret)
+
+
 def list_gamemakers(request):
     makers = GameMaker.objects.all()
     return JsonResponse(list(makers.values()), safe=False)
-

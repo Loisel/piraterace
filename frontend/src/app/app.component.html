@@ -46,11 +46,11 @@
     </ion-header>
     <ion-content>
       <ion-list>
-        <ion-menu-toggle auto-hide="true">
-          <ion-item><a routerLink="home">Home</a></ion-item>
+        <ion-menu-toggle auto-hide="true" routerLink="home">
+          <ion-item [button]="true" routerLink="home">Home</ion-item>
         </ion-menu-toggle>
         <ion-menu-toggle auto-hide="true">
-          <ion-item><a routerLink="lobby">Lobby</a></ion-item>
+          <ion-item [button]="true" routerLink="lobby">Lobby</ion-item>
         </ion-menu-toggle>
       </ion-list>
     </ion-content>
