@@ -196,6 +196,8 @@ class GameScene extends Phaser.Scene {
     // create the layers we want in the right order
     map.createLayer(GI.map.layers[0].name, tileset, 0, 0);
 
+    this.drawGrid();
+
     Object.entries(GI.players).forEach(([playerid, player]) => {
       console.log(playerid, player);
       var boat = this.add.sprite(
@@ -219,6 +221,26 @@ class GameScene extends Phaser.Scene {
       delay: 1000, // 1000 = 1 second
       loop: true,
     });
+  }
+
+  drawGrid(color = 0x000000, alpha = 0.2): void {
+    let GI = this.component.gameinfo;
+    console.log(GI);
+    const Nx = GI.map.width;
+    const Ny = GI.map.height;
+    const maxX = GI.map.tilewidth * Nx * 2; // FJ: no idea why the 2 is here
+    const maxY = GI.map.tileheight * Ny * 2; // FJ: no idea why the 2 is here
+
+    for (let i = 0; i < Ny; i++) {
+      //horizontal lines
+      const y = i * GI.map.tileheight;
+      this.add.line(0, 0, 0, y, maxX, y, color, alpha);
+    }
+    for (let j = 0; j < Nx; j++) {
+      // vertical lines
+      const x = j * GI.map.tilewidth;
+      this.add.line(0, 0, x, 0, x, maxY, color, alpha);
+    }
   }
 
   updateEvent(): void {
