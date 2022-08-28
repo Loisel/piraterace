@@ -4,18 +4,22 @@ import random
 
 from piraterace.settings import MAPSDIR
 from pigame.models import (
-    DIRID2NAME, CARDS, DIRID2MOVE,
-    )
+    DIRID2NAME,
+    CARDS,
+    DIRID2MOVE,
+)
+
 
 def determine_next_cards_played(players, ncardslots):
     r = []
-    for i in range(0,ncardslots):
+    for i in range(0, ncardslots):
         res = []
         for p in players:
-            res.extend((p.id, p.deck[(p.next_card+i) % 4]))
+            res.extend((p.id, p.deck[(p.next_card + i) % 4]))
         # sort by ranking...
         r.extend(res)
     return r
+
 
 def determine_starting_locations(initmap, players):
     for layer in initmap["layers"]:
@@ -31,6 +35,7 @@ def determine_starting_locations(initmap, players):
         player.start_loc_y = int(positions[n]["y"] / theight)
         player.start_direction = random.choice(list(DIRID2NAME.keys()))
     return players
+
 
 def play_stack(game):
     initial_map = load_inital_map(game.mapfile)
@@ -49,13 +54,15 @@ def play_stack(game):
     for rnd in range(Nrounds):
 
         stack_start = rnd * game.ncardslots * len(players)
-        stack_end = (rnd+1) * game.ncardslots * len(players)
+        stack_end = (rnd + 1) * game.ncardslots * len(players)
         this_round_cards = stack[stack_start:stack_end]
 
         for playerid, card in this_round_cards:
             player = players[playerid]
             actions = get_actions_for_card(game, initial_map, players, playerid, card)
             actionstack.extend(actions)
+
+        # add canon balls here
 
     return players, actionstack
 
@@ -64,14 +71,14 @@ def get_actions_for_card(game, gmap, players, playerid, card):
     player = players[playerid]
 
     actions = []
-    rot = CARDS[card]['rot']
+    rot = CARDS[card]["rot"]
     if rot != 0:
         actions.append(dict(key="rotate", target=playerid, val=rot))
         player.direction = (player.direction + rot) % 4
 
-    for mov in range(abs(CARDS[card]['move'])):
+    for mov in range(abs(CARDS[card]["move"])):
         # here collisions have to happen
-        inc = int(CARDS[card]['move'] / abs(CARDS[card]['move']))
+        inc = int(CARDS[card]["move"] / abs(CARDS[card]["move"]))
 
         xinc = DIRID2MOVE[player.direction][0] * inc
         yinc = DIRID2MOVE[player.direction][1] * inc
@@ -103,6 +110,7 @@ def move_player_x(game, gmap, players, player, inc):
     actions.append(dict(key="move_x", target=player.pk, val=inc))
     return actions
 
+
 def move_player_y(game, gmap, players, player, inc):
     actions = []
     bg = list(filter(lambda l: l["name"] == "background", gmap["layers"]))[0]
@@ -130,6 +138,7 @@ def load_inital_map(fname):
     # tl = dt.layers[0].data
     # colliding = []
     return dt
+
 
 def verify_map(mapobj):
     layer_names = [l["name"] for l in mapobj["layers"]]

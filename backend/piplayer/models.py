@@ -6,12 +6,13 @@ from django.dispatch import receiver
 
 from pigame.models import BaseGame
 
+
 class Account(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     start_loc_x = models.PositiveSmallIntegerField(null=True, blank=True)
     start_loc_y = models.PositiveSmallIntegerField(null=True, blank=True)
     start_direction = models.PositiveIntegerField(null=True, blank=True)
-    #game_lobby = models.ForeignKey(GameConfig, on_delete=models.CASCADE)
+    # game_lobby = models.ForeignKey(GameConfig, on_delete=models.CASCADE)
     game = models.ForeignKey(BaseGame, on_delete=models.CASCADE, null=True, blank=True)
     deck = ArrayField(models.IntegerField(null=True, blank=True), null=True, blank=True)
 
@@ -21,6 +22,7 @@ class Account(models.Model):
 
     # avatar =
     time_submitted = models.DateTimeField(blank=True, null=True)
+
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):

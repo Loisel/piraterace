@@ -17,22 +17,31 @@ from django.contrib import admin
 from django.urls import re_path, path, include
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('pigame/', include('pigame.urls')),
-    path('auth/', include('djoser.urls')),
-    path('auth/', include('djoser.urls.jwt')),
+    path("admin/", admin.site.urls),
+    path("pigame/", include("pigame.urls")),
+    path("auth/", include("djoser.urls")),
+    path("auth/", include("djoser.urls.jwt")),
 ]
 
 
 # if in debug mode, redirect static requests to media_ROOT
 from django.conf import settings
-from  django.views import static
+from django.views import static
 
 if settings.DEBUG == True:
     urlpatterns += [
-        re_path(r'^media/(?P<path>.*)$', static.serve, {
-            'document_root': settings.MEDIA_ROOT,
-        }),
-        re_path(r'^static/(?P<path>.*)$', static.serve, {
-            'document_root': settings.STATIC_ROOT,
-        }), ]
+        re_path(
+            r"^media/(?P<path>.*)$",
+            static.serve,
+            {
+                "document_root": settings.MEDIA_ROOT,
+            },
+        ),
+        re_path(
+            r"^static/(?P<path>.*)$",
+            static.serve,
+            {
+                "document_root": settings.STATIC_ROOT,
+            },
+        ),
+    ]
