@@ -35,7 +35,7 @@ export class TokenInterceptor implements HttpInterceptor {
       filter((token) => token !== 'uninitialized'),
       take(1), // filter 'uninitialized' value to actually wait until auth module may have loaded a token from storage
       switchMap((token) => {
-        console.log('TokenInterceptor token : ', token);
+        //console.log('TokenInterceptor token : ', token);
         if (token) {
           request = request.clone({
             setHeaders: { Authorization: 'JWT ' + token },
