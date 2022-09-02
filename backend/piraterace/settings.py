@@ -158,6 +158,7 @@ MEDIA_ROOT = "/media_volume"
 MEDIA_URL = "/media/"
 
 MAPSDIR = os.path.join(STATIC_ROOT, "maps")
+CARDSURL = os.path.join("cards")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

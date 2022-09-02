@@ -10,14 +10,33 @@ from pigame.models import (
 )
 
 
+def switch_cards_on_hand(player, src, target):
+    tmp = player.deck[player.next_card + src]
+    player.deck[player.next_card + src] = player.deck[player.next_card + target]
+    player.deck[player.next_card + target] = tmp
+    player.save(update_fields=["deck"])
+
+
+def get_cards_on_hand(player, ncards):
+    if player.next_card + ncards - 1 > len(player.deck):
+        remaining_cards = player.deck[player.next_card :]
+        old_cards = player.deck[: player.next_card]
+        random.shuffle(old_cards)
+        player.deck = remaining_cards + old_cards
+        player.next_card = 0
+        player.save(update_fields=["next_card", "deck"])
+
+    res = []
+    for i in range(0, ncards):
+        res.extend((player.id, player.deck[(player.next_card + i)]))
+    return res
+
+
 def determine_next_cards_played(players, ncardslots):
     r = []
-    for i in range(0, ncardslots):
-        res = []
-        for p in players:
-            res.extend((p.id, p.deck[(p.next_card + i) % 4]))
-        # sort by ranking...
-        r.extend(res)
+    for p in players:
+        r.extend(get_cards_on_hand(p, ncardslots))
+    # TODO: sort by ranking...
     return r
 
 
@@ -40,7 +59,7 @@ def determine_starting_locations(initmap, players):
 def play_stack(game):
     initial_map = load_inital_map(game.mapfile)
     stack = game.cards_played
-    Nrounds = len(game.cards_played) // game.ncardslots
+    Nrounds = game.round
     players = {p.pk: p for p in list(game.account_set.all())}
 
     for pk, player in players.items():
@@ -48,14 +67,14 @@ def play_stack(game):
         player.xpos = player.start_loc_x
         player.ypos = player.start_loc_y
 
-    stack = list(zip(stack[::2], stack[1::2]))
+    cardstack = list(zip(stack[::2], stack[1::2]))
 
     actionstack = []
     for rnd in range(Nrounds):
 
         stack_start = rnd * game.ncardslots * len(players)
         stack_end = (rnd + 1) * game.ncardslots * len(players)
-        this_round_cards = stack[stack_start:stack_end]
+        this_round_cards = cardstack[stack_start:stack_end]
 
         for playerid, card in this_round_cards:
             player = players[playerid]
@@ -100,10 +119,10 @@ def move_player_x(game, gmap, players, player, inc):
         damage = next(filter(lambda p: p["name"] == "damage", tile_prop["properties"]))["value"]
         actions.append(dict(key="collision_x", target=player.pk, val=inc, damage=damage))
         return actions
-    for pid, p in players.items():
-        if (p.xpos == player.xpos + inc) and (p.ypos == player.ypos):
-            actions.extend(move_player_x(game, gmap, players, p, inc))
-            if (p.xpos == player.xpos + inc) and (p.ypos == player.ypos):
+    for pid, p2 in players.items():
+        if (p2.xpos == player.xpos + inc) and (p2.ypos == player.ypos):
+            actions.extend(move_player_x(game, gmap, players, p2, inc))
+            if (p2.xpos == player.xpos + inc) and (p2.ypos == player.ypos):
                 return actions
             break
     player.xpos += inc
@@ -121,10 +140,10 @@ def move_player_y(game, gmap, players, player, inc):
         damage = next(filter(lambda p: p["name"] == "damage", tile_prop["properties"]))["value"]
         actions.append(dict(key="collision_y", target=player.pk, val=inc, damage=damage))
         return actions
-    for pid, p in players.items():
-        if (p.xpos == player.xpos) and (p.ypos == player.ypos + inc):
-            actions.extend(move_player_y(game, gmap, players, p, inc))
-            if (p.xpos == player.xpos) and (p.ypos == player.ypos + inc):
+    for pid, p2 in players.items():
+        if (p2.xpos == player.xpos) and (p2.ypos == player.ypos + inc):
+            actions.extend(move_player_y(game, gmap, players, p2, inc))
+            if (p2.xpos == player.xpos) and (p2.ypos == player.ypos + inc):
                 return actions
             break
     player.ypos += inc

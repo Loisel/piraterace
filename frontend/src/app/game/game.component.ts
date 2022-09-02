@@ -2,7 +2,8 @@ import { IonicModule } from '@ionic/angular';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { HttpService } from '../services/http.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { interval } from 'rxjs';
+import { interval, BehaviorSubject } from 'rxjs';
+import { filter, pairwise } from 'rxjs/operators';
 import Phaser from 'phaser';
 import { environment } from '../../environments/environment';
 
@@ -15,6 +16,10 @@ export class GameComponent implements OnInit, OnDestroy {
   phaserGame: Phaser.Game;
   config: Phaser.Types.Core.GameConfig;
   gameinfo: any = null;
+  cardsinfo: any = [];
+  CARDS_URL = environment.STATIC_URL;
+  Ngameround = new BehaviorSubject<number>(0);
+
   constructor(
     private httpService: HttpService,
     private route: ActivatedRoute,
@@ -26,6 +31,7 @@ export class GameComponent implements OnInit, OnDestroy {
       (gameinfo) => {
         console.log('Game:', gameinfo);
         this.gameinfo = gameinfo;
+        this.Ngameround.next(gameinfo['Ngameround']);
         this.config = {
           type: Phaser.AUTO,
           physics: { default: 'None' },
@@ -47,6 +53,15 @@ export class GameComponent implements OnInit, OnDestroy {
       (err) => console.error(err),
       () => console.log('observable complete')
     );
+    this.getPlayerCards();
+    this.Ngameround.asObservable()
+      .pipe(
+        pairwise(),
+        filter((vals) => vals[0] !== vals[1])
+      )
+      .subscribe((val) => {
+        this.getPlayerCards();
+      });
   }
 
   ngOnDestroy() {}
@@ -54,6 +69,23 @@ export class GameComponent implements OnInit, OnDestroy {
   load_gameinfo() {
     let id = +this.route.snapshot.paramMap.get('game_id');
     return this.httpService.getGame(id);
+  }
+
+  getPlayerCards() {
+    this.httpService.getPlayerCards().subscribe((result) => {
+      this.cardsinfo = result;
+    });
+  }
+
+  onCardsReorder({ detail }) {
+    console.log(detail);
+    this.httpService
+      .switchPlayerCards(detail.from, detail.to)
+      .subscribe((result) => {
+        console.log('switch cards:', result);
+        this.cardsinfo = result;
+        detail.complete(true);
+      });
   }
 }
 
@@ -213,6 +245,7 @@ class GameScene extends Phaser.Scene {
       this.boats[playerid] = boat;
     });
 
+    //return;
     this.play_actionstack(100); // play the first action stack really quickly in case user does a reload
 
     this.updateTimer = this.time.addEvent({
@@ -228,18 +261,18 @@ class GameScene extends Phaser.Scene {
     console.log(GI);
     const Nx = GI.map.width;
     const Ny = GI.map.height;
-    const maxX = GI.map.tilewidth * Nx * 2; // FJ: no idea why the 2 is here
-    const maxY = GI.map.tileheight * Ny * 2; // FJ: no idea why the 2 is here
+    const maxX = GI.map.tilewidth * Nx; // FJ: no idea why the 2 is here
+    const maxY = GI.map.tileheight * Ny; // FJ: no idea why the 2 is here
 
     for (let i = 0; i < Ny; i++) {
       //horizontal lines
       const y = i * GI.map.tileheight;
-      this.add.line(0, 0, 0, y, maxX, y, color, alpha);
+      this.add.line(maxX * 0.5, y, 0, 0, maxX, 0, color, alpha);
     }
     for (let j = 0; j < Nx; j++) {
       // vertical lines
       const x = j * GI.map.tilewidth;
-      this.add.line(0, 0, x, 0, x, maxY, color, alpha);
+      this.add.line(x, maxY * 0.5, 0, 0, 0, maxY, color, alpha);
     }
   }
 
@@ -247,6 +280,7 @@ class GameScene extends Phaser.Scene {
     this.component.load_gameinfo().subscribe((gameinfo) => {
       console.log('UpdateEvent:', gameinfo);
       this.component.gameinfo = gameinfo;
+      this.component.Ngameround.next(gameinfo['Ngameround']);
       this.play_actionstack(1000);
     });
   }

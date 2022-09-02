@@ -11,23 +11,43 @@ import os
 import glob
 from piraterace.settings import MAPSDIR
 
-from pigame.models import BaseGame, ClassicGame, DEFAULT_DECK, GameMaker
+from pigame.models import BaseGame, ClassicGame, DEFAULT_DECK, GameMaker, CARDS
 from piplayer.models import Account
 import datetime
 import pytz
 from pigame.game_logic import (
     determine_next_cards_played,
     determine_starting_locations,
+    get_cards_on_hand,
     load_inital_map,
     play_stack,
+    switch_cards_on_hand,
     verify_map,
 )
+
+
+@api_view(["GET", "POST"])
+@permission_classes((IsAuthenticated,))
+def player_cards(request, **kwargs):
+    player = request.user.account
+
+    if request.method == "POST":
+        src, target = request.data
+        switch_cards_on_hand(player, src, target)
+
+    cards = []
+    for card in get_cards_on_hand(player, player.game.ncardsavail)[1::2]:
+        cards.append([card, CARDS[card]])
+
+    return JsonResponse(cards, safe=False)
 
 
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
 def game(request, game_id, **kwargs):
     game = get_object_or_404(BaseGame, pk=game_id)
+    player = request.user.account
+
     players = game.account_set.all()
     initmap = load_inital_map(game.mapfile)
 
@@ -42,20 +62,23 @@ def game(request, game_id, **kwargs):
 
     if datetime.datetime.now(pytz.utc) > game.timestamp + datetime.timedelta(seconds=game.round_time):
         cards_played = game.cards_played
-        cards_played.extend(determine_next_cards_played(players, game.ncardslots))
+        cards_on_hand = determine_next_cards_played(players, game.ncardsavail)
+        cards_played.extend(cards_on_hand[: game.ncardslots * 2])  # times 2 because it is a playerid, card tuple
         game.cards_played = cards_played
         game.timestamp = datetime.datetime.now()
+        game.round += 1
         game.save()
 
         for p in players:  # increment next card pointer
             p.next_card += game.ncardsavail
             p.save()
 
-        payload["text"] = "game increment"
+        payload["new_round"] = True
 
     players, actionstack = play_stack(game)
 
     payload["actionstack"] = actionstack
+    payload["Ngameround"] = game.round
     payload["players"] = {}
     for p in players.values():
         payload["players"][p.pk] = dict(
@@ -66,6 +89,7 @@ def game(request, game_id, **kwargs):
             pos_y=p.ypos,
             direction=p.direction,
         )
+
     return JsonResponse(payload)
 
 
@@ -76,9 +100,7 @@ def create_game(request, gamemaker_id, **kwargs):
     if request.user.pk != maker.creator_userid:
         return JsonResponse(f"Only the user who opened the game may start it", status=404, safe=False)
 
-    print(f"Maker player ids: {maker.player_ids}")
     players = Account.objects.filter(user__pk__in=maker.player_ids)
-    print(f"Players in Game: {players}")
     game = ClassicGame(
         mapfile=maker.mapfile,
         mode=maker.mode,

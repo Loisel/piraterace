@@ -2,6 +2,8 @@ from django.db import models
 from polymorphic.models import PolymorphicModel
 from django.contrib.postgres.fields import ArrayField
 
+from piraterace.settings import CARDSURL
+
 DIRID2NAME = {0: "up", 1: "right", 2: "down", 3: "left"}
 
 DIRNAME2ID = {v: k for k, v in DIRID2NAME.items()}
@@ -13,21 +15,29 @@ CARDS = {
         descr="forward move",
         move=1,
         rot=0,
+        img="move_forward_1.jpg",
+        url=f"{CARDSURL}/move_forward_1.jpg",
     ),
     2: dict(
         descr="forward move 2",
         move=2,
         rot=0,
+        img="move_forward_2.jpg",
+        url=f"{CARDSURL}/move_forward_2.jpg",
     ),
     10: dict(
         descr="back move 1",
         move=-1,
         rot=0,
+        img="move_back_1.jpg",
+        url=f"{CARDSURL}/move_back_1.jpg",
     ),
     20: dict(
         descr="rotate left",
         move=0,
         rot=-1,
+        img="rot_left.jpg",
+        url=f"{CARDSURL}/rot_left.jpg",
     ),
 }
 
@@ -98,6 +108,7 @@ class BaseGame(PolymorphicModel):
     # nplayers = models.PositiveSmallIntegerField(null=True, blank=True)
     # playerlist ist ein account set, oder?
     mapfile = models.CharField(max_length=256)
+    round = models.PositiveIntegerField(default=1)
     nlives = models.PositiveSmallIntegerField(default=3)
     damage_on_hit = models.PositiveSmallIntegerField(default=10)
     npause_on_repair = models.PositiveSmallIntegerField(default=1)

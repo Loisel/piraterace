@@ -5,6 +5,7 @@ from pigame import views
 app_name = "pigame"
 
 urlpatterns = [
+    path("player_cards", views.player_cards, name="player_cards"),
     path("game/<int:game_id>", views.game, name="game"),
     path("create_game/<int:gamemaker_id>", views.create_game),
     path("create_new_gamemaker", views.create_new_gamemaker),
