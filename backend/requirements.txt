@@ -9,3 +9,4 @@ djangorestframework_simplejwt
 djoser
 psycopg2-binary
 Werkzeug
+matplotlib

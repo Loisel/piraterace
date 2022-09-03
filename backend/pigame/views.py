@@ -11,7 +11,7 @@ import os
 import glob
 from piraterace.settings import MAPSDIR
 
-from pigame.models import BaseGame, ClassicGame, DEFAULT_DECK, GameMaker, CARDS
+from pigame.models import BaseGame, ClassicGame, DEFAULT_DECK, GameMaker, CARDS, COLORS
 from piplayer.models import Account
 import datetime
 import pytz
@@ -140,14 +140,22 @@ def create_game(request, gamemaker_id, **kwargs):
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
 def view_gamemaker(request, gamemaker_id):
-    return JsonResponse(model_to_dict(get_object_or_404(GameMaker, pk=gamemaker_id)))
+    caller = request.user.account
+    gm = model_to_dict(get_object_or_404(GameMaker, pk=gamemaker_id))
+    players = Account.objects.filter(id__in=gm["player_ids"])
+    gm["player_names"] = [p.user.username for p in players]
 
+    ## colors_to_pick = [c for c in COLORS.keys() if c not in gm["player_colors"]]
+    ## the callers color can also be chosen
+    ## colors_to_pick.append(gm["player_colors"][gm["player_ids"].index(caller.pk)])
+    gm["player_color_choices"] = COLORS
+    return JsonResponse(gm)
 
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
 def join_gamemaker(request, gamemaker_id, **kwargs):
     maker = get_object_or_404(GameMaker, pk=gamemaker_id)
-    player = request.user
+    player = request.user.account
     maker.add_player(player)
     maker.save()
     return redirect(reverse("pigame:view_gamemaker", kwargs={"gamemaker_id": maker.pk}))
@@ -156,7 +164,7 @@ def join_gamemaker(request, gamemaker_id, **kwargs):
 @api_view(["POST"])
 @permission_classes((IsAuthenticated,))
 def create_gamemaker(request, **kwargs):
-    player = request.user
+    player = request.user.account
 
     data = request.data
 
@@ -178,7 +186,6 @@ def create_gamemaker(request, **kwargs):
 @api_view(["GET", "POST"])
 @permission_classes((IsAuthenticated,))
 def create_new_gamemaker(request, **kwargs):
-    player = request.user
 
     available_maps = [os.path.basename(f) for f in glob.glob(os.path.join(MAPSDIR, "*.json"))]
 
