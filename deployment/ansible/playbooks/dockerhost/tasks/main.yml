@@ -1,0 +1,52 @@
+---
+
+- name: Add en_US.UTF-8 locale to /etc/environment
+  lineinfile:
+    dest: /etc/environment
+    regexp: ^LC_ALL
+    line: LC_ALL=en_US.UTF-8
+
+- name: Add en_US.UTF-8 language to /etc/environment
+  lineinfile:
+    dest: /etc/environment
+    regexp: ^LANGUAGE
+    line: LANGUAGE=en_US.UTF-8
+
+- name: Install aptitude using apt
+  apt: name=aptitude state=latest update_cache=yes force_apt_get=yes
+
+- name: Install required system packages
+  apt: name={{ item }} state=latest update_cache=yes
+  loop: [ 'apt-transport-https', 'ca-certificates', 'curl', 'software-properties-common', 'python3-pip', 'virtualenv', 'python3-setuptools']
+
+- name: Add Docker GPG apt Key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add Docker Repository
+  apt_repository:
+    repo: deb https://download.docker.com/linux/ubuntu focal stable
+    state: present
+
+- name: Update apt and install docker-ce
+  apt: update_cache=yes name={{ item }} state=latest
+  loop:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+    - snapd
+
+- name: Install latest docker-compose
+  get_url:
+    url: https://github.com/docker/compose/releases/download/v2.10.2/docker-compose-linux-x86_64
+    dest: /usr/local/bin/docker-compose
+    mode: 0777
+
+- name: Deploy docker logrotate
+  template:
+    src: files/logrotate-docker
+    dest: '/etc/logrotate.d/docker-container'
+    owner: root
+    group: root
+    mode: 0600

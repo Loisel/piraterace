@@ -1,0 +1,7 @@
+---
+
+- hosts: piraterace_dev
+
+  roles:
+     - role: dockerhost
+     - role: hetzner
