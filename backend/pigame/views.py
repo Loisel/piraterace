@@ -149,6 +149,7 @@ def view_gamemaker(request, gamemaker_id):
     ## the callers color can also be chosen
     ## colors_to_pick.append(gm["player_colors"][gm["player_ids"].index(caller.pk)])
     gm["player_color_choices"] = COLORS
+    gm["caller_idx"] = gm["player_ids"].index(caller.pk)
     return JsonResponse(gm)
 
 @api_view(["GET"])

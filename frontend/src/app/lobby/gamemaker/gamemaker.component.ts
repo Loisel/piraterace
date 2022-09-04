@@ -11,6 +11,9 @@ import { Router, ActivatedRoute } from '@angular/router';
 })
 export class GameMakerComponent implements OnInit {
   gameMaker: GameMaker;
+  playerColor: string;
+  playerTeam: number;
+  playerReady: boolean;
   constructor(
     private httpService: HttpService,
     private route: ActivatedRoute,
@@ -31,5 +34,16 @@ export class GameMakerComponent implements OnInit {
       console.log(payload);
       this.router.navigate(['game', payload['game_id']]);
     });
+  }
+
+  onPlayerInfoChange(event) {
+    console.log("Color", this.playerColor);
+    // this.httpService.updatePlayerInfo(this.gameMaker.id, {
+    //   color: this.playerColor,
+    //   team: this.playerTeam,
+    //   ready: this.playerReady
+    // }).subscribe((gamemaker) => {
+    //   this.gameMaker = gamemaker;
+    // });
   }
 }

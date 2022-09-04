@@ -1,7 +1,55 @@
+<ion-content>
 <h2>GameMaker</h2>
+<ion-grid>
+  <ion-row>
+    <ion-col>Player</ion-col>
+    <ion-col>Color</ion-col>
+    <ion-col>Team</ion-col>
+    <ion-col>Ready?</ion-col>
+  </ion-row>
+  <ion-row *ngFor="let p of gameMaker?.player_ids; let i = index" [attr.data-index]="p">
+    <ion-col>{{gameMaker?.player_names[i]}}</ion-col>
+    <ion-col>{{gameMaker?.player_colors[i]}}</ion-col>
+    <ion-col>{{gameMaker?.player_teams[i]}}</ion-col>
+    <ion-col>{{gameMaker?.player_ready[i]}}</ion-col>
+  </ion-row>
+</ion-grid>
+
+<ion-list>
+  <ion-item>
+    <ion-label>Color</ion-label>
+    <ion-select
+      placeholder="{{gameMaker?.player_colors[gameMaker?.caller_idx]}}"
+      id="color_select"
+      (ionChange)="onPlayerInfoChange($event)"
+      [(ngModel)]="playerColor">
+      <ion-select-option *ngFor="let color of gameMaker?.player_color_choices | keyvalue"
+                         [attr.value]="color.value">{{color.key}}</ion-select-option>
+    </ion-select>
+  </ion-item>
+  <ion-item>
+    <ion-label>Team</ion-label>
+    <ion-input
+      placeholder="{{gameMaker?.player_teams[gameMaker?.caller_idx]}}"
+      inputmode="numeric" type="number"(ionChange)="onPlayerInfoChange($event)"
+      [(ngModel)]="playerTeam">
+    </ion-input>
+  </ion-item>
+  <ion-item>
+    <ion-label>Ready</ion-label>
+    <ion-checkbox
+      checked={{gameMaker?.player_ready[gameMaker?.caller_idx]}}
+      id="ready_check"(ionChange)="onPlayerInfoChange($event)"
+      [(ngModel)]="playerReady">
+    </ion-checkbox>
+  </ion-item>
+</ion-list>
+
+
 <ul class="games">
   <button (click)="createGame()">
     <span>Start</span>
   </button>
   <pre>{{ gameMaker | json }}</pre>
 </ul>
+</ion-content>
