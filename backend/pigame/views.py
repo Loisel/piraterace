@@ -97,10 +97,13 @@ def game(request, game_id, **kwargs):
 @permission_classes((IsAuthenticated,))
 def create_game(request, gamemaker_id, **kwargs):
     maker = get_object_or_404(GameMaker, pk=gamemaker_id)
-    if request.user.pk != maker.creator_userid:
+    if request.user.account.pk != maker.creator_userid:
         return JsonResponse(f"Only the user who opened the game may start it", status=404, safe=False)
 
-    players = Account.objects.filter(user__pk__in=maker.player_ids)
+    if not all(maker.player_ready):
+        return JsonResponse(f"Player not ready", status=404, safe=False)
+
+    players = Account.objects.filter(pk__in=maker.player_ids)
     game = ClassicGame(
         mapfile=maker.mapfile,
         mode=maker.mode,
@@ -117,6 +120,8 @@ def create_game(request, gamemaker_id, **kwargs):
     )
     game.save()
 
+    maker.game = game
+    maker.save()
     initmap = load_inital_map(game.mapfile)
     players = determine_starting_locations(initmap, players)
 
@@ -150,7 +155,26 @@ def view_gamemaker(request, gamemaker_id):
     ## colors_to_pick.append(gm["player_colors"][gm["player_ids"].index(caller.pk)])
     gm["player_color_choices"] = COLORS
     gm["caller_idx"] = gm["player_ids"].index(caller.pk)
+
     return JsonResponse(gm)
+
+
+@api_view(["POST"])
+@permission_classes((IsAuthenticated,))
+def update_gm_player_info(request, gamemaker_id):
+    caller = request.user.account
+    gm = get_object_or_404(GameMaker, pk=gamemaker_id)
+
+    data = request.data
+    idx = gm.player_ids.index(caller.pk)
+
+    gm.player_colors[idx] = data["color"]
+    gm.player_teams[idx] = data["team"]
+    gm.player_ready[idx] = data["ready"]
+    gm.save()
+
+    return redirect(reverse("pigame:view_gamemaker", kwargs={"gamemaker_id": gm.pk}))
+
 
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
@@ -210,5 +234,5 @@ def create_new_gamemaker(request, **kwargs):
 
 
 def list_gamemakers(request):
-    makers = GameMaker.objects.all()
+    makers = GameMaker.objects.filter(game=None)
     return JsonResponse(list(makers.values()), safe=False)

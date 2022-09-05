@@ -14,6 +14,7 @@ import { environment } from '../../environments/environment';
 })
 export class GameComponent implements OnInit, OnDestroy {
   phaserGame: Phaser.Game;
+  defaultScene: GameScene;
   config: Phaser.Types.Core.GameConfig;
   gameinfo: any = null;
   cardsinfo: any = [];
@@ -66,6 +67,11 @@ export class GameComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {}
 
+  ionViewWillLeave() {
+    this.phaserGame.destroy(true, false);
+    // this.defaultScene.updateTimer.paused = true;
+  }
+
   load_gameinfo() {
     let id = +this.route.snapshot.paramMap.get('game_id');
     return this.httpService.getGame(id);
@@ -102,6 +108,7 @@ class GameScene extends Phaser.Scene {
   constructor(config, component) {
     super(config);
     this.component = component;
+    this.component.defaultScene = this;
   }
 
   preload() {

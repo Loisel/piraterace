@@ -68,6 +68,7 @@ CHOICE_MODES = [
 
 COLORS = mcolors.TABLEAU_COLORS
 
+
 class GameMaker(models.Model):
     player_ids = ArrayField(models.IntegerField(), default=list)
     player_colors = ArrayField(models.CharField(max_length=7), default=list)
@@ -89,6 +90,8 @@ class GameMaker(models.Model):
     countdown_mode = models.CharField(max_length=1, choices=CHOICE_MODES, default="d")
     countdown = models.PositiveIntegerField(default=30)
     round_time = models.PositiveIntegerField(default=30)
+
+    game = models.OneToOneField("BaseGame", null=True, blank=True, on_delete=models.CASCADE)
 
     @property
     def nplayers(self):
