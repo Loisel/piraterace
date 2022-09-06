@@ -1,8 +1,11 @@
 import { Component, OnInit } from '@angular/core';
+import { ToastController } from '@ionic/angular';
+import { Router, ActivatedRoute } from '@angular/router';
+import { BehaviorSubject } from 'rxjs';
+
 import { GameMaker } from '../../model/gamemaker';
 import { HttpService } from '../../services/http.service';
 import { environment } from '../../../environments/environment';
-import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-gamelist',
@@ -11,42 +14,83 @@ import { Router, ActivatedRoute } from '@angular/router';
 })
 export class GamelistComponent implements OnInit {
   gameMakers: GameMaker[] = [];
-  create_gamemaker_url = `${environment.API_URL}/pigame/create_gamemaker`;
+  reconnectGameId = new BehaviorSubject<number>(null);
+  updateTimer: ReturnType<typeof setInterval>;
+
   constructor(
     private httpService: HttpService,
+    private route: ActivatedRoute,
     private router: Router,
-    private route: ActivatedRoute
+    private toastController: ToastController
   ) {}
 
   ngOnInit() {
-    this.httpService.getGamesList().subscribe((gameMakers) => {
-      console.log(gameMakers);
-      this.gameMakers = gameMakers;
+    this.updateGameMakers();
+    this.updateTimer = setInterval(() => {
+      this.updateGameMakers();
+    }, 2000);
+  }
+
+  ionViewWillLeave() {
+    clearInterval(this.updateTimer);
+  }
+
+  updateGameMakers() {
+    this.httpService.getGamesList().subscribe((ret) => {
+      console.log(ret);
+      this.gameMakers = ret['gameMakers'];
+      this.reconnectGameId.next(ret['reconnect_game']);
     });
   }
 
-  //createGameMaker(): void {
-  //  console.log('Ping');
-  //  this.httpService.createGameMaker().subscribe(
-  //    (gameMaker) => {
-  //      console.log(gameMaker);
-  //      this.router.navigate(['view_gamemaker', gameMaker.id], {
-  //        relativeTo: this.route,
-  //      });
-  //    },
-  //    (err) => {
-  //      console.log(err);
-  //    }
-  //  );
-  //}
-
   joinGameMaker(id: number): void {
     console.log('Join');
-    this.httpService.joinGameMaker(id).subscribe((gameMaker) => {
-      console.log(gameMaker);
-      this.router.navigate(['view_gamemaker', gameMaker.id], {
-        relativeTo: this.route,
-      });
+    this.httpService.joinGameMaker(id).subscribe(
+      (ret) => {
+        console.log(ret);
+        this.router.navigate(['view_gamemaker', ret.id], {
+          relativeTo: this.route,
+        });
+      },
+      (error) => {
+        console.log('Failed request', error);
+        this.presentToast(error.error, 'danger');
+      }
+    );
+  }
+
+  newGameMaker(id: number): void {
+    console.log('NewGameMaker');
+    this.httpService.get_create_new_gameMaker().subscribe(
+      (ret) => {
+        console.log(ret);
+        this.router.navigate(['newgamemaker'], {
+          relativeTo: this.route,
+        });
+      },
+      (error) => {
+        console.log('Failed request', error);
+        this.presentToast(error.error, 'danger');
+      }
+    );
+  }
+
+  reconnectGame() {
+    console.log('Reconnect to game: ', [
+      'game',
+      this.reconnectGameId.getValue(),
+    ]);
+    //this.router.navigate(['game', this.reconnectGameId.getValue()]);
+    let id = this.reconnectGameId.getValue();
+    this.router.navigate(['game', id]);
+  }
+
+  async presentToast(msg, color = 'primary') {
+    const toast = await this.toastController.create({
+      message: msg,
+      color: color,
+      duration: 5000,
     });
+    toast.present();
   }
 }

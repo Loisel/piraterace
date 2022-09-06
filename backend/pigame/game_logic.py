@@ -28,7 +28,7 @@ def get_cards_on_hand(player, ncards):
 
     res = []
     for i in range(0, ncards):
-        res.extend((player.id, player.deck[(player.next_card + i)]))
+        res.extend((player.pk, player.deck[(player.next_card + i)]))
     return res
 
 

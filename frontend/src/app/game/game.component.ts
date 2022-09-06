@@ -1,4 +1,5 @@
 import { IonicModule } from '@ionic/angular';
+import { ToastController } from '@ionic/angular';
 import {
   Component,
   OnInit,
@@ -7,11 +8,12 @@ import {
   ViewChild,
   ElementRef,
 } from '@angular/core';
-import { HttpService } from '../services/http.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { interval, BehaviorSubject } from 'rxjs';
 import { filter, pairwise } from 'rxjs/operators';
 import Phaser from 'phaser';
+
+import { HttpService } from '../services/http.service';
 import { environment } from '../../environments/environment';
 
 @Component({
@@ -33,7 +35,8 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private httpService: HttpService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private toastController: ToastController
   ) {}
 
   ngOnInit() {}
@@ -91,7 +94,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   load_gameinfo() {
-    let id = +this.route.snapshot.paramMap.get('game_id');
+    let id = +this.route.snapshot.paramMap.get('id');
     return this.httpService.getGame(id);
   }
 
@@ -110,6 +113,29 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
         this.cardsinfo = result;
         detail.complete(true);
       });
+  }
+
+  leaveGame() {
+    this.httpService.get_leaveGame().subscribe(
+      (ret) => {
+        console.log('Success leave game: ', ret);
+        this.presentToast(ret, 'success');
+        this.router.navigate(['/']);
+      },
+      (error) => {
+        console.log('failed leave game: ', error);
+        this.presentToast(error.error, 'danger');
+      }
+    );
+  }
+
+  async presentToast(msg, color = 'primary') {
+    const toast = await this.toastController.create({
+      message: msg,
+      color: color,
+      duration: 5000,
+    });
+    toast.present();
   }
 }
 
@@ -281,7 +307,7 @@ class GameScene extends Phaser.Scene {
       this.boats[playerid] = boat;
     });
 
-    // return;
+    return;
     this.play_actionstack(10); // play the first action stack really quickly in case user does a reload
 
     this.updateTimer = this.time.addEvent({

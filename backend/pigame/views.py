@@ -100,6 +100,19 @@ def game(request, game_id, **kwargs):
 
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
+def leave_game(request, **kwargs):
+    account = request.user.account
+    if not account.game:
+        return JsonResponse(f"You are currently not in a game", status=404, safe=False)
+    else:
+        gameid = account.game.pk
+        account.game = None
+        account.save(update_fields=["game"])
+        return JsonResponse(f"Left Game {gameid}", safe=False)
+
+
+@api_view(["GET"])
+@permission_classes((IsAuthenticated,))
 def create_game(request, gamemaker_id, **kwargs):
     maker = get_object_or_404(GameMaker, pk=gamemaker_id)
     if request.user.account.pk != maker.creator_userid:
@@ -152,7 +165,7 @@ def create_game(request, gamemaker_id, **kwargs):
 def view_gamemaker(request, gamemaker_id):
     caller = request.user.account
     gm = model_to_dict(get_object_or_404(GameMaker, pk=gamemaker_id))
-    players = Account.objects.filter(id__in=gm["player_ids"])
+    players = Account.objects.filter(pk__in=gm["player_ids"])
     gm["player_names"] = [p.user.username for p in players]
 
     ## colors_to_pick = [c for c in COLORS.keys() if c not in gm["player_colors"]]
@@ -184,6 +197,8 @@ def update_gm_player_info(request, gamemaker_id):
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
 def join_gamemaker(request, gamemaker_id, **kwargs):
+    if request.user.account.game:
+        return JsonResponse(f"You are already in game {request.user.account.game}", status=404, safe=False)
     maker = get_object_or_404(GameMaker, pk=gamemaker_id)
     player = request.user.account
     maker.add_player(player)
@@ -194,6 +209,8 @@ def join_gamemaker(request, gamemaker_id, **kwargs):
 @api_view(["POST"])
 @permission_classes((IsAuthenticated,))
 def create_gamemaker(request, **kwargs):
+    if request.user.account.game:
+        return JsonResponse(f"You are already in game {request.user.account.game}", status=404, safe=False)
     player = request.user.account
 
     data = request.data
@@ -216,6 +233,8 @@ def create_gamemaker(request, **kwargs):
 @api_view(["GET", "POST"])
 @permission_classes((IsAuthenticated,))
 def create_new_gamemaker(request, **kwargs):
+    if request.user.account.game:
+        return JsonResponse(f"You are already in game {request.user.account.game}", status=404, safe=False)
 
     available_maps = [os.path.basename(f) for f in glob.glob(os.path.join(MAPSDIR, "*.json"))]
 
@@ -240,4 +259,13 @@ def create_new_gamemaker(request, **kwargs):
 
 def list_gamemakers(request):
     makers = GameMaker.objects.filter(game=None)
-    return JsonResponse(list(makers.values()), safe=False)
+    ret = dict(
+        gameMakers=list(makers.values()),
+        reconnect_game=None,
+    )
+    try:
+        ret["reconnect_game"] = request.user.account.game.pk
+    except Exception as e:
+        print(e)
+        pass
+    return JsonResponse(ret)

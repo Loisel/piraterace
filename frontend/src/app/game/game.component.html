@@ -5,7 +5,16 @@
         <div id="game" #game_div></div>
       </ion-col>
       <ion-col size="2">
+        <ion-item
+          class="ion-float-right ion-float-bottom"
+          [button]="true"
+          (click)="leaveGame()"
+        >
+          <ion-icon name="exit-outline" color="danger"></ion-icon>
+        </ion-item>
+
         Round {{ Ngameround | async }}
+
         <ion-reorder-group
           (ionItemReorder)="onCardsReorder($event)"
           disabled="false"

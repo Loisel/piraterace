@@ -8,7 +8,7 @@ from pigame.models import BaseGame
 
 
 class Account(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     start_loc_x = models.PositiveSmallIntegerField(null=True, blank=True)
     start_loc_y = models.PositiveSmallIntegerField(null=True, blank=True)
     start_direction = models.PositiveIntegerField(null=True, blank=True)

@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
+import { ToastController } from '@ionic/angular';
+import { Router, ActivatedRoute } from '@angular/router';
+
 import { GameMaker } from '../../model/gamemaker';
 import { HttpService } from '../../services/http.service';
 import { environment } from '../../../environments/environment';
-import { Router, ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-gamemaker',
@@ -15,7 +17,8 @@ export class GameMakerComponent implements OnInit {
   constructor(
     private httpService: HttpService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private toastController: ToastController
   ) {}
 
   ngOnInit() {
@@ -37,10 +40,16 @@ export class GameMakerComponent implements OnInit {
   }
 
   createGame() {
-    this.httpService.createGame(this.gameMaker.id).subscribe((payload) => {
-      console.log(payload);
-      // this.router.navigate(['game', payload['game_id']]);
-    });
+    this.httpService.createGame(this.gameMaker.id).subscribe(
+      (payload) => {
+        console.log(payload);
+        // this.router.navigate(['game', payload['game_id']]);
+      },
+      (error) => {
+        console.log('Failed this.httpService.createGame:', error);
+        this.presentToast(error.error, 'danger');
+      }
+    );
   }
 
   ionViewWillLeave() {
@@ -58,5 +67,14 @@ export class GameMakerComponent implements OnInit {
       .subscribe((data: any) => {
         this.gameMaker = data;
       });
+  }
+
+  async presentToast(msg, color = 'primary') {
+    const toast = await this.toastController.create({
+      message: msg,
+      color: color,
+      duration: 5000,
+    });
+    toast.present();
   }
 }
