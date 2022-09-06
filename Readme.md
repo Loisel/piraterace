@@ -34,6 +34,12 @@ docker-compose stop
 docker-compose up -d
 ```
 
+### Open the game
+
+The game is running under the nginx which forwards all calls to the correct backends.
+
+https://localhost:1337
+
 ## Cloud Deployment
 
 The game is hosted on hetzner cloud ( https://www.hetzner.com/cloud ) with the following environments:
