@@ -38,7 +38,7 @@ docker-compose up -d
 
 The game is running under the nginx which forwards all calls to the correct backends.
 
-https://localhost:1337
+http://localhost:1337
 
 ## Cloud Deployment
 
