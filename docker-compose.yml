@@ -17,7 +17,7 @@ services:
       - ./volumes/static_volume:/static_volume
       - ./volumes/media_volume:/media_volume
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     depends_on:
       - db
 
@@ -28,8 +28,8 @@ services:
     volumes:
       - ./frontend:/code
     ports:
-      - "8100:8100"
-      - "8200:8200"
+      - "127.0.0.1:8100:8100"
+      - "127.0.0.1:8200:8200"
 
   nginx:
     build: nginx
@@ -39,5 +39,6 @@ services:
       - backend
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/users.passwd:/etc/nginx/users.passwd
       - ./volumes/static_volume:/static_volume
       - ./volumes/media_volume:/media_volume
