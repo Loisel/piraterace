@@ -1,5 +1,12 @@
 import { IonicModule } from '@ionic/angular';
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  AfterViewInit,
+  OnDestroy,
+  ViewChild,
+  ElementRef,
+} from '@angular/core';
 import { HttpService } from '../services/http.service';
 import { Router, ActivatedRoute } from '@angular/router';
 import { interval, BehaviorSubject } from 'rxjs';
@@ -12,7 +19,7 @@ import { environment } from '../../environments/environment';
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.scss'],
 })
-export class GameComponent implements OnInit, OnDestroy {
+export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   phaserGame: Phaser.Game;
   defaultScene: GameScene;
   config: Phaser.Types.Core.GameConfig;
@@ -21,13 +28,17 @@ export class GameComponent implements OnInit, OnDestroy {
   CARDS_URL = environment.STATIC_URL;
   Ngameround = new BehaviorSubject<number>(0);
 
+  @ViewChild('game_div', { read: ElementRef }) game_div: ElementRef;
+
   constructor(
     private httpService: HttpService,
     private route: ActivatedRoute,
     private router: Router
   ) {}
 
-  ngOnInit() {
+  ngOnInit() {}
+
+  ngAfterViewInit() {
     this.load_gameinfo().subscribe(
       (gameinfo) => {
         console.log('Game:', gameinfo);
@@ -37,10 +48,17 @@ export class GameComponent implements OnInit, OnDestroy {
           type: Phaser.AUTO,
           physics: { default: 'None' },
           scale: {
-            mode: Phaser.Scale.FIT,
             parent: 'game',
             width: this.gameinfo.map.width * this.gameinfo.map.tilewidth,
             height: this.gameinfo.map.height * this.gameinfo.map.tileheight,
+            min: {
+              height: this.game_div.nativeElement.offsetHeight,
+            },
+            max: {
+              height: this.game_div.nativeElement.offsetHeight,
+            },
+            mode: Phaser.Scale.FIT,
+            autoCenter: Phaser.Scale.CENTER_BOTH,
           },
           fps: {
             target: 24,
