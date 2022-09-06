@@ -21,7 +21,7 @@ import { environment } from '../../environments/environment';
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.scss'],
 })
-export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
+export class GameComponent {
   phaserGame: Phaser.Game;
   defaultScene: GameScene;
   config: Phaser.Types.Core.GameConfig;
@@ -39,9 +39,7 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     private toastController: ToastController
   ) {}
 
-  ngOnInit() {}
-
-  ngAfterViewInit() {
+  ionViewWillEnter() {
     this.load_gameinfo().subscribe(
       (gameinfo) => {
         console.log('Game:', gameinfo);
@@ -55,19 +53,9 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
         this.config = {
           type: Phaser.AUTO,
           physics: { default: 'None' },
-          scale: {
-            parent: 'game',
-            width: this.gameinfo.map.width * this.gameinfo.map.tilewidth,
-            height: this.gameinfo.map.height * this.gameinfo.map.tileheight,
-            min: {
-              height: this.game_div.nativeElement.offsetHeight,
-            },
-            max: {
-              height: this.game_div.nativeElement.offsetHeight,
-            },
-            mode: Phaser.Scale.FIT,
-            autoCenter: Phaser.Scale.CENTER_BOTH,
-          },
+          parent: 'piraterace-game',
+          width: this.gameinfo.map.width * this.gameinfo.map.tilewidth,
+          height: this.gameinfo.map.height * this.gameinfo.map.tileheight,
           fps: {
             target: 24,
             forceSetTimeOut: true,
@@ -90,8 +78,6 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
         this.getPlayerCards();
       });
   }
-
-  ngOnDestroy() {}
 
   ionViewWillLeave() {
     this.phaserGame.destroy(true, false);
