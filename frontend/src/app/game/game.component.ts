@@ -45,6 +45,11 @@ export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
     this.load_gameinfo().subscribe(
       (gameinfo) => {
         console.log('Game:', gameinfo);
+        console.log(
+          'Game_div size:',
+          this.game_div.nativeElement.offsetWidth,
+          this.game_div.nativeElement.offsetHeight
+        );
         this.gameinfo = gameinfo;
         this.Ngameround.next(gameinfo['Ngameround']);
         this.config = {

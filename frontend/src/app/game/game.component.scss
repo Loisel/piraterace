@@ -3,5 +3,8 @@ ion-grid {
   height: 100%;
   ion-row {
     height: 100%;
+    ion-col {
+      height: 100%;
+    }
   }
 }
