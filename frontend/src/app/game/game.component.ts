@@ -236,6 +236,7 @@ class GameScene extends Phaser.Scene {
     map.createLayer(GI.map.layers[0].name, tileset, 0, 0);
 
     this.drawGrid();
+    this.drawCheckpoints();
 
     Object.entries(GI.players).forEach(([playerid, player]) => {
       console.log(playerid, player);
@@ -252,7 +253,7 @@ class GameScene extends Phaser.Scene {
       this.boats[playerid] = boat;
     });
 
-    //return;
+    // return;
     this.play_actionstack(100); // play the first action stack really quickly in case user does a reload
 
     this.updateTimer = this.time.addEvent({
@@ -260,6 +261,22 @@ class GameScene extends Phaser.Scene {
       callbackScope: this,
       delay: 1000, // 1000 = 1 second
       loop: true,
+    });
+  }
+
+  drawCheckpoints(): void {
+    let GI = this.component.gameinfo;
+    Object.entries(GI.checkpoints).forEach(([name, pos]) => {
+      console.log('Checkpoints', name, pos);
+      let num = this.add.text(
+        (pos[0] + 0.5) * GI.map.tilewidth,
+        (pos[1] + 0.5) * GI.map.tileheight,
+        name,
+        {
+          fontSize: '30px',
+        }
+      );
+      num.setOrigin(0.5, 0.5);
     });
   }
 

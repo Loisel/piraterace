@@ -59,8 +59,55 @@
                  "rotation":0,
                  "visible":true,
                  "width":0,
-                 "x":455.688279171666,
-                 "y":401.856971467321
+                 "x":171.437830039987,
+                 "y":879.333849503118
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":3,
+         "name":"checkpoints",
+         "objects":[
+                {
+                 "class":"",
+                 "height":0,
+                 "id":8,
+                 "name":"2",
+                 "point":true,
+                 "rotation":0,
+                 "visible":true,
+                 "width":0,
+                 "x":736.176724998336,
+                 "y":215.583205802116
+                }, 
+                {
+                 "class":"",
+                 "height":0,
+                 "id":9,
+                 "name":"1",
+                 "point":true,
+                 "rotation":0,
+                 "visible":true,
+                 "width":0,
+                 "x":352.917692461242,
+                 "y":780.890278794331
+                }, 
+                {
+                 "class":"",
+                 "height":0,
+                 "id":10,
+                 "name":"3",
+                 "point":true,
+                 "rotation":0,
+                 "visible":true,
+                 "width":0,
+                 "x":352.917692461242,
+                 "y":167.675826734979
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -68,8 +115,8 @@
          "x":0,
          "y":0
         }],
- "nextlayerid":3,
- "nextobjectid":8,
+ "nextlayerid":4,
+ "nextobjectid":11,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.9.0",

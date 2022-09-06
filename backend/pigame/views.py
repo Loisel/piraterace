@@ -18,6 +18,7 @@ import pytz
 from pigame.game_logic import (
     determine_next_cards_played,
     determine_starting_locations,
+    determine_checkpoint_locations,
     get_cards_on_hand,
     load_inital_map,
     play_stack,
@@ -50,6 +51,7 @@ def game(request, game_id, **kwargs):
 
     players = game.account_set.all()
     initmap = load_inital_map(game.mapfile)
+    checkpoints = determine_checkpoint_locations(initmap)
 
     payload = dict(
         text="hallo",
@@ -58,6 +60,7 @@ def game(request, game_id, **kwargs):
         cards_played=game.cards_played,
         map=initmap,
         mapfile=game.mapfile,
+        checkpoints=checkpoints,
     )
 
     if datetime.datetime.now(pytz.utc) > game.timestamp + datetime.timedelta(seconds=game.round_time):
