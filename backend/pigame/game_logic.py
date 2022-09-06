@@ -28,7 +28,7 @@ def get_cards_on_hand(player, ncards):
 
     res = []
     for i in range(0, ncards):
-        res.extend((player.id, player.deck[(player.next_card + i)]))
+        res.extend((player.pk, player.deck[(player.next_card + i)]))
     return res
 
 
@@ -56,6 +56,20 @@ def determine_starting_locations(initmap, players):
     return players
 
 
+def determine_checkpoint_locations(initmap):
+    for layer in initmap["layers"]:
+        if layer["name"] == "checkpoints":
+            positions = layer["objects"]
+            break
+
+    theight = initmap["tileheight"]
+    twidth = initmap["tilewidth"]
+    checkpoints = {}
+    for pos in positions:
+        checkpoints[int(pos["name"])] = (int(pos["x"] / twidth), int(pos["y"] / theight))
+    return checkpoints
+
+
 def play_stack(game):
     initial_map = load_inital_map(game.mapfile)
     stack = game.cards_played
@@ -66,8 +80,10 @@ def play_stack(game):
         player.direction = player.start_direction
         player.xpos = player.start_loc_x
         player.ypos = player.start_loc_y
+        player.next_checkpoint = 1
 
     cardstack = list(zip(stack[::2], stack[1::2]))
+    checkpoints = determine_checkpoint_locations(initial_map)
 
     actionstack = []
     for rnd in range(Nrounds):
@@ -81,6 +97,11 @@ def play_stack(game):
             actions = get_actions_for_card(game, initial_map, players, playerid, card)
             actionstack.extend(actions)
 
+        for player in players.values():
+            if (player.xpos == checkpoints[player.next_checkpoint][0]) and (player.ypos == checkpoints[player.next_checkpoint][1]):
+                if player.next_checkpoint == len(checkpoints):
+                    print("You win")
+                player.next_checkpoint += 1
         # add canon balls here
 
     return players, actionstack
@@ -173,4 +194,18 @@ def verify_map(mapobj):
     tilesets = mapobj["tilesets"]
     if len(tilesets) != 1:
         err_msg.append(f"{len(tilesets)} tilesets found. Only supporting 1 tileset.")
+    if "checkpoints" in layer_names:
+        clayer = list(filter(lambda l: l["name"] == "checkpoints", mapobj["layers"]))[0]
+        if len(clayer["objects"]) < 1:
+            err_msg.append(f"checkpoints layer has only {len(clayer['objects'])} entries.")
+        names = set()
+        for o in clayer["objects"]:
+            try:
+                names.add(int(o["name"]))
+            except:
+                err_msg.append(f"Failed to convert checkpoint name {o['name']}, needs to be integer")
+        expected_names = set(range(1, len(clayer["objects"]) + 1))
+        diff = expected_names.difference(names)
+        if len(diff) > 0:
+            err_msg.append(f"Missing named checkpoints {diff}")
     return err_msg

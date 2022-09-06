@@ -1,19 +1,29 @@
 <ion-content>
-  Round {{ Ngameround | async }}
   <ion-grid>
     <ion-row>
-      <ion-col size="8">
-        <div id="game"></div>
-        <!-- needs to be outside of ion-content or otherwise canvas size is for some reason set to size 0.... could not find out how to fix this easily -->
+      <ion-col id="game_col">
+        <div id="game" #game_div></div>
       </ion-col>
-      <ion-col>
+      <ion-col size="2">
+        <ion-item
+          class="ion-float-right ion-float-bottom"
+          [button]="true"
+          (click)="leaveGame()"
+        >
+          <ion-icon name="exit-outline" color="danger"></ion-icon>
+        </ion-item>
+
+        Round {{ Ngameround | async }}
+
         <ion-reorder-group
           (ionItemReorder)="onCardsReorder($event)"
           disabled="false"
         >
           <ion-item *ngFor="let card of cardsinfo">
-            <ion-img [src]="CARDS_URL + card[1].url"></ion-img>
-            <ion-reorder slot="end"></ion-reorder>
+            <ion-thumbnail>
+              <ion-img [src]="CARDS_URL + card[1].url"></ion-img>
+            </ion-thumbnail>
+            <ion-reorder slot="start"></ion-reorder>
           </ion-item>
         </ion-reorder-group>
       </ion-col>

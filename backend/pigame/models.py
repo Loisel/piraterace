@@ -1,6 +1,8 @@
 from django.db import models
 from polymorphic.models import PolymorphicModel
 from django.contrib.postgres.fields import ArrayField
+import matplotlib.colors as mcolors
+import random
 
 from piraterace.settings import CARDSURL
 
@@ -64,12 +66,12 @@ CHOICE_MODES = [
     ("s", "Count from second to last finished"),
 ]
 
-COLORS = ["blue", "green"]
+COLORS = mcolors.TABLEAU_COLORS
 
 
 class GameMaker(models.Model):
     player_ids = ArrayField(models.IntegerField(), default=list)
-    player_colors = ArrayField(models.IntegerField(), default=list)
+    player_colors = ArrayField(models.CharField(max_length=7), default=list)
     player_teams = ArrayField(models.IntegerField(), default=list)
     player_ready = ArrayField(models.BooleanField(default=False), default=list)
     nmaxplayers = models.PositiveSmallIntegerField(default=1)
@@ -89,14 +91,17 @@ class GameMaker(models.Model):
     countdown = models.PositiveIntegerField(default=30)
     round_time = models.PositiveIntegerField(default=30)
 
+    game = models.OneToOneField("BaseGame", null=True, blank=True, on_delete=models.CASCADE)
+
     @property
     def nplayers(self):
         return len(self.player_ids)
 
     def add_player(self, player):
+        colors_to_pick = [c for c in COLORS.keys() if c not in self.player_colors]
         if player.pk not in self.player_ids:
             self.player_ids.append(player.pk)
-            self.player_colors.append(-1)  # TODO
+            self.player_colors.append(random.choice(colors_to_pick))  # TODO
             self.player_teams.append(-1)
             self.player_ready.append(False)
         return self.player_ids.index(player.pk)

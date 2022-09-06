@@ -8,12 +8,12 @@ from pigame.models import BaseGame
 
 
 class Account(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     start_loc_x = models.PositiveSmallIntegerField(null=True, blank=True)
     start_loc_y = models.PositiveSmallIntegerField(null=True, blank=True)
     start_direction = models.PositiveIntegerField(null=True, blank=True)
     # game_lobby = models.ForeignKey(GameConfig, on_delete=models.CASCADE)
-    game = models.ForeignKey(BaseGame, on_delete=models.CASCADE, null=True, blank=True)
+    game = models.ForeignKey(BaseGame, on_delete=models.SET_NULL, null=True, blank=True)
     deck = ArrayField(models.IntegerField(null=True, blank=True), null=True, blank=True)
 
     next_card = models.PositiveSmallIntegerField(default=0)

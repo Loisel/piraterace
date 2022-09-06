@@ -1,10 +1,19 @@
 import { IonicModule } from '@ionic/angular';
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { HttpService } from '../services/http.service';
+import { ToastController } from '@ionic/angular';
+import {
+  Component,
+  OnInit,
+  AfterViewInit,
+  OnDestroy,
+  ViewChild,
+  ElementRef,
+} from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { interval, BehaviorSubject } from 'rxjs';
 import { filter, pairwise } from 'rxjs/operators';
 import Phaser from 'phaser';
+
+import { HttpService } from '../services/http.service';
 import { environment } from '../../environments/environment';
 
 @Component({
@@ -12,34 +21,52 @@ import { environment } from '../../environments/environment';
   templateUrl: './game.component.html',
   styleUrls: ['./game.component.scss'],
 })
-export class GameComponent implements OnInit, OnDestroy {
+export class GameComponent implements OnInit, AfterViewInit, OnDestroy {
   phaserGame: Phaser.Game;
+  defaultScene: GameScene;
   config: Phaser.Types.Core.GameConfig;
   gameinfo: any = null;
   cardsinfo: any = [];
   CARDS_URL = environment.STATIC_URL;
   Ngameround = new BehaviorSubject<number>(0);
 
+  @ViewChild('game_div', { read: ElementRef }) game_div: ElementRef;
+
   constructor(
     private httpService: HttpService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private toastController: ToastController
   ) {}
 
-  ngOnInit() {
+  ngOnInit() {}
+
+  ngAfterViewInit() {
     this.load_gameinfo().subscribe(
       (gameinfo) => {
         console.log('Game:', gameinfo);
+        console.log(
+          'Game_div size:',
+          this.game_div.nativeElement.offsetWidth,
+          this.game_div.nativeElement.offsetHeight
+        );
         this.gameinfo = gameinfo;
         this.Ngameround.next(gameinfo['Ngameround']);
         this.config = {
           type: Phaser.AUTO,
           physics: { default: 'None' },
           scale: {
-            mode: Phaser.Scale.FIT,
             parent: 'game',
             width: this.gameinfo.map.width * this.gameinfo.map.tilewidth,
             height: this.gameinfo.map.height * this.gameinfo.map.tileheight,
+            min: {
+              height: this.game_div.nativeElement.offsetHeight,
+            },
+            max: {
+              height: this.game_div.nativeElement.offsetHeight,
+            },
+            mode: Phaser.Scale.FIT,
+            autoCenter: Phaser.Scale.CENTER_BOTH,
           },
           fps: {
             target: 24,
@@ -66,8 +93,13 @@ export class GameComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {}
 
+  ionViewWillLeave() {
+    this.phaserGame.destroy(true, false);
+    // this.defaultScene.updateTimer.paused = true;
+  }
+
   load_gameinfo() {
-    let id = +this.route.snapshot.paramMap.get('game_id');
+    let id = +this.route.snapshot.paramMap.get('id');
     return this.httpService.getGame(id);
   }
 
@@ -87,6 +119,29 @@ export class GameComponent implements OnInit, OnDestroy {
         detail.complete(true);
       });
   }
+
+  leaveGame() {
+    this.httpService.get_leaveGame().subscribe(
+      (ret) => {
+        console.log('Success leave game: ', ret);
+        this.presentToast(ret, 'success');
+        this.router.navigate(['/']);
+      },
+      (error) => {
+        console.log('failed leave game: ', error);
+        this.presentToast(error.error, 'danger');
+      }
+    );
+  }
+
+  async presentToast(msg, color = 'primary') {
+    const toast = await this.toastController.create({
+      message: msg,
+      color: color,
+      duration: 5000,
+    });
+    toast.present();
+  }
 }
 
 class GameScene extends Phaser.Scene {
@@ -99,9 +154,11 @@ class GameScene extends Phaser.Scene {
   move_frames: number = 3;
   anim_frac: number = 0.5;
   anim_cutoff: number = 10; // below this duration we just skip animations
+  checkpointLabels: Phaser.GameObjects.Text[] = [];
   constructor(config, component) {
     super(config);
     this.component = component;
+    this.component.defaultScene = this;
   }
 
   preload() {
@@ -209,6 +266,15 @@ class GameScene extends Phaser.Scene {
         delay: (i - this.last_played_action) * animation_time_ms, // 1000 = 1 second
       });
     }
+
+    this.animationTimer = this.time.addEvent({
+      callback: () => {
+        this.drawCheckpoints();
+      },
+      callbackScope: this,
+      delay: (actionstack.length - this.last_played_action) * animation_time_ms, // 1000 = 1 second
+    });
+
     this.last_played_action = actionstack.length;
   }
 
@@ -229,6 +295,7 @@ class GameScene extends Phaser.Scene {
     map.createLayer(GI.map.layers[0].name, tileset, 0, 0);
 
     this.drawGrid();
+    this.drawCheckpoints();
 
     Object.entries(GI.players).forEach(([playerid, player]) => {
       console.log(playerid, player);
@@ -245,14 +312,46 @@ class GameScene extends Phaser.Scene {
       this.boats[playerid] = boat;
     });
 
-    //return;
-    this.play_actionstack(100); // play the first action stack really quickly in case user does a reload
+    return;
+    this.play_actionstack(10); // play the first action stack really quickly in case user does a reload
 
     this.updateTimer = this.time.addEvent({
       callback: this.updateEvent,
       callbackScope: this,
       delay: 1000, // 1000 = 1 second
       loop: true,
+    });
+  }
+
+  drawCheckpoints(): void {
+    console.log('drawCheckpoints', this);
+    for (let text of this.checkpointLabels) {
+      text.destroy();
+    }
+    this.checkpointLabels = [];
+    let GI = this.component.gameinfo;
+    let next_cp = GI.players[GI.me]['next_checkpoint'];
+    Object.entries(GI.checkpoints).forEach(([name, pos]) => {
+      let color = 'white';
+      if (name < next_cp) {
+        color = 'green';
+      } else if (name == next_cp) {
+        color = 'red';
+      }
+      console.log('Checkpoints', name, pos, color, next_cp);
+      let num = this.add.text(
+        (pos[0] + 0.5) * GI.map.tilewidth,
+        (pos[1] + 0.5) * GI.map.tileheight,
+        name,
+        {
+          fontSize: '30px',
+          strokeThickness: 5,
+          stroke: color,
+          color: color,
+        }
+      );
+      num.setOrigin(0.5, 0.5);
+      this.checkpointLabels.push(num);
     });
   }
 

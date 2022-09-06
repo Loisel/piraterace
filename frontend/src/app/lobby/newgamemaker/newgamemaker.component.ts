@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import Phaser from 'phaser';
+import { ToastController } from '@ionic/angular';
 
 import { HttpService } from '../../services/http.service';
 import { NewGameMaker } from '../../model/newgamemaker';
@@ -18,12 +19,13 @@ export class NewGameMakerComponent implements OnInit {
   constructor(
     private httpService: HttpService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private toastController: ToastController
   ) {}
 
   ngOnInit() {
-    this.httpService.get_create_new_gameMakerURL().subscribe((response) => {
-      console.log('Get get_create_new_gameMakerURL', response);
+    this.httpService.get_create_new_gameMaker().subscribe((response) => {
+      console.log('Get get_create_new_gameMaker', response);
       this.data = response;
     });
   }
@@ -38,9 +40,9 @@ export class NewGameMakerComponent implements OnInit {
     this.data.selected_map = e.target.value;
 
     this.httpService
-      .post_create_new_gameMakerURL(this.data)
+      .post_create_new_gameMaker(this.data)
       .subscribe((response) => {
-        console.log('post post_create_new_gameMakerURL', response);
+        console.log('post post_create_new_gameMaker', response);
         this.data = response;
         this.draw_phaser_snapshot();
       });
@@ -59,6 +61,7 @@ export class NewGameMakerComponent implements OnInit {
       },
       (err) => {
         console.log(err);
+        this.presentToast(err.error, 'danger');
       }
     );
   }
@@ -141,5 +144,14 @@ export class NewGameMakerComponent implements OnInit {
 
     this.phaserGame = new Phaser.Game(config);
     this.phaserGame.scene.pause('default');
+  }
+
+  async presentToast(msg, color = 'primary') {
+    const toast = await this.toastController.create({
+      message: msg,
+      color: color,
+      duration: 5000,
+    });
+    toast.present();
   }
 }

@@ -11,13 +11,14 @@ import os
 import glob
 from piraterace.settings import MAPSDIR
 
-from pigame.models import BaseGame, ClassicGame, DEFAULT_DECK, GameMaker, CARDS
+from pigame.models import BaseGame, ClassicGame, DEFAULT_DECK, GameMaker, CARDS, COLORS
 from piplayer.models import Account
 import datetime
 import pytz
 from pigame.game_logic import (
     determine_next_cards_played,
     determine_starting_locations,
+    determine_checkpoint_locations,
     get_cards_on_hand,
     load_inital_map,
     play_stack,
@@ -50,6 +51,7 @@ def game(request, game_id, **kwargs):
 
     players = game.account_set.all()
     initmap = load_inital_map(game.mapfile)
+    checkpoints = determine_checkpoint_locations(initmap)
 
     payload = dict(
         text="hallo",
@@ -58,6 +60,8 @@ def game(request, game_id, **kwargs):
         cards_played=game.cards_played,
         map=initmap,
         mapfile=game.mapfile,
+        checkpoints=checkpoints,
+        me=player.pk,
     )
 
     if datetime.datetime.now(pytz.utc) > game.timestamp + datetime.timedelta(seconds=game.round_time):
@@ -88,6 +92,7 @@ def game(request, game_id, **kwargs):
             pos_x=p.xpos,
             pos_y=p.ypos,
             direction=p.direction,
+            next_checkpoint=p.next_checkpoint,
         )
 
     return JsonResponse(payload)
@@ -95,12 +100,28 @@ def game(request, game_id, **kwargs):
 
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
+def leave_game(request, **kwargs):
+    account = request.user.account
+    if not account.game:
+        return JsonResponse(f"You are currently not in a game", status=404, safe=False)
+    else:
+        gameid = account.game.pk
+        account.game = None
+        account.save(update_fields=["game"])
+        return JsonResponse(f"Left Game {gameid}", safe=False)
+
+
+@api_view(["GET"])
+@permission_classes((IsAuthenticated,))
 def create_game(request, gamemaker_id, **kwargs):
     maker = get_object_or_404(GameMaker, pk=gamemaker_id)
-    if request.user.pk != maker.creator_userid:
+    if request.user.account.pk != maker.creator_userid:
         return JsonResponse(f"Only the user who opened the game may start it", status=404, safe=False)
 
-    players = Account.objects.filter(user__pk__in=maker.player_ids)
+    if not all(maker.player_ready):
+        return JsonResponse(f"Player not ready", status=404, safe=False)
+
+    players = Account.objects.filter(pk__in=maker.player_ids)
     game = ClassicGame(
         mapfile=maker.mapfile,
         mode=maker.mode,
@@ -117,6 +138,8 @@ def create_game(request, gamemaker_id, **kwargs):
     )
     game.save()
 
+    maker.game = game
+    maker.save()
     initmap = load_inital_map(game.mapfile)
     players = determine_starting_locations(initmap, players)
 
@@ -140,14 +163,44 @@ def create_game(request, gamemaker_id, **kwargs):
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
 def view_gamemaker(request, gamemaker_id):
-    return JsonResponse(model_to_dict(get_object_or_404(GameMaker, pk=gamemaker_id)))
+    caller = request.user.account
+    gm = model_to_dict(get_object_or_404(GameMaker, pk=gamemaker_id))
+    players = Account.objects.filter(pk__in=gm["player_ids"])
+    gm["player_names"] = [p.user.username for p in players]
+
+    ## colors_to_pick = [c for c in COLORS.keys() if c not in gm["player_colors"]]
+    ## the callers color can also be chosen
+    ## colors_to_pick.append(gm["player_colors"][gm["player_ids"].index(caller.pk)])
+    gm["player_color_choices"] = COLORS
+    gm["caller_idx"] = gm["player_ids"].index(caller.pk)
+
+    return JsonResponse(gm)
+
+
+@api_view(["POST"])
+@permission_classes((IsAuthenticated,))
+def update_gm_player_info(request, gamemaker_id):
+    caller = request.user.account
+    gm = get_object_or_404(GameMaker, pk=gamemaker_id)
+
+    data = request.data
+    idx = gm.player_ids.index(caller.pk)
+
+    gm.player_colors[idx] = data["color"]
+    gm.player_teams[idx] = data["team"]
+    gm.player_ready[idx] = data["ready"]
+    gm.save()
+
+    return redirect(reverse("pigame:view_gamemaker", kwargs={"gamemaker_id": gm.pk}))
 
 
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
 def join_gamemaker(request, gamemaker_id, **kwargs):
+    if request.user.account.game:
+        return JsonResponse(f"You are already in game {request.user.account.game}", status=404, safe=False)
     maker = get_object_or_404(GameMaker, pk=gamemaker_id)
-    player = request.user
+    player = request.user.account
     maker.add_player(player)
     maker.save()
     return redirect(reverse("pigame:view_gamemaker", kwargs={"gamemaker_id": maker.pk}))
@@ -156,7 +209,9 @@ def join_gamemaker(request, gamemaker_id, **kwargs):
 @api_view(["POST"])
 @permission_classes((IsAuthenticated,))
 def create_gamemaker(request, **kwargs):
-    player = request.user
+    if request.user.account.game:
+        return JsonResponse(f"You are already in game {request.user.account.game}", status=404, safe=False)
+    player = request.user.account
 
     data = request.data
 
@@ -178,7 +233,8 @@ def create_gamemaker(request, **kwargs):
 @api_view(["GET", "POST"])
 @permission_classes((IsAuthenticated,))
 def create_new_gamemaker(request, **kwargs):
-    player = request.user
+    if request.user.account.game:
+        return JsonResponse(f"You are already in game {request.user.account.game}", status=404, safe=False)
 
     available_maps = [os.path.basename(f) for f in glob.glob(os.path.join(MAPSDIR, "*.json"))]
 
@@ -202,5 +258,14 @@ def create_new_gamemaker(request, **kwargs):
 
 
 def list_gamemakers(request):
-    makers = GameMaker.objects.all()
-    return JsonResponse(list(makers.values()), safe=False)
+    makers = GameMaker.objects.filter(game=None)
+    ret = dict(
+        gameMakers=list(makers.values()),
+        reconnect_game=None,
+    )
+    try:
+        ret["reconnect_game"] = request.user.account.game.pk
+    except Exception as e:
+        print(e)
+        pass
+    return JsonResponse(ret)

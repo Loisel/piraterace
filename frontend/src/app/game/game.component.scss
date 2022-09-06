@@ -1,0 +1,10 @@
+ion-grid {
+  // have fullheight grid and one row so that game div sets max size of the phaser canvas
+  height: 100%;
+  ion-row {
+    height: 100%;
+    ion-col {
+      height: 100%;
+    }
+  }
+}
