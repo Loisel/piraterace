@@ -105,6 +105,7 @@ class GameScene extends Phaser.Scene {
   move_frames: number = 3;
   anim_frac: number = 0.5;
   anim_cutoff: number = 10; // below this duration we just skip animations
+  checkpointLabels: Phaser.GameObjects.Text[] = [];
   constructor(config, component) {
     super(config);
     this.component = component;
@@ -216,6 +217,15 @@ class GameScene extends Phaser.Scene {
         delay: (i - this.last_played_action) * animation_time_ms, // 1000 = 1 second
       });
     }
+
+    this.animationTimer = this.time.addEvent({
+      callback: () => {
+        this.drawCheckpoints();
+      },
+      callbackScope: this,
+      delay: (actionstack.length - this.last_played_action) * animation_time_ms, // 1000 = 1 second
+    });
+
     this.last_played_action = actionstack.length;
   }
 
@@ -254,7 +264,7 @@ class GameScene extends Phaser.Scene {
     });
 
     // return;
-    this.play_actionstack(100); // play the first action stack really quickly in case user does a reload
+    this.play_actionstack(10); // play the first action stack really quickly in case user does a reload
 
     this.updateTimer = this.time.addEvent({
       callback: this.updateEvent,
@@ -265,18 +275,34 @@ class GameScene extends Phaser.Scene {
   }
 
   drawCheckpoints(): void {
+    console.log('drawCheckpoints', this);
+    for (let text of this.checkpointLabels) {
+      text.destroy();
+    }
+    this.checkpointLabels = [];
     let GI = this.component.gameinfo;
+    let next_cp = GI.players[GI.me]['next_checkpoint'];
     Object.entries(GI.checkpoints).forEach(([name, pos]) => {
-      console.log('Checkpoints', name, pos);
+      let color = 'white';
+      if (name < next_cp) {
+        color = 'green';
+      } else if (name == next_cp) {
+        color = 'red';
+      }
+      console.log('Checkpoints', name, pos, color, next_cp);
       let num = this.add.text(
         (pos[0] + 0.5) * GI.map.tilewidth,
         (pos[1] + 0.5) * GI.map.tileheight,
         name,
         {
           fontSize: '30px',
+          strokeThickness: 5,
+          stroke: color,
+          color: color,
         }
       );
       num.setOrigin(0.5, 0.5);
+      this.checkpointLabels.push(num);
     });
   }
 

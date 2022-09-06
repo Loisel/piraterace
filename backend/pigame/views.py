@@ -61,6 +61,7 @@ def game(request, game_id, **kwargs):
         map=initmap,
         mapfile=game.mapfile,
         checkpoints=checkpoints,
+        me=player.pk,
     )
 
     if datetime.datetime.now(pytz.utc) > game.timestamp + datetime.timedelta(seconds=game.round_time):
@@ -91,6 +92,7 @@ def game(request, game_id, **kwargs):
             pos_x=p.xpos,
             pos_y=p.ypos,
             direction=p.direction,
+            next_checkpoint=p.next_checkpoint,
         )
 
     return JsonResponse(payload)

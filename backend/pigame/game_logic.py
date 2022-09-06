@@ -66,7 +66,7 @@ def determine_checkpoint_locations(initmap):
     twidth = initmap["tilewidth"]
     checkpoints = {}
     for pos in positions:
-        checkpoints[pos["name"]] = (int(pos["x"] / twidth), int(pos["y"] / theight))
+        checkpoints[int(pos["name"])] = (int(pos["x"] / twidth), int(pos["y"] / theight))
     return checkpoints
 
 
@@ -80,8 +80,10 @@ def play_stack(game):
         player.direction = player.start_direction
         player.xpos = player.start_loc_x
         player.ypos = player.start_loc_y
+        player.next_checkpoint = 1
 
     cardstack = list(zip(stack[::2], stack[1::2]))
+    checkpoints = determine_checkpoint_locations(initial_map)
 
     actionstack = []
     for rnd in range(Nrounds):
@@ -95,6 +97,11 @@ def play_stack(game):
             actions = get_actions_for_card(game, initial_map, players, playerid, card)
             actionstack.extend(actions)
 
+        for player in players.values():
+            if (player.xpos == checkpoints[player.next_checkpoint][0]) and (player.ypos == checkpoints[player.next_checkpoint][1]):
+                if player.next_checkpoint == len(checkpoints):
+                    print("You win")
+                player.next_checkpoint += 1
         # add canon balls here
 
     return players, actionstack
