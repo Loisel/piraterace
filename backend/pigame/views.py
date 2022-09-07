@@ -93,6 +93,8 @@ def game(request, game_id, **kwargs):
             pos_y=p.ypos,
             direction=p.direction,
             next_checkpoint=p.next_checkpoint,
+            color=p.color,
+            team=p.team,
         )
 
     return JsonResponse(payload)
@@ -143,12 +145,14 @@ def create_game(request, gamemaker_id, **kwargs):
     initmap = load_inital_map(game.mapfile)
     players = determine_starting_locations(initmap, players)
 
-    for p in players:
+    for n, p in enumerate(players):
         p.game = game
         p.deck = DEFAULT_DECK
         p.next_card = 0
         p.lives = game.nlives
         p.damage = 0
+        p.color = maker.player_colors[n]
+        p.team = maker.player_teams[n]
         p.save()
 
     payload = dict(
