@@ -23,7 +23,6 @@ import { environment } from '../../environments/environment';
 })
 export class GameComponent {
   phaserGame: Phaser.Game;
-  defaultScene: GameScene;
   config: Phaser.Types.Core.GameConfig;
   gameinfo: any = null;
   cardsinfo: any = [];
@@ -51,18 +50,28 @@ export class GameComponent {
         this.gameinfo = gameinfo;
         this.Ngameround.next(gameinfo['Ngameround']);
         this.config = {
-          type: Phaser.AUTO,
-          physics: { default: 'None' },
           parent: 'piraterace-game',
+          type: Phaser.AUTO,
           width: this.gameinfo.map.width * this.gameinfo.map.tilewidth,
           height: this.gameinfo.map.height * this.gameinfo.map.tileheight,
+          scale: {
+            min: {
+              height: this.game_div.nativeElement.offsetHeight,
+            },
+            max: {
+              height: this.game_div.nativeElement.offsetHeight,
+            },
+            mode: Phaser.Scale.FIT,
+            autoCenter: Phaser.Scale.CENTER_BOTH,
+          },
+          physics: { default: 'None' },
           fps: {
             target: 24,
             forceSetTimeOut: true,
           },
         };
 
-        this.config.scene = new GameScene(this.config, this);
+        this.config.scene = new GameScene(this);
         this.phaserGame = new Phaser.Game(this.config);
       },
       (err) => console.error(err),
@@ -141,10 +150,9 @@ class GameScene extends Phaser.Scene {
   anim_frac: number = 0.5;
   anim_cutoff: number = 10; // below this duration we just skip animations
   checkpointLabels: Phaser.GameObjects.Text[] = [];
-  constructor(config, component) {
-    super(config);
+  constructor(component) {
+    super('MainGameScene');
     this.component = component;
-    this.component.defaultScene = this;
   }
 
   preload() {
@@ -298,7 +306,7 @@ class GameScene extends Phaser.Scene {
       this.boats[playerid] = boat;
     });
 
-    return;
+    //return;
     this.play_actionstack(10); // play the first action stack really quickly in case user does a reload
 
     this.updateTimer = this.time.addEvent({
