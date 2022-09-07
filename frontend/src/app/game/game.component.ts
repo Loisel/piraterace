@@ -176,7 +176,7 @@ class GameScene extends Phaser.Scene {
     let frame_delay = time / this.move_frames;
     let boat = this.boats[boat_id];
     if (frame_delay < this.anim_cutoff) {
-      boat.angle += angle;
+      boat.boat.angle += angle;
     } else {
       this.animationTimer = this.time.addEvent({
         callback: () => {
