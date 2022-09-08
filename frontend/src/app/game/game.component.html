@@ -19,12 +19,13 @@
           (ionItemReorder)="onCardsReorder($event)"
           disabled="false"
         >
-          <ion-item *ngFor="let card of cardsinfo">
-            <ion-thumbnail>
-              <ion-img [src]="CARDS_URL + card[1].url"></ion-img>
-            </ion-thumbnail>
-            <ion-reorder slot="start"></ion-reorder>
-          </ion-item>
+          <ion-reorder *ngFor="let card of cardsinfo">
+            <ion-item>
+              <ion-thumbnail>
+                <ion-img [src]="CARDS_URL + card[1].url"></ion-img>
+              </ion-thumbnail>
+            </ion-item>
+          </ion-reorder>
         </ion-reorder-group>
       </ion-col>
     </ion-row>

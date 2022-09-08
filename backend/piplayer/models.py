@@ -19,6 +19,8 @@ class Account(models.Model):
     next_card = models.PositiveSmallIntegerField(default=0)
     lives = models.PositiveSmallIntegerField(default=3)
     damage = models.PositiveSmallIntegerField(default=0)
+    color = models.CharField(max_length=7, null=True, blank=True)
+    team = models.IntegerField(null=True, blank=True)
 
     # avatar =
     time_submitted = models.DateTimeField(blank=True, null=True)

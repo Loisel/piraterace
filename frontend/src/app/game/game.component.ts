@@ -23,7 +23,6 @@ import { environment } from '../../environments/environment';
 })
 export class GameComponent {
   phaserGame: Phaser.Game;
-  defaultScene: GameScene;
   config: Phaser.Types.Core.GameConfig;
   gameinfo: any = null;
   cardsinfo: any = [];
@@ -51,18 +50,28 @@ export class GameComponent {
         this.gameinfo = gameinfo;
         this.Ngameround.next(gameinfo['Ngameround']);
         this.config = {
-          type: Phaser.AUTO,
-          physics: { default: 'None' },
           parent: 'piraterace-game',
+          type: Phaser.AUTO,
           width: this.gameinfo.map.width * this.gameinfo.map.tilewidth,
           height: this.gameinfo.map.height * this.gameinfo.map.tileheight,
+          scale: {
+            min: {
+              height: this.game_div.nativeElement.offsetHeight,
+            },
+            max: {
+              height: this.game_div.nativeElement.offsetHeight,
+            },
+            mode: Phaser.Scale.FIT,
+            autoCenter: Phaser.Scale.CENTER_BOTH,
+          },
+          physics: { default: 'None' },
           fps: {
             target: 24,
             forceSetTimeOut: true,
           },
         };
 
-        this.config.scene = new GameScene(this.config, this);
+        this.config.scene = new GameScene(this);
         this.phaserGame = new Phaser.Game(this.config);
       },
       (err) => console.error(err),
@@ -141,14 +150,12 @@ class GameScene extends Phaser.Scene {
   anim_frac: number = 0.5;
   anim_cutoff: number = 10; // below this duration we just skip animations
   checkpointLabels: Phaser.GameObjects.Text[] = [];
-  constructor(config, component) {
-    super(config);
+  constructor(component) {
+    super('MainGameScene');
     this.component = component;
-    this.component.defaultScene = this;
   }
 
   preload() {
-    console.log('Component', this.component);
     this.load.image(
       'tileset',
       `${environment.STATIC_URL}/maps/${this.component.gameinfo.map.tilesets[0].image}`
@@ -169,11 +176,11 @@ class GameScene extends Phaser.Scene {
     let frame_delay = time / this.move_frames;
     let boat = this.boats[boat_id];
     if (frame_delay < this.anim_cutoff) {
-      boat.angle += angle;
+      boat.boat.angle += angle;
     } else {
       this.animationTimer = this.time.addEvent({
         callback: () => {
-          boat.angle += angle / this.move_frames;
+          boat.boat.angle += angle / this.move_frames;
         },
         callbackScope: this,
         delay: frame_delay, // 1000 = 1 second
@@ -187,13 +194,17 @@ class GameScene extends Phaser.Scene {
     let frame_delay = time / this.move_frames;
     let boat = this.boats[boat_id];
     if (frame_delay < this.anim_cutoff) {
-      boat.x += move_x;
-      boat.y += move_y;
+      boat.boat.x += move_x;
+      boat.boat.y += move_y;
+      boat.bd.x += move_x;
+      boat.bd.y += move_y;
     } else {
       this.animationTimer = this.time.addEvent({
         callback: () => {
-          boat.x += move_x / this.move_frames;
-          boat.y += move_y / this.move_frames;
+          boat.boat.x += move_x / this.move_frames;
+          boat.boat.y += move_y / this.move_frames;
+          boat.bd.x += move_x / this.move_frames;
+          boat.bd.y += move_y / this.move_frames;
         },
         callbackScope: this,
         delay: frame_delay, // 1000 = 1 second
@@ -284,7 +295,6 @@ class GameScene extends Phaser.Scene {
     this.drawCheckpoints();
 
     Object.entries(GI.players).forEach(([playerid, player]) => {
-      console.log(playerid, player);
       var boat = this.add.sprite(
         (player['start_pos_x'] + 0.5) * GI.map.tilewidth,
         (player['start_pos_y'] + 0.5) * GI.map.tileheight,
@@ -295,10 +305,23 @@ class GameScene extends Phaser.Scene {
       //scale evenly
       boat.scaleX = boat.scaleY;
       boat.angle = player['start_direction'] * 90;
-      this.boats[playerid] = boat;
+
+      let color = Phaser.Display.Color.HexStringToColor(player['color']);
+      let backdrop = this.add.rectangle(
+        (player['start_pos_x'] + 0.5) * GI.map.tilewidth,
+        (player['start_pos_y'] + 0.5) * GI.map.tileheight,
+        GI.map.tilewidth,
+        GI.map.tileheight,
+        color.color,
+        0.5
+      );
+      this.boats[playerid] = {
+        boat: boat,
+        bd: backdrop,
+      };
     });
 
-    return;
+    //return;
     this.play_actionstack(10); // play the first action stack really quickly in case user does a reload
 
     this.updateTimer = this.time.addEvent({
@@ -310,7 +333,6 @@ class GameScene extends Phaser.Scene {
   }
 
   drawCheckpoints(): void {
-    console.log('drawCheckpoints', this);
     for (let text of this.checkpointLabels) {
       text.destroy();
     }
@@ -324,7 +346,6 @@ class GameScene extends Phaser.Scene {
       } else if (name == next_cp) {
         color = 'red';
       }
-      console.log('Checkpoints', name, pos, color, next_cp);
       let num = this.add.text(
         (pos[0] + 0.5) * GI.map.tilewidth,
         (pos[1] + 0.5) * GI.map.tileheight,
@@ -363,7 +384,6 @@ class GameScene extends Phaser.Scene {
 
   updateEvent(): void {
     this.component.load_gameinfo().subscribe((gameinfo) => {
-      console.log('UpdateEvent:', gameinfo);
       this.component.gameinfo = gameinfo;
       this.component.Ngameround.next(gameinfo['Ngameround']);
       this.play_actionstack(1000);

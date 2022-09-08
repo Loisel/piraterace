@@ -98,7 +98,7 @@ class GameMaker(models.Model):
         return len(self.player_ids)
 
     def add_player(self, player):
-        colors_to_pick = [c for c in COLORS.keys() if c not in self.player_colors]
+        colors_to_pick = [c for c in COLORS.values() if c not in self.player_colors]
         if player.pk not in self.player_ids:
             self.player_ids.append(player.pk)
             self.player_colors.append(random.choice(colors_to_pick))  # TODO
