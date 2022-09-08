@@ -295,6 +295,16 @@ class GameScene extends Phaser.Scene {
     this.drawCheckpoints();
 
     Object.entries(GI.players).forEach(([playerid, player]) => {
+      let color = Phaser.Display.Color.HexStringToColor(player['color']);
+      let backdrop = this.add.rectangle(
+        (player['start_pos_x'] + 0.5) * GI.map.tilewidth,
+        (player['start_pos_y'] + 0.5) * GI.map.tileheight,
+        GI.map.tilewidth,
+        GI.map.tileheight,
+        color.color,
+        0.75
+      );
+
       var boat = this.add.sprite(
         (player['start_pos_x'] + 0.5) * GI.map.tilewidth,
         (player['start_pos_y'] + 0.5) * GI.map.tileheight,
@@ -306,15 +316,6 @@ class GameScene extends Phaser.Scene {
       boat.scaleX = boat.scaleY;
       boat.angle = player['start_direction'] * 90;
 
-      let color = Phaser.Display.Color.HexStringToColor(player['color']);
-      let backdrop = this.add.rectangle(
-        (player['start_pos_x'] + 0.5) * GI.map.tilewidth,
-        (player['start_pos_y'] + 0.5) * GI.map.tileheight,
-        GI.map.tilewidth,
-        GI.map.tileheight,
-        color.color,
-        0.5
-      );
       this.boats[playerid] = {
         boat: boat,
         bd: backdrop,
