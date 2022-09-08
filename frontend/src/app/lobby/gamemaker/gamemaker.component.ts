@@ -21,10 +21,10 @@ export class GameMakerComponent implements OnInit {
     private toastController: ToastController
   ) {}
 
-  ngOnInit() {
+  ngOnInit() {}
+
+  registerupdateGameMakerInterval() {
     let id = +this.route.snapshot.paramMap.get('id');
-    console.log(id);
-    this.updateGameMaker(id);
     this.updateTimer = setInterval(() => {
       this.updateGameMaker(id);
     }, 2000);
@@ -52,6 +52,12 @@ export class GameMakerComponent implements OnInit {
     );
   }
 
+  ionViewWillEnter() {
+    let id = +this.route.snapshot.paramMap.get('id');
+    console.log(id);
+    this.updateGameMaker(id);
+    this.registerupdateGameMakerInterval();
+  }
   ionViewWillLeave() {
     clearInterval(this.updateTimer);
   }
