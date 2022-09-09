@@ -190,8 +190,6 @@ def create_game(request, gamemaker_id, **kwargs):
         p.game = game
         p.deck = DEFAULT_DECK
         p.next_card = 0
-        p.lives = game.nlives
-        p.damage = 0
         p.color = maker.player_colors[n]
         p.team = maker.player_teams[n]
         p.save()
