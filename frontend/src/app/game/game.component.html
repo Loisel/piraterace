@@ -23,8 +23,9 @@
           <ion-reorder *ngFor="let card of cardsinfo">
             <ion-item>
               <ion-thumbnail>
-                <ion-img [src]="CARDS_URL + card[1].url"></ion-img>
+                <ion-img [src]="CARDS_URL + card[2].url"></ion-img>
               </ion-thumbnail>
+              <ion-badge>{{ card[1] }}</ion-badge>
             </ion-item>
           </ion-reorder>
         </ion-reorder-group>

@@ -9,9 +9,10 @@ from rest_framework.permissions import IsAuthenticated
 
 import os
 import glob
+import random
 from piraterace.settings import MAPSDIR
 
-from pigame.models import BaseGame, ClassicGame, DEFAULT_DECK, GameMaker, CARDS, COLORS
+from pigame.models import BaseGame, ClassicGame, DEFAULT_DECK, GameMaker, CARDS, COLORS, card_id_rank
 from piplayer.models import Account
 import datetime
 import pytz
@@ -20,6 +21,7 @@ from pigame.game_logic import (
     determine_starting_locations,
     determine_checkpoint_locations,
     get_cards_on_hand,
+    flatten_list_of_tuples,
     load_inital_map,
     play_stack,
     switch_cards_on_hand,
@@ -40,8 +42,9 @@ def player_cards(request, **kwargs):
         switch_cards_on_hand(player, src, target)
 
     cards = []
-    for card in get_cards_on_hand(player, player.game.ncardsavail)[1::2]:
-        cards.append([card, CARDS[card]])
+    for playerid, card in get_cards_on_hand(player, player.game.ncardsavail):
+        cardid, cardrank = card_id_rank(card)
+        cards.append([cardid, cardrank, CARDS[cardid]])
 
     return JsonResponse(cards, safe=False)
 
@@ -70,8 +73,8 @@ def game(request, game_id, **kwargs):
 
     # check if players submitted their cards an hence countdown should start:
     COUNTDOWN_GRACE_TIME = 2
+    num_players_submitted = players.filter(time_submitted__isnull=False).count()
     if not game.timestamp:
-        num_players_submitted = players.filter(time_submitted__isnull=False).count()
         if game.countdown_mode == "d":
             if num_players_submitted > 0:
                 game.timestamp = datetime.datetime.now(pytz.utc) + datetime.timedelta(seconds=game.countdown + COUNTDOWN_GRACE_TIME)
@@ -88,10 +91,10 @@ def game(request, game_id, **kwargs):
     else:
         payload["countdown"] = None
 
-    if game.timestamp and (datetime.datetime.now(pytz.utc) > game.timestamp):
+    if (game.timestamp and (datetime.datetime.now(pytz.utc) > game.timestamp)) or num_players_submitted == players.count():
         cards_played = game.cards_played
-        cards_on_hand = determine_next_cards_played(players, game.ncardsavail)
-        cards_played.extend(cards_on_hand[: game.ncardslots * 2])  # times 2 because it is a playerid, card tuple
+        cards_played_next = determine_next_cards_played(players, game.ncardslots)
+        cards_played.extend(flatten_list_of_tuples(cards_played_next))
         game.cards_played = cards_played
         game.timestamp = None
         game.round += 1
@@ -103,6 +106,7 @@ def game(request, game_id, **kwargs):
             p.save()
 
         payload["new_round"] = True
+        payload["countdown"] = None
 
     players, actionstack = play_stack(game)
 
@@ -163,7 +167,7 @@ def create_game(request, gamemaker_id, **kwargs):
         return JsonResponse(f"Only the user who opened the game may start it", status=404, safe=False)
 
     if not all(maker.player_ready):
-        return JsonResponse(f"Player not ready", status=404, safe=False)
+        return JsonResponse(f"Not all players ready yet", status=404, safe=False)
 
     players = Account.objects.filter(pk__in=maker.player_ids)
     game = ClassicGame(
@@ -189,6 +193,7 @@ def create_game(request, gamemaker_id, **kwargs):
     for n, p in enumerate(players):
         p.game = game
         p.deck = DEFAULT_DECK
+        random.shuffle(p.deck)
         p.next_card = 0
         p.color = maker.player_colors[n]
         p.team = maker.player_teams[n]

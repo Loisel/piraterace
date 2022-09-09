@@ -24,7 +24,9 @@ export class GamelistComponent implements OnInit {
     private toastController: ToastController
   ) {}
 
-  ngOnInit() {
+  ngOnInit() {}
+
+  ionViewWillEnter() {
     this.updateGameMakers();
     this.updateTimer = setInterval(() => {
       this.updateGameMakers();
