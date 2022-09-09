@@ -32,6 +32,9 @@ from pigame.game_logic import (
 def player_cards(request, **kwargs):
     player = request.user.account
 
+    if player.time_submitted:
+        return JsonResponse(f"You already submitted your cards at {player.time_submitted}", status=404, safe=False)
+
     if request.method == "POST":
         src, target = request.data
         switch_cards_on_hand(player, src, target)
@@ -62,19 +65,41 @@ def game(request, game_id, **kwargs):
         mapfile=game.mapfile,
         checkpoints=checkpoints,
         me=player.pk,
+        countdown_duration=game.countdown,
     )
 
-    if datetime.datetime.now(pytz.utc) > game.timestamp + datetime.timedelta(seconds=game.round_time):
+    # check if players submitted their cards an hence countdown should start:
+    COUNTDOWN_GRACE_TIME = 2
+    if not game.timestamp:
+        num_players_submitted = players.filter(time_submitted__isnull=False).count()
+        if game.countdown_mode == "d":
+            if num_players_submitted > 0:
+                game.timestamp = datetime.datetime.now(pytz.utc) + datetime.timedelta(seconds=game.countdown + COUNTDOWN_GRACE_TIME)
+        elif game.countdown_mode == "s":
+            if num_players_submitted >= players.count() - 1:
+                game.timestamp = datetime.datetime.now(pytz.utc) + datetime.timedelta(seconds=game.countdown + COUNTDOWN_GRACE_TIME)
+        else:
+            raise ValueError(f"game.countdown_mode {game.countdown_mode} not implemented here")
+        game.save(update_fields=["timestamp"])
+
+    if game.timestamp:
+        dt = game.timestamp - datetime.datetime.now(pytz.utc) - datetime.timedelta(seconds=COUNTDOWN_GRACE_TIME)
+        payload["countdown"] = dt.total_seconds()
+    else:
+        payload["countdown"] = None
+
+    if game.timestamp and (datetime.datetime.now(pytz.utc) > game.timestamp):
         cards_played = game.cards_played
         cards_on_hand = determine_next_cards_played(players, game.ncardsavail)
         cards_played.extend(cards_on_hand[: game.ncardslots * 2])  # times 2 because it is a playerid, card tuple
         game.cards_played = cards_played
-        game.timestamp = datetime.datetime.now()
+        game.timestamp = None
         game.round += 1
         game.save()
 
         for p in players:  # increment next card pointer
             p.next_card += game.ncardsavail
+            p.time_submitted = None
             p.save()
 
         payload["new_round"] = True
@@ -115,6 +140,23 @@ def leave_game(request, **kwargs):
 
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
+def submit_cards(request, **kwargs):
+    account = request.user.account
+    if not account.game:
+        return JsonResponse(f"You are currently not in a game", status=404, safe=False)
+
+    if account.time_submitted:
+        return JsonResponse(f"You already submitted your cards at {account.time_submitted}", status=404, safe=False)
+
+    now = datetime.datetime.now()
+    account.time_submitted = now
+    account.save(update_fields=["time_submitted"])
+
+    return JsonResponse(f"You submitted your cards at {now}", safe=False)
+
+
+@api_view(["GET"])
+@permission_classes((IsAuthenticated,))
 def create_game(request, gamemaker_id, **kwargs):
     maker = get_object_or_404(GameMaker, pk=gamemaker_id)
     if request.user.account.pk != maker.creator_userid:
@@ -136,7 +178,6 @@ def create_game(request, gamemaker_id, **kwargs):
         allow_transfer=maker.allow_transfer,
         countdown_mode=maker.countdown_mode,
         countdown=maker.countdown,
-        round_time=maker.round_time,
     )
     game.save()
 

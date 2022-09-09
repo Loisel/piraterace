@@ -11,6 +11,8 @@ import {
 import { Router, ActivatedRoute } from '@angular/router';
 import { interval, BehaviorSubject } from 'rxjs';
 import { filter, pairwise } from 'rxjs/operators';
+import { timer, Subject } from 'rxjs';
+import { map, takeUntil, takeWhile, finalize } from 'rxjs/operators';
 import Phaser from 'phaser';
 
 import { HttpService } from '../services/http.service';
@@ -28,6 +30,10 @@ export class GameComponent {
   cardsinfo: any = [];
   CARDS_URL = environment.STATIC_URL;
   Ngameround = new BehaviorSubject<number>(0);
+
+  countDownStop = new Subject<any>();
+  countDownValue: number = -1;
+  countDownTimer: any;
 
   @ViewChild('game_div', { read: ElementRef }) game_div: ElementRef;
 
@@ -88,6 +94,27 @@ export class GameComponent {
       });
   }
 
+  finalizeCountDown() {
+    this.countDownValue = -1;
+    console.log('Finalize Countdown');
+  }
+
+  setupCountDown(start: number, end: number) {
+    this.countDownValue = start / end;
+    const updatefreq = 500;
+    this.countDownTimer = timer(0, updatefreq).pipe(
+      takeUntil(this.countDownStop),
+      takeWhile((_) => this.countDownValue < 1),
+      finalize(() => this.finalizeCountDown()),
+      map((_) => {
+        console.log('time increment', this.countDownValue);
+        this.countDownValue =
+          this.countDownValue + (1 / (end - start)) * (updatefreq / 1000);
+        return this.countDownValue; // [0,1] for progressbar
+      })
+    );
+  }
+
   ionViewWillLeave() {
     this.phaserGame.destroy(true, false);
     // this.defaultScene.updateTimer.paused = true;
@@ -106,13 +133,32 @@ export class GameComponent {
 
   onCardsReorder({ detail }) {
     console.log(detail);
-    this.httpService
-      .switchPlayerCards(detail.from, detail.to)
-      .subscribe((result) => {
+    this.httpService.switchPlayerCards(detail.from, detail.to).subscribe(
+      (result) => {
         console.log('switch cards:', result);
         this.cardsinfo = result;
         detail.complete(true);
-      });
+      },
+      (error) => {
+        console.log('failed reorder cards: ', error);
+        this.presentToast(error.error, 'danger');
+        detail.complete(false);
+      }
+    );
+  }
+
+  submitCards() {
+    this.httpService.submitCards().subscribe(
+      (ret) => {
+        console.log('submitCards: ', ret);
+        this.presentToast(ret, 'success');
+        // set cards inactive
+      },
+      (error) => {
+        console.log('failed leave game: ', error);
+        this.presentToast(error.error, 'danger');
+      }
+    );
   }
 
   leaveGame() {
@@ -385,9 +431,19 @@ class GameScene extends Phaser.Scene {
 
   updateEvent(): void {
     this.component.load_gameinfo().subscribe((gameinfo) => {
+      console.log('GameInfo ', gameinfo);
       this.component.gameinfo = gameinfo;
       this.component.Ngameround.next(gameinfo['Ngameround']);
       this.play_actionstack(1000);
+
+      if (gameinfo.countdown) {
+        if (this.component.countDownValue < 0) {
+          this.component.setupCountDown(
+            gameinfo.countdown_duration - gameinfo.countdown,
+            gameinfo.countdown_duration
+          );
+        }
+      }
     });
   }
 

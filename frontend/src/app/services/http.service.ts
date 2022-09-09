@@ -16,6 +16,7 @@ export class HttpService {
   create_gameURL = `${environment.API_URL}/pigame/create_game`;
   get_gameURL = `${environment.API_URL}/pigame/game`;
   player_cardsURL = `${environment.API_URL}/pigame/player_cards`;
+  submitCardsURL = `${environment.API_URL}/pigame/submit_cards`;
   player_infoURL = `${environment.API_URL}/pigame/update_gm_player_info`;
   get_leaveGameURL = `${environment.API_URL}/pigame/leave_game`;
 
@@ -40,6 +41,9 @@ export class HttpService {
   }
   getPlayerCards() {
     return this.httpClient.get(`${this.player_cardsURL}`);
+  }
+  submitCards() {
+    return this.httpClient.get(`${this.submitCardsURL}`);
   }
   switchPlayerCards(from: number, to: number) {
     let data = [from, to];

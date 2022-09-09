@@ -89,7 +89,6 @@ class GameMaker(models.Model):
     creator_userid = models.PositiveIntegerField()
     countdown_mode = models.CharField(max_length=1, choices=CHOICE_MODES, default="d")
     countdown = models.PositiveIntegerField(default=30)
-    round_time = models.PositiveIntegerField(default=30)
 
     game = models.OneToOneField("BaseGame", null=True, blank=True, on_delete=models.CASCADE)
 
@@ -124,9 +123,8 @@ class BaseGame(PolymorphicModel):
 
     countdown_mode = models.CharField(max_length=1, choices=CHOICE_MODES, default="d")
     countdown = models.PositiveIntegerField(default=30)
-    round_time = models.PositiveIntegerField(default=5)
     time_started = models.DateTimeField(auto_now_add=True)
-    timestamp = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField(blank=True, null=True)  # time when round finishes
     cards_played = ArrayField(models.IntegerField(null=True, blank=True), default=list)
     # chat =
 
