@@ -1,11 +1,11 @@
 <ion-app>
-  <ion-header>
-    <ion-toolbar color="primary">
+  <ion-header transluscent="true">
+    <ion-toolbar>
       <ion-buttons slot="start">
-        <ion-menu-button menu="leftmenu" color="dark"></ion-menu-button>
+        <ion-menu-button menu="leftmenu"></ion-menu-button>
       </ion-buttons>
 
-      <ion-title> PirateRace </ion-title>
+      <ion-title><img style="display: inline-block; padding-top: 8px; height: 5ex;" src="assets/theme/logo.png" /></ion-title>
 
       <ion-buttons id="usermenu-button" slot="end">
         <div *ngIf="!(authService.isAuthenticated | async)">
