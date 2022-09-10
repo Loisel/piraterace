@@ -192,8 +192,8 @@ class GameScene extends Phaser.Scene {
   last_played_action: number = 0;
   component: any = null;
   // animation config
-  move_frames: number = 3;
-  anim_frac: number = 0.5;
+  move_frames: number = 3; // number of sub steps of animations
+  anim_frac: number = 0.5; // fraction of animation time we spend with doing things
   anim_cutoff: number = 10; // below this duration we just skip animations
   checkpointLabels: Phaser.GameObjects.Text[] = [];
   constructor(component) {
@@ -259,6 +259,44 @@ class GameScene extends Phaser.Scene {
     }
   }
 
+  collision_boat(
+    boat_id: number,
+    shake_x: number,
+    shake_y: number,
+    time: number
+  ) {
+    time *= this.anim_frac;
+    const num_frames = 8; // fw, fw, fw, bw, fw, bw, bw, bw
+    const dt_frames = time / num_frames;
+    if (dt_frames > this.anim_cutoff) {
+      let boat = this.boats[boat_id];
+      this.animationTimer = this.time.addEvent({
+        callback: () => {
+          console.log('Collision forward steps');
+          boat.boat.x += shake_x / num_frames;
+          boat.boat.y += shake_y / num_frames;
+          boat.bd.x += shake_x / num_frames;
+          boat.bd.y += shake_y / num_frames;
+        },
+        callbackScope: this,
+        delay: dt_frames,
+        repeat: num_frames / 2,
+      });
+      this.animationTimer = this.time.addEvent({
+        callback: () => {
+          console.log('Collision backward steps');
+          boat.boat.x -= shake_x / num_frames;
+          boat.boat.y -= shake_y / num_frames;
+          boat.bd.x -= shake_x / num_frames;
+          boat.bd.y -= shake_y / num_frames;
+        },
+        callbackScope: this,
+        delay: dt_frames * 3.5, // add a bit more to have backwards shakes shortly after forward moves
+        repeat: num_frames / 2,
+      });
+    }
+  }
+
   play_actionstack(animation_time_ms: number) {
     let GI = this.component.gameinfo;
     let actionstack = this.component.gameinfo.actionstack;
@@ -298,6 +336,20 @@ class GameScene extends Phaser.Scene {
                 action.target,
                 0,
                 action.val * GI.map.tileheight,
+                animation_time_ms
+              );
+            } else if (action.key === 'collision_x') {
+              this.collision_boat(
+                action.target,
+                action.val * GI.map.tileheight * 0.3,
+                0,
+                animation_time_ms
+              );
+            } else if (action.key === 'collision_y') {
+              this.collision_boat(
+                action.target,
+                0,
+                action.val * GI.map.tileheight * 0.3,
                 animation_time_ms
               );
             } else {
