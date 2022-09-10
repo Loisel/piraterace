@@ -12,7 +12,7 @@ import { environment } from '../../../environments/environment';
   templateUrl: './newgamemaker.component.html',
   styleUrls: ['./newgamemaker.component.scss'],
 })
-export class NewGameMakerComponent implements OnInit {
+export class NewGameMakerComponent {
   data: NewGameMaker = null;
   phaserGame: Phaser.Game = null;
 
@@ -23,14 +23,14 @@ export class NewGameMakerComponent implements OnInit {
     private toastController: ToastController
   ) {}
 
-  ngOnInit() {
+  ionViewWillEnter() {
     this.httpService.get_create_new_gameMaker().subscribe((response) => {
       console.log('Get get_create_new_gameMaker', response);
       this.data = response;
     });
   }
 
-  ngOnDestroy() {
+  ionViewWillLeave() {
     this.remove_phaser_snapshot();
   }
 
@@ -126,11 +126,11 @@ export class NewGameMakerComponent implements OnInit {
     let config = {
       type: Phaser.AUTO,
       physics: { default: 'None' },
+      parent: 'map-preview',
+      width: this.data.map_info.width * this.data.map_info.tilewidth,
+      height: this.data.map_info.height * this.data.map_info.tileheight,
       scale: {
         mode: Phaser.Scale.FIT,
-        parent: 'game',
-        width: this.data.map_info.width * this.data.map_info.tilewidth,
-        height: this.data.map_info.height * this.data.map_info.tileheight,
       },
       fps: {
         target: 0,

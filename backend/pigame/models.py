@@ -12,6 +12,8 @@ DIRNAME2ID = {v: k for k, v in DIRID2NAME.items()}
 
 DIRID2MOVE = {0: [0, -1], 1: [1, 0], 2: [0, 1], 3: [-1, 0]}
 
+NRANKINGS = 100
+
 CARDS = {
     1: dict(
         descr="forward move",
@@ -45,11 +47,21 @@ CARDS = {
 
 
 def gen_default_deck():
-    c = [1, 2, 10, 20]
+    c = []
+    for rank in range(10, NRANKINGS - 1, 10):
+        c.append(1 * NRANKINGS + rank)
+        c.append(2 * NRANKINGS + rank)
+        c.append(10 * NRANKINGS + rank)
+        c.append(20 * NRANKINGS + rank)
     return c
 
 
+def card_id_rank(cardval):
+    return cardval // NRANKINGS, cardval % NRANKINGS
+
+
 DEFAULT_DECK = gen_default_deck()
+print(f"DEFAULT_DECK: {DEFAULT_DECK}")
 
 maps = dict(
     default=dict(
@@ -83,13 +95,12 @@ class GameMaker(models.Model):
     damage_on_hit = models.PositiveSmallIntegerField(default=10)
     npause_on_repair = models.PositiveSmallIntegerField(default=1)
     npause_on_destroy = models.PositiveSmallIntegerField(default=1)
-    ncardslots = models.PositiveSmallIntegerField(default=2)
-    ncardsavail = models.PositiveSmallIntegerField(default=3)
+    ncardslots = models.PositiveSmallIntegerField(default=5)
+    ncardsavail = models.PositiveSmallIntegerField(default=7)
     allow_transfer = models.BooleanField(default=False)
     creator_userid = models.PositiveIntegerField()
     countdown_mode = models.CharField(max_length=1, choices=CHOICE_MODES, default="d")
     countdown = models.PositiveIntegerField(default=30)
-    round_time = models.PositiveIntegerField(default=30)
 
     game = models.OneToOneField("BaseGame", null=True, blank=True, on_delete=models.CASCADE)
 
@@ -98,7 +109,7 @@ class GameMaker(models.Model):
         return len(self.player_ids)
 
     def add_player(self, player):
-        colors_to_pick = [c for c in COLORS.keys() if c not in self.player_colors]
+        colors_to_pick = [c for c in COLORS.values() if c not in self.player_colors]
         if player.pk not in self.player_ids:
             self.player_ids.append(player.pk)
             self.player_colors.append(random.choice(colors_to_pick))  # TODO
@@ -124,9 +135,8 @@ class BaseGame(PolymorphicModel):
 
     countdown_mode = models.CharField(max_length=1, choices=CHOICE_MODES, default="d")
     countdown = models.PositiveIntegerField(default=30)
-    round_time = models.PositiveIntegerField(default=5)
     time_started = models.DateTimeField(auto_now_add=True)
-    timestamp = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField(blank=True, null=True)  # time when round finishes
     cards_played = ArrayField(models.IntegerField(null=True, blank=True), default=list)
     # chat =
 

@@ -12,7 +12,9 @@
       [attr.data-index]="p"
     >
       <ion-col>{{ gameMaker?.player_names[i] }}</ion-col>
-      <ion-col>{{ gameMaker?.player_colors[i] }}</ion-col>
+      <ion-col
+        [ngStyle]="{ 'background-color': gameMaker?.player_colors[i] }"
+      ></ion-col>
       <ion-col>{{ gameMaker?.player_teams[i] }}</ion-col>
       <ion-col>{{ gameMaker?.player_ready[i] }}</ion-col>
     </ion-row>
@@ -22,7 +24,10 @@
     <ion-item>
       <ion-label>Color</ion-label>
       <ion-select
-        placeholder="{{ gameMaker?.player_colors[gameMaker?.caller_idx] }}"
+        value="{{ gameMaker?.player_colors[gameMaker?.caller_idx] }}"
+        [ngStyle]="{
+          'background-color': gameMaker?.player_colors[gameMaker?.caller_idx]
+        }"
         id="color_select"
         (ionChange)="onPlayerInfoChange($event)"
         [(ngModel)]="gameMaker?.player_colors[gameMaker?.caller_idx]"
@@ -30,6 +35,7 @@
         <ion-select-option
           *ngFor="let color of gameMaker?.player_color_choices | keyvalue"
           [attr.value]="color.value"
+          [ngStyle]="{ 'background-color': color.value }"
           >{{ color.key }}</ion-select-option
         >
       </ion-select>

@@ -5,27 +5,41 @@
         <div id="piraterace-game" #game_div></div>
       </ion-col>
       <ion-col size="2">
-        <ion-item
-          class="ion-float-right ion-float-bottom"
-          [button]="true"
-          (click)="leaveGame()"
-        >
-          <ion-icon name="exit-outline" color="danger"></ion-icon>
-        </ion-item>
-
-        Round {{ Ngameround | async }}
+        <ion-item-divider>
+          <ion-item> Round {{ Ngameround | async }} </ion-item>
+          <ion-item
+            class="ion-float-right ion-float-bottom"
+            [button]="true"
+            (click)="leaveGame()"
+          >
+            <ion-icon name="exit-outline" color="danger"></ion-icon>
+          </ion-item>
+        </ion-item-divider>
 
         <ion-reorder-group
           (ionItemReorder)="onCardsReorder($event)"
           disabled="false"
         >
-          <ion-item *ngFor="let card of cardsinfo">
-            <ion-thumbnail>
-              <ion-img [src]="CARDS_URL + card[1].url"></ion-img>
-            </ion-thumbnail>
-            <ion-reorder slot="start"></ion-reorder>
-          </ion-item>
+          <ion-reorder *ngFor="let card of cardsinfo">
+            <ion-item>
+              <ion-thumbnail>
+                <ion-img [src]="CARDS_URL + card[2].url"></ion-img>
+              </ion-thumbnail>
+              <ion-badge>{{ card[1] }}</ion-badge>
+            </ion-item>
+          </ion-reorder>
         </ion-reorder-group>
+        <ion-item [button]="true" (click)="submitCards()">
+          <ion-icon name="send-outline" color="success"></ion-icon>
+          <ion-label>Submit Cards</ion-label>
+        </ion-item>
+
+        <ion-item>
+          <ion-progress-bar
+            [value]="countDownTimer | async"
+            color="danger"
+          ></ion-progress-bar>
+        </ion-item>
       </ion-col>
     </ion-row>
   </ion-grid>

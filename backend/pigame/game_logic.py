@@ -7,7 +7,16 @@ from pigame.models import (
     DIRID2NAME,
     CARDS,
     DIRID2MOVE,
+    card_id_rank,
 )
+
+
+def argsort(seq):
+    return sorted(range(len(seq)), key=seq.__getitem__)
+
+
+def flatten_list_of_tuples(lot):
+    return [i for j in lot for i in j]
 
 
 def switch_cards_on_hand(player, src, target):
@@ -18,6 +27,10 @@ def switch_cards_on_hand(player, src, target):
 
 
 def get_cards_on_hand(player, ncards):
+    """
+    get next ncards that a player can draw from his deck
+        return list of tuples of (playerid, card)
+    """
     if player.next_card + ncards - 1 > len(player.deck):
         remaining_cards = player.deck[player.next_card :]
         old_cards = player.deck[: player.next_card]
@@ -28,16 +41,30 @@ def get_cards_on_hand(player, ncards):
 
     res = []
     for i in range(0, ncards):
-        res.extend((player.pk, player.deck[(player.next_card + i)]))
+        res.append((player.pk, player.deck[(player.next_card + i)]))
     return res
 
 
 def determine_next_cards_played(players, ncardslots):
-    r = []
-    for p in players:
-        r.extend(get_cards_on_hand(p, ncardslots))
-    # TODO: sort by ranking...
-    return r
+    """
+    returns the cards in order that they will be played in a game by participating players.
+    ncardslots will be returned for each player
+    returns list of (playerid, card) tuples
+    """
+    cards_per_player = [get_cards_on_hand(p, ncardslots) for p in players]
+
+    # sort by ranking...
+    ret = []
+    for i in range(ncardslots):
+        nth_cards = [pcards[i] for pcards in cards_per_player]  # i.e. for each player one card
+        rankings = [card_id_rank(c)[1] for pid, c in nth_cards]
+        # print(f"{i} :: cards this segment {nth_cards} rankings {rankings}")
+        # if rankings collide, i.e. are the same we could compare submitted timestamps here
+        for j in argsort(rankings)[::-1]:
+            ret.append(nth_cards[j])
+
+    # print(f"cards sorted: {ret}")
+    return ret
 
 
 def determine_starting_locations(initmap, players):
@@ -85,12 +112,15 @@ def play_stack(game):
     cardstack = list(zip(stack[::2], stack[1::2]))
     checkpoints = determine_checkpoint_locations(initial_map)
 
+    # print(f"full cardstack {cardstack}")
+
     actionstack = []
     for rnd in range(Nrounds):
 
         stack_start = rnd * game.ncardslots * len(players)
         stack_end = (rnd + 1) * game.ncardslots * len(players)
         this_round_cards = cardstack[stack_start:stack_end]
+        # print(f"this_round_cards: {this_round_cards}")
 
         for playerid, card in this_round_cards:
             player = players[playerid]
@@ -111,14 +141,15 @@ def get_actions_for_card(game, gmap, players, playerid, card):
     player = players[playerid]
 
     actions = []
-    rot = CARDS[card]["rot"]
+    cardid, cardrank = card_id_rank(card)
+    rot = CARDS[cardid]["rot"]
     if rot != 0:
         actions.append(dict(key="rotate", target=playerid, val=rot))
         player.direction = (player.direction + rot) % 4
 
-    for mov in range(abs(CARDS[card]["move"])):
+    for mov in range(abs(CARDS[cardid]["move"])):
         # here collisions have to happen
-        inc = int(CARDS[card]["move"] / abs(CARDS[card]["move"]))
+        inc = int(CARDS[cardid]["move"] / abs(CARDS[cardid]["move"]))
 
         xinc = DIRID2MOVE[player.direction][0] * inc
         yinc = DIRID2MOVE[player.direction][1] * inc
