@@ -144,7 +144,7 @@ def get_actions_for_card(game, gmap, players, playerid, card):
     cardid, cardrank = card_id_rank(card)
     rot = CARDS[cardid]["rot"]
     if rot != 0:
-        actions.append(dict(key="rotate", target=playerid, val=rot))
+        actions.append([dict(key="rotate", target=playerid, val=rot)])
         player.direction = (player.direction + rot) % 4
 
     for mov in range(abs(CARDS[cardid]["move"])):
@@ -155,9 +155,9 @@ def get_actions_for_card(game, gmap, players, playerid, card):
         yinc = DIRID2MOVE[player.direction][1] * inc
 
         if xinc != 0:
-            actions.extend(move_player_x(game, gmap, players, player, xinc))
+            actions.append(move_player_x(game, gmap, players, player, xinc))
         if yinc != 0:
-            actions.extend(move_player_y(game, gmap, players, player, yinc))
+            actions.append(move_player_y(game, gmap, players, player, yinc))
     return actions
 
 
@@ -169,8 +169,7 @@ def move_player_x(game, gmap, players, player, inc):
     tile_prop = next(filter(lambda p: p["id"] == tile_id, tile_props))
     if next(filter(lambda p: p["name"] == "collision", tile_prop["properties"]))["value"] == True:
         damage = next(filter(lambda p: p["name"] == "damage", tile_prop["properties"]))["value"]
-        actions.append(dict(key="collision_x", target=player.pk, val=inc, damage=damage))
-        return actions
+        return [dict(key="collision_x", target=player.pk, val=inc, damage=damage)]
     for pid, p2 in players.items():
         if (p2.xpos == player.xpos + inc) and (p2.ypos == player.ypos):
             actions.extend(move_player_x(game, gmap, players, p2, inc))

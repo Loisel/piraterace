@@ -308,52 +308,54 @@ class GameScene extends Phaser.Scene {
     );
 
     for (let i = this.last_played_action; i < actionstack.length; i++) {
-      let action = actionstack[i];
+      let action_grp = actionstack[i];
       this.animationTimer = this.time.addEvent({
         callback: () => {
-          console.log(action);
+          console.log(action_grp);
 
-          if (action.target > 0) {
-            let boat = this.boats[action.target];
-            if (action.key === 'rotate') {
-              // boat.angle += 90 * action.val;
-              this.rotate_boat(
-                action.target,
-                90 * action.val,
-                animation_time_ms
-              );
-            } else if (action.key === 'move_x') {
-              // boat.x += action.val * GI.map.tilewidth;
-              this.move_boat(
-                action.target,
-                action.val * GI.map.tilewidth,
-                0,
-                animation_time_ms
-              );
-            } else if (action.key === 'move_y') {
-              // boat.y += action.val * GI.map.tileheight;
-              this.move_boat(
-                action.target,
-                0,
-                action.val * GI.map.tileheight,
-                animation_time_ms
-              );
-            } else if (action.key === 'collision_x') {
-              this.collision_boat(
-                action.target,
-                action.val * GI.map.tileheight * 0.3,
-                0,
-                animation_time_ms
-              );
-            } else if (action.key === 'collision_y') {
-              this.collision_boat(
-                action.target,
-                0,
-                action.val * GI.map.tileheight * 0.3,
-                animation_time_ms
-              );
-            } else {
-              console.log('Error, key not found.');
+          for (let action of action_grp) {
+            if (action.target > 0) {
+              let boat = this.boats[action.target];
+              if (action.key === 'rotate') {
+                // boat.angle += 90 * action.val;
+                this.rotate_boat(
+                  action.target,
+                  90 * action.val,
+                  animation_time_ms
+                );
+              } else if (action.key === 'move_x') {
+                // boat.x += action.val * GI.map.tilewidth;
+                this.move_boat(
+                  action.target,
+                  action.val * GI.map.tilewidth,
+                  0,
+                  animation_time_ms
+                );
+              } else if (action.key === 'move_y') {
+                // boat.y += action.val * GI.map.tileheight;
+                this.move_boat(
+                  action.target,
+                  0,
+                  action.val * GI.map.tileheight,
+                  animation_time_ms
+                );
+              } else if (action.key === 'collision_x') {
+                this.collision_boat(
+                  action.target,
+                  action.val * GI.map.tileheight * 0.3,
+                  0,
+                  animation_time_ms
+                );
+              } else if (action.key === 'collision_y') {
+                this.collision_boat(
+                  action.target,
+                  0,
+                  action.val * GI.map.tileheight * 0.3,
+                  animation_time_ms
+                );
+              } else {
+                console.log('Error, key not found.');
+              }
             }
           }
         },
