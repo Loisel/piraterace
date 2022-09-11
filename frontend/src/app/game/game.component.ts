@@ -497,6 +497,9 @@ class GameScene extends Phaser.Scene {
             gameinfo.countdown_duration
           );
         }
+      }else{
+        this.component.countDownStop.next();
+        this.component.countDownTimer = 0;
       }
     });
   }
