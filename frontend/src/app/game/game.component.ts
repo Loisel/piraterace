@@ -90,12 +90,14 @@ export class GameComponent {
         filter((vals) => vals[0] !== vals[1])
       )
       .subscribe((val) => {
+        this.countDownStop.next();
         this.getPlayerCards();
       });
   }
 
   finalizeCountDown() {
     this.countDownValue = -1;
+    this.countDownTimer = 0;
     console.log('Finalize Countdown');
   }
 
@@ -497,9 +499,6 @@ class GameScene extends Phaser.Scene {
             gameinfo.countdown_duration
           );
         }
-      }else{
-        this.component.countDownStop.next();
-        this.component.countDownTimer = 0;
       }
     });
   }
