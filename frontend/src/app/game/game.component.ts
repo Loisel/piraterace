@@ -219,6 +219,39 @@ class GameScene extends Phaser.Scene {
     );
   }
 
+  shoot_cannon(
+    boat_id: number,
+    target_x: number,
+    target_y: number,
+    time: number
+  ) {
+    time *= this.anim_frac;
+    let move_frames = 10;
+    let frame_delay = time / move_frames;
+    let boat = this.boats[boat_id];
+    if (frame_delay >= this.anim_cutoff) {
+      console.log('Shooting:', boat_id, 'at x/y', target_x, target_y);
+
+      let cannonball = this.add.circle(boat.boat.x, boat.boat.y, 10, 0);
+      let dX = target_x - boat.boat.x;
+      let dY = target_y - boat.boat.y;
+      let iternum = 0;
+      this.animationTimer = this.time.addEvent({
+        callback: () => {
+          cannonball.x += dX / move_frames;
+          cannonball.y += dY / move_frames;
+          iternum += 1;
+          if (iternum == move_frames) {
+            cannonball.destroy();
+          }
+        },
+        callbackScope: this,
+        delay: frame_delay, // 1000 = 1 second
+        repeat: move_frames - 1,
+      });
+    }
+  }
+
   rotate_boat(boat_id: number, angle: number, time: number) {
     time *= this.anim_frac;
     let frame_delay = time / this.move_frames;
@@ -353,6 +386,13 @@ class GameScene extends Phaser.Scene {
                   action.target,
                   0,
                   action.val * GI.map.tileheight * 0.3,
+                  animation_time_ms
+                );
+              } else if (action.key === 'shot') {
+                this.shoot_cannon(
+                  action.target,
+                  (action.collided_at[0] + 0.5) * GI.map.tilewidth,
+                  (action.collided_at[1] + 0.5) * GI.map.tilewidth,
                   animation_time_ms
                 );
               } else {
