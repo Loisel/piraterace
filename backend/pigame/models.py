@@ -81,11 +81,14 @@ CHOICE_MODES = [
 COLORS = mcolors.TABLEAU_COLORS
 
 
-class GameMaker(models.Model):
+class GameConfig(models.Model):
     player_ids = ArrayField(models.IntegerField(), default=list)
     player_colors = ArrayField(models.CharField(max_length=7), default=list)
     player_teams = ArrayField(models.IntegerField(), default=list)
     player_ready = ArrayField(models.BooleanField(default=False), default=list)
+    player_start_x = ArrayField(models.PositiveSmallIntegerField(), default=list)
+    player_start_y = ArrayField(models.PositiveSmallIntegerField(), default=list)
+    player_start_directions = ArrayField(models.PositiveSmallIntegerField(), default=list)
     nmaxplayers = models.PositiveSmallIntegerField(default=1)
     mode = models.CharField(max_length=1, choices=GAME_MODES, default="c")
     # nplayers = models.PositiveSmallIntegerField(null=True, blank=True)
@@ -102,7 +105,7 @@ class GameMaker(models.Model):
     countdown_mode = models.CharField(max_length=1, choices=CHOICE_MODES, default="d")
     countdown = models.PositiveIntegerField(default=30)
 
-    game = models.OneToOneField("BaseGame", null=True, blank=True, on_delete=models.CASCADE)
+    game = models.OneToOneField("BaseGame", related_name="config", null=True, blank=True, on_delete=models.CASCADE)
 
     @property
     def nplayers(self):
@@ -125,20 +128,10 @@ class BaseGame(PolymorphicModel):
     # playerlist ist ein account set, oder?
     mapfile = models.CharField(max_length=256)
     round = models.PositiveIntegerField(default=1)
-    nlives = models.PositiveSmallIntegerField(default=3)
-    damage_on_hit = models.PositiveSmallIntegerField(default=10)
-    npause_on_repair = models.PositiveSmallIntegerField(default=1)
-    npause_on_destroy = models.PositiveSmallIntegerField(default=1)
-    ncardslots = models.PositiveSmallIntegerField(default=2)
-    ncardsavail = models.PositiveSmallIntegerField(default=3)
-    allow_transfer = models.BooleanField(default=False)
 
-    countdown_mode = models.CharField(max_length=1, choices=CHOICE_MODES, default="d")
-    countdown = models.PositiveIntegerField(default=30)
     time_started = models.DateTimeField(auto_now_add=True)
     timestamp = models.DateTimeField(blank=True, null=True)  # time when round finishes
     cards_played = ArrayField(models.IntegerField(null=True, blank=True), default=list)
-    # chat =
 
 
 class ClassicGame(BaseGame):

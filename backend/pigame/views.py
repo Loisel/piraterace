@@ -12,7 +12,7 @@ import glob
 import random
 from piraterace.settings import MAPSDIR
 
-from pigame.models import BaseGame, ClassicGame, DEFAULT_DECK, GameMaker, CARDS, COLORS, card_id_rank
+from pigame.models import BaseGame, ClassicGame, DEFAULT_DECK, GameConfig, CARDS, COLORS, card_id_rank
 from piplayer.models import Account
 import datetime
 import pytz
@@ -28,6 +28,8 @@ from pigame.game_logic import (
     verify_map,
 )
 
+TIME_PER_ACTION = 1
+
 
 @api_view(["GET", "POST"])
 @permission_classes((IsAuthenticated,))
@@ -42,7 +44,7 @@ def player_cards(request, **kwargs):
         switch_cards_on_hand(player, src, target)
 
     cards = []
-    for playerid, card in get_cards_on_hand(player, player.game.ncardsavail):
+    for playerid, card in get_cards_on_hand(player, player.game.config.ncardsavail):
         cardid, cardrank = card_id_rank(card)
         cards.append([cardid, cardrank, CARDS[cardid]])
 
@@ -55,8 +57,8 @@ def game(request, game_id, **kwargs):
     game = get_object_or_404(BaseGame, pk=game_id)
     player = request.user.account
 
-    players = game.account_set.all()
-    initmap = load_inital_map(game.mapfile)
+    player_accounts = game.account_set.all()
+    initmap = load_inital_map(game.config.mapfile)
     checkpoints = determine_checkpoint_locations(initmap)
 
     payload = dict(
@@ -65,25 +67,33 @@ def game(request, game_id, **kwargs):
         time_started=game.time_started,
         cards_played=game.cards_played,
         map=initmap,
-        mapfile=game.mapfile,
+        mapfile=game.config.mapfile,
         checkpoints=checkpoints,
         me=player.pk,
-        countdown_duration=game.countdown,
+        countdown_duration=game.config.countdown,
+        time_per_action=TIME_PER_ACTION,
     )
 
     # check if players submitted their cards an hence countdown should start:
     COUNTDOWN_GRACE_TIME = 2
-    num_players_submitted = players.filter(time_submitted__isnull=False).count()
+    num_players_submitted = player_accounts.filter(time_submitted__isnull=False).count()
     if not game.timestamp:
-        if game.countdown_mode == "d":
+        if game.config.countdown_mode == "d":
             if num_players_submitted > 0:
-                game.timestamp = datetime.datetime.now(pytz.utc) + datetime.timedelta(seconds=game.countdown + COUNTDOWN_GRACE_TIME)
-        elif game.countdown_mode == "s":
-            if num_players_submitted >= players.count() - 1:
-                game.timestamp = datetime.datetime.now(pytz.utc) + datetime.timedelta(seconds=game.countdown + COUNTDOWN_GRACE_TIME)
+                game.timestamp = datetime.datetime.now(pytz.utc) + datetime.timedelta(
+                    seconds=game.config.countdown + COUNTDOWN_GRACE_TIME
+                )
+        elif game.config.countdown_mode == "s":
+            if num_players_submitted >= player_accounts.count() - 1:
+                game.timestamp = datetime.datetime.now(pytz.utc) + datetime.timedelta(
+                    seconds=game.config.countdown + COUNTDOWN_GRACE_TIME
+                )
         else:
-            raise ValueError(f"game.countdown_mode {game.countdown_mode} not implemented here")
+            raise ValueError(f"game.config.countdown_mode {game.config.countdown_mode} not implemented here")
         game.save(update_fields=["timestamp"])
+
+    if num_players_submitted == player_accounts.count():
+        game.timestamp = datetime.datetime.now(pytz.utc)
 
     if game.timestamp:
         dt = game.timestamp - datetime.datetime.now(pytz.utc) - datetime.timedelta(seconds=COUNTDOWN_GRACE_TIME)
@@ -91,30 +101,41 @@ def game(request, game_id, **kwargs):
     else:
         payload["countdown"] = None
 
-    if (game.timestamp and (datetime.datetime.now(pytz.utc) > game.timestamp)) or num_players_submitted == players.count():
+    if game.timestamp and (datetime.datetime.now(pytz.utc) >= game.timestamp):
+        old_actionstack = play_stack(game)[1]
         cards_played = game.cards_played
-        cards_played_next = determine_next_cards_played(players, game.ncardslots)
+        cards_played_next = determine_next_cards_played(
+            list(player_accounts.values_list("pk", flat=True)), game.config.player_ids, game.config.ncardslots
+        )
         cards_played.extend(flatten_list_of_tuples(cards_played_next))
         game.cards_played = cards_played
+        payload["countdown"] = None
+        game.save(update_fields=["cards_played"])
+    else:
+        old_actionstack = None
+
+    animation_time = 0
+    player_states, actionstack = play_stack(game)
+    if old_actionstack:
+        animation_time = (len(actionstack) - len(old_actionstack)) * TIME_PER_ACTION
+
+    if game.timestamp and (datetime.datetime.now(pytz.utc) >= game.timestamp + datetime.timedelta(seconds=animation_time)):
         game.timestamp = None
         game.round += 1
         game.save()
 
-        for p in players:  # increment next card pointer
-            p.next_card += game.ncardsavail
+        for p in player_accounts:  # increment next card pointer
+            p.next_card += game.config.ncardsavail
             p.time_submitted = None
             p.save()
 
-        payload["new_round"] = True
-        payload["countdown"] = None
-
-    players, actionstack = play_stack(game)
+        # payload["new_round"] = True
 
     payload["actionstack"] = actionstack
     payload["Ngameround"] = game.round
     payload["players"] = {}
-    for p in players.values():
-        payload["players"][p.pk] = dict(
+    for p in player_states.values():
+        payload["players"][p.id] = dict(
             start_pos_x=p.start_loc_x,
             start_pos_y=p.start_loc_y,
             start_direction=p.start_direction,
@@ -162,41 +183,30 @@ def submit_cards(request, **kwargs):
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
 def create_game(request, gamemaker_id, **kwargs):
-    maker = get_object_or_404(GameMaker, pk=gamemaker_id)
-    if request.user.account.pk != maker.creator_userid:
+    config = get_object_or_404(GameConfig, pk=gamemaker_id)
+    if request.user.account.pk != config.creator_userid:
         return JsonResponse(f"Only the user who opened the game may start it", status=404, safe=False)
 
-    if not all(maker.player_ready):
+    if not all(config.player_ready):
         return JsonResponse(f"Not all players ready yet", status=404, safe=False)
 
-    players = Account.objects.filter(pk__in=maker.player_ids)
-    game = ClassicGame(
-        mapfile=maker.mapfile,
-        mode=maker.mode,
-        nlives=maker.nlives,
-        damage_on_hit=maker.damage_on_hit,
-        npause_on_repair=maker.npause_on_repair,
-        npause_on_destroy=maker.npause_on_destroy,
-        ncardslots=maker.ncardslots,
-        ncardsavail=maker.ncardsavail,
-        allow_transfer=maker.allow_transfer,
-        countdown_mode=maker.countdown_mode,
-        countdown=maker.countdown,
-    )
+    players = Account.objects.filter(pk__in=config.player_ids)
+    initmap = load_inital_map(config.mapfile)
+    xpos, ypos, dirs = determine_starting_locations(initmap)
+    config.player_start_x = xpos[: len(players)]
+    config.player_start_y = ypos[: len(players)]
+    config.player_start_directions = dirs[: len(players)]
+    game = ClassicGame()
     game.save()
 
-    maker.game = game
-    maker.save()
-    initmap = load_inital_map(game.mapfile)
-    players = determine_starting_locations(initmap, players)
+    config.game = game
+    config.save()
 
     for n, p in enumerate(players):
         p.game = game
         p.deck = DEFAULT_DECK
         random.shuffle(p.deck)
         p.next_card = 0
-        p.color = maker.player_colors[n]
-        p.team = maker.player_teams[n]
         p.save()
 
     payload = dict(
@@ -211,7 +221,7 @@ def create_game(request, gamemaker_id, **kwargs):
 @permission_classes((IsAuthenticated,))
 def view_gamemaker(request, gamemaker_id):
     caller = request.user.account
-    gm = model_to_dict(get_object_or_404(GameMaker, pk=gamemaker_id))
+    gm = model_to_dict(get_object_or_404(GameConfig, pk=gamemaker_id))
     players = Account.objects.filter(pk__in=gm["player_ids"])
     gm["player_names"] = [p.user.username for p in players]
 
@@ -228,7 +238,7 @@ def view_gamemaker(request, gamemaker_id):
 @permission_classes((IsAuthenticated,))
 def update_gm_player_info(request, gamemaker_id):
     caller = request.user.account
-    gm = get_object_or_404(GameMaker, pk=gamemaker_id)
+    gm = get_object_or_404(GameConfig, pk=gamemaker_id)
 
     data = request.data
     idx = gm.player_ids.index(caller.pk)
@@ -246,7 +256,7 @@ def update_gm_player_info(request, gamemaker_id):
 def join_gamemaker(request, gamemaker_id, **kwargs):
     if request.user.account.game:
         return JsonResponse(f"You are already in game {request.user.account.game}", status=404, safe=False)
-    maker = get_object_or_404(GameMaker, pk=gamemaker_id)
+    maker = get_object_or_404(GameConfig, pk=gamemaker_id)
     player = request.user.account
     maker.add_player(player)
     maker.save()
@@ -269,12 +279,12 @@ def create_gamemaker(request, **kwargs):
     if errs:
         return JsonResponse(errs, status=404, safe=False)
 
-    maker = GameMaker(creator_userid=player.pk, mapfile=mapfile, player_ids=[])
-    maker.add_player(player)
-    maker.save()
+    game = GameConfig(creator_userid=player.pk, mapfile=mapfile, player_ids=[])
+    game.add_player(player)
+    game.save()
 
-    payload = model_to_dict(maker)
-    return redirect(reverse("pigame:view_gamemaker", kwargs={"gamemaker_id": maker.pk}))
+    payload = model_to_dict(game)
+    return redirect(reverse("pigame:view_gamemaker", kwargs={"gamemaker_id": game.pk}))
 
 
 @api_view(["GET", "POST"])
@@ -305,9 +315,9 @@ def create_new_gamemaker(request, **kwargs):
 
 
 def list_gamemakers(request):
-    makers = GameMaker.objects.filter(game=None)
+    games = GameConfig.objects.filter(game=None)
     ret = dict(
-        gameMakers=list(makers.values()),
+        gameMakers=list(games.values()),
         reconnect_game=None,
     )
     try:

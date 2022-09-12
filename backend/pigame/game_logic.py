@@ -1,8 +1,10 @@
 import json
 import os
 import random
+import types
 
 from piraterace.settings import MAPSDIR
+from piplayer.models import Account
 from pigame.models import (
     DIRID2NAME,
     CARDS,
@@ -45,13 +47,20 @@ def get_cards_on_hand(player, ncards):
     return res
 
 
-def determine_next_cards_played(players, ncardslots):
+def determine_next_cards_played(players_in_game, player_ids, ncardslots):
     """
     returns the cards in order that they will be played in a game by participating players.
     ncardslots will be returned for each player
     returns list of (playerid, card) tuples
     """
-    cards_per_player = [get_cards_on_hand(p, ncardslots) for p in players]
+
+    print(f"player_ids {player_ids}, player_in_game {players_in_game}")
+    cards_per_player = []
+    for i in player_ids:
+        if i in players_in_game:
+            cards_per_player.append(get_cards_on_hand(Account.objects.get(pk=i), ncardslots))
+        else:
+            raise ValueError("Not implemented")
 
     # sort by ranking...
     ret = []
@@ -67,7 +76,7 @@ def determine_next_cards_played(players, ncardslots):
     return ret
 
 
-def determine_starting_locations(initmap, players):
+def determine_starting_locations(initmap):
     for layer in initmap["layers"]:
         if layer["name"] == "startinglocs":
             positions = layer["objects"]
@@ -76,11 +85,14 @@ def determine_starting_locations(initmap, players):
     random.shuffle(positions)
     theight = initmap["tileheight"]
     twidth = initmap["tilewidth"]
-    for n, player in enumerate(players):
-        player.start_loc_x = int(positions[n]["x"] / twidth)
-        player.start_loc_y = int(positions[n]["y"] / theight)
-        player.start_direction = random.choice(list(DIRID2NAME.keys()))
-    return players
+    start_pos_x = []
+    start_pos_y = []
+    start_direction = []
+    for p in positions:
+        start_pos_x.append(int(p["x"] / twidth))
+        start_pos_y.append(int(p["y"] / theight))
+        start_direction.append(random.choice(list(DIRID2NAME.keys())))
+    return start_pos_x, start_pos_y, start_direction
 
 
 def determine_checkpoint_locations(initmap):
@@ -98,16 +110,31 @@ def determine_checkpoint_locations(initmap):
 
 
 def play_stack(game):
-    initial_map = load_inital_map(game.mapfile)
+    initial_map = load_inital_map(game.config.mapfile)
     stack = game.cards_played
     Nrounds = game.round
-    players = {p.pk: p for p in list(game.account_set.all())}
 
-    for pk, player in players.items():
-        player.direction = player.start_direction
-        player.xpos = player.start_loc_x
-        player.ypos = player.start_loc_y
-        player.next_checkpoint = 1
+    players = {}
+    for pid, x, y, direction, color, team in zip(
+        game.config.player_ids,
+        game.config.player_start_x,
+        game.config.player_start_y,
+        game.config.player_start_directions,
+        game.config.player_colors,
+        game.config.player_teams,
+    ):
+        p = types.SimpleNamespace()
+        p.id = pid
+        p.start_loc_x = x
+        p.start_loc_y = y
+        p.start_direction = direction
+        p.xpos = x
+        p.ypos = y
+        p.direction = direction
+        p.next_checkpoint = 1
+        p.color = color
+        p.team = team
+        players[pid] = p
 
     cardstack = list(zip(stack[::2], stack[1::2]))
     checkpoints = determine_checkpoint_locations(initial_map)
@@ -118,17 +145,17 @@ def play_stack(game):
     # we do not generate the actions for the *current* round `Nround`!
     for rnd in range(Nrounds - 1):
 
-        stack_start = rnd * game.ncardslots * len(players)
-        stack_end = (rnd + 1) * game.ncardslots * len(players)
+        stack_start = rnd * game.config.ncardslots * len(players)
+        stack_end = (rnd + 1) * game.config.ncardslots * len(players)
         this_round_cards = cardstack[stack_start:stack_end]
         # print(f"this_round_cards: {this_round_cards}")
 
         for playerid, card in this_round_cards:
-            actions = get_actions_for_card(game, initial_map, players, playerid, card)
+            actions = get_actions_for_card(game, initial_map, players, players[playerid], card)
             actionstack.extend(actions)
 
         # cannons
-        actionstack.append([shoot_cannon(game, initial_map, players, pid) for pid in players])
+        actionstack.append([shoot_cannon(game, initial_map, players, p) for p in players.values()])
 
         for player in players.values():
             if (player.xpos == checkpoints[player.next_checkpoint][0]) and (player.ypos == checkpoints[player.next_checkpoint][1]):
@@ -140,8 +167,7 @@ def play_stack(game):
     return players, actionstack
 
 
-def shoot_cannon(game, gmap, players, playerid):
-    player = players[playerid]
+def shoot_cannon(game, gmap, players, player):
     CB_DAMAGE = 10
 
     xinc = DIRID2MOVE[player.direction][0]
@@ -156,21 +182,20 @@ def shoot_cannon(game, gmap, players, playerid):
         # hit a player ?
         for other_player in players.values():
             if (cb_x == other_player.xpos) and (cb_y == other_player.ypos):
-                return dict(key="shot", target=playerid, other_player=other_player.pk, damage=CB_DAMAGE, collided_at=(cb_x, cb_y))
+                return dict(key="shot", target=player.id, other_player=other_player.id, damage=CB_DAMAGE, collided_at=(cb_x, cb_y))
         # hit a colliding map tile?
         if get_tile_properties(gmap, cb_x, cb_y)["collision"]:
-            return dict(key="shot", target=playerid, collided_at=(cb_x, cb_y))
-    return dict(key="shot", target=playerid, collided_at=(cb_x, cb_y))
+            return dict(key="shot", target=player.id, collided_at=(cb_x, cb_y))
+    return dict(key="shot", target=player.id, collided_at=(cb_x, cb_y))
 
 
-def get_actions_for_card(game, gmap, players, playerid, card):
-    player = players[playerid]
+def get_actions_for_card(game, gmap, players, player, card):
 
     actions = []
     cardid, cardrank = card_id_rank(card)
     rot = CARDS[cardid]["rot"]
     if rot != 0:
-        actions.append([dict(key="rotate", target=playerid, val=rot)])
+        actions.append([dict(key="rotate", target=player.id, val=rot)])
         player.direction = (player.direction + rot) % 4
 
     for mov in range(abs(CARDS[cardid]["move"])):
@@ -192,7 +217,7 @@ def move_player_x(game, gmap, players, player, inc):
     tile_prop = get_tile_properties(gmap, player.xpos + inc, player.ypos)
     if tile_prop["collision"]:
         damage = tile_prop["damage"]
-        return [dict(key="collision_x", target=player.pk, val=inc, damage=damage)]
+        return [dict(key="collision_x", target=player.id, val=inc, damage=damage)]
     for pid, p2 in players.items():
         if (p2.xpos == player.xpos + inc) and (p2.ypos == player.ypos):
             actions.extend(move_player_x(game, gmap, players, p2, inc))
@@ -200,7 +225,7 @@ def move_player_x(game, gmap, players, player, inc):
                 return actions
             break
     player.xpos += inc
-    actions.append(dict(key="move_x", target=player.pk, val=inc))
+    actions.append(dict(key="move_x", target=player.id, val=inc))
     return actions
 
 
@@ -209,7 +234,7 @@ def move_player_y(game, gmap, players, player, inc):
     tile_prop = get_tile_properties(gmap, player.xpos, player.ypos + inc)
     if tile_prop["collision"]:
         damage = tile_prop["damage"]
-        actions.append(dict(key="collision_y", target=player.pk, val=inc, damage=damage))
+        actions.append(dict(key="collision_y", target=player.id, val=inc, damage=damage))
         return actions
     for pid, p2 in players.items():
         if (p2.xpos == player.xpos) and (p2.ypos == player.ypos + inc):
@@ -218,7 +243,7 @@ def move_player_y(game, gmap, players, player, inc):
                 return actions
             break
     player.ypos += inc
-    actions.append(dict(key="move_y", target=player.pk, val=inc))
+    actions.append(dict(key="move_y", target=player.id, val=inc))
     return actions
 
 
