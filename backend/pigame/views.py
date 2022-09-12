@@ -203,7 +203,6 @@ def create_game(request, gamemaker_id, **kwargs):
         text="game created",
         game_id=game.pk,
         time_started=game.time_started,
-        url=f"http://localhost:8000/pigame/game/{game.pk}",
     )
     return JsonResponse(payload)
 
