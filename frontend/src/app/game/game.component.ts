@@ -90,12 +90,14 @@ export class GameComponent {
         filter((vals) => vals[0] !== vals[1])
       )
       .subscribe((val) => {
+        this.countDownStop.next();
         this.getPlayerCards();
       });
   }
 
   finalizeCountDown() {
     this.countDownValue = -1;
+    this.countDownTimer = 0;
     console.log('Finalize Countdown');
   }
 
@@ -217,6 +219,73 @@ class GameScene extends Phaser.Scene {
     );
   }
 
+  damage_stars(target_x: number, target_y: number, time: number) {
+    time *= this.anim_frac;
+    let frame_delay = time / this.move_frames;
+    if (frame_delay >= this.anim_cutoff) {
+      let stars = this.add.group();
+      stars.add(this.add.star(target_x - 2, target_y + 6, 5, 6, 11, 0xff0000));
+      stars.add(this.add.star(target_x - 5, target_y - 11, 5, 8, 13, 0xff0000));
+      let iternum = 0;
+      this.animationTimer = this.time.addEvent({
+        callback: () => {
+          stars.incY(-4);
+          iternum += 1;
+          if (iternum == this.move_frames) {
+            stars.destroy(true);
+          }
+        },
+        callbackScope: this,
+        delay: frame_delay, // 1000 = 1 second
+        repeat: this.move_frames - 1,
+      });
+    }
+  }
+
+  shoot_cannon(
+    boat_id: number,
+    target_x: number,
+    target_y: number,
+    tilewidth: number,
+    tileheight: number,
+    show_stars: boolean,
+    time: number
+  ) {
+    let boat = this.boats[boat_id];
+    let dX = target_x - boat.boat.x;
+    let dY = target_y - boat.boat.y;
+    // distance in number of tiles
+    let dist = Math.round(
+      Math.max(Math.abs(dX) / tilewidth, Math.abs(dY) / tileheight)
+    );
+    time *= this.anim_frac;
+    // one frame per tile
+    let move_frames = dist;
+    let frame_delay = time / move_frames;
+    if (frame_delay >= this.anim_cutoff) {
+      console.log('Shooting:', boat_id, 'at x/y', target_x, target_y);
+
+      let cannonball = this.add.circle(boat.boat.x, boat.boat.y, 10, 0);
+      let iternum = 0;
+      this.animationTimer = this.time.addEvent({
+        callback: () => {
+          cannonball.x += dX / move_frames;
+          cannonball.y += dY / move_frames;
+          iternum += 1;
+          if (iternum == move_frames) {
+            cannonball.destroy();
+            if (show_stars) {
+              this.damage_stars(target_x, target_y, time);
+            }
+          }
+        },
+        callbackScope: this,
+        delay: frame_delay, // 1000 = 1 second
+        repeat: move_frames - 1,
+      });
+    }
+  }
+
   rotate_boat(boat_id: number, angle: number, time: number) {
     time *= this.anim_frac;
     let frame_delay = time / this.move_frames;
@@ -308,52 +377,65 @@ class GameScene extends Phaser.Scene {
     );
 
     for (let i = this.last_played_action; i < actionstack.length; i++) {
-      let action = actionstack[i];
+      let action_grp = actionstack[i];
       this.animationTimer = this.time.addEvent({
         callback: () => {
-          console.log(action);
+          console.log(action_grp);
 
-          if (action.target > 0) {
-            let boat = this.boats[action.target];
-            if (action.key === 'rotate') {
-              // boat.angle += 90 * action.val;
-              this.rotate_boat(
-                action.target,
-                90 * action.val,
-                animation_time_ms
-              );
-            } else if (action.key === 'move_x') {
-              // boat.x += action.val * GI.map.tilewidth;
-              this.move_boat(
-                action.target,
-                action.val * GI.map.tilewidth,
-                0,
-                animation_time_ms
-              );
-            } else if (action.key === 'move_y') {
-              // boat.y += action.val * GI.map.tileheight;
-              this.move_boat(
-                action.target,
-                0,
-                action.val * GI.map.tileheight,
-                animation_time_ms
-              );
-            } else if (action.key === 'collision_x') {
-              this.collision_boat(
-                action.target,
-                action.val * GI.map.tileheight * 0.3,
-                0,
-                animation_time_ms
-              );
-            } else if (action.key === 'collision_y') {
-              this.collision_boat(
-                action.target,
-                0,
-                action.val * GI.map.tileheight * 0.3,
-                animation_time_ms
-              );
-            } else {
-              console.log('Error, key not found.');
+          for (let action of action_grp) {
+            if (action.target > 0) {
+              let boat = this.boats[action.target];
+              if (action.key === 'rotate') {
+                // boat.angle += 90 * action.val;
+                this.rotate_boat(
+                  action.target,
+                  90 * action.val,
+                  animation_time_ms
+                );
+              } else if (action.key === 'move_x') {
+                // boat.x += action.val * GI.map.tilewidth;
+                this.move_boat(
+                  action.target,
+                  action.val * GI.map.tilewidth,
+                  0,
+                  animation_time_ms
+                );
+              } else if (action.key === 'move_y') {
+                // boat.y += action.val * GI.map.tileheight;
+                this.move_boat(
+                  action.target,
+                  0,
+                  action.val * GI.map.tileheight,
+                  animation_time_ms
+                );
+              } else if (action.key === 'collision_x') {
+                this.collision_boat(
+                  action.target,
+                  action.val * GI.map.tileheight * 0.3,
+                  0,
+                  animation_time_ms
+                );
+              } else if (action.key === 'collision_y') {
+                this.collision_boat(
+                  action.target,
+                  0,
+                  action.val * GI.map.tileheight * 0.3,
+                  animation_time_ms
+                );
+              } else if (action.key === 'shot') {
+                let show_stars = action.other_player !== undefined;
+                this.shoot_cannon(
+                  action.target,
+                  (action.collided_at[0] + 0.5) * GI.map.tilewidth,
+                  (action.collided_at[1] + 0.5) * GI.map.tilewidth,
+                  GI.map.tilewidth,
+                  GI.map.tileheight,
+                  show_stars,
+                  animation_time_ms
+                );
+              } else {
+                console.log('Error, key not found.');
+              }
             }
           }
         },

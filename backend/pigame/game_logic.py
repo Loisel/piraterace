@@ -115,7 +115,8 @@ def play_stack(game):
     # print(f"full cardstack {cardstack}")
 
     actionstack = []
-    for rnd in range(Nrounds):
+    # we do not generate the actions for the *current* round `Nround`!
+    for rnd in range(Nrounds - 1):
 
         stack_start = rnd * game.ncardslots * len(players)
         stack_end = (rnd + 1) * game.ncardslots * len(players)
@@ -123,9 +124,11 @@ def play_stack(game):
         # print(f"this_round_cards: {this_round_cards}")
 
         for playerid, card in this_round_cards:
-            player = players[playerid]
             actions = get_actions_for_card(game, initial_map, players, playerid, card)
             actionstack.extend(actions)
+
+        # cannons
+        actionstack.append([shoot_cannon(game, initial_map, players, pid) for pid in players])
 
         for player in players.values():
             if (player.xpos == checkpoints[player.next_checkpoint][0]) and (player.ypos == checkpoints[player.next_checkpoint][1]):
@@ -137,6 +140,29 @@ def play_stack(game):
     return players, actionstack
 
 
+def shoot_cannon(game, gmap, players, playerid):
+    player = players[playerid]
+    CB_DAMAGE = 10
+
+    xinc = DIRID2MOVE[player.direction][0]
+    yinc = DIRID2MOVE[player.direction][1]
+
+    cb_x = player.xpos
+    cb_y = player.ypos
+
+    while (cb_x >= 0 and cb_x < gmap["width"]) and (cb_y >= 0 and cb_y < gmap["height"]):
+        cb_x += xinc
+        cb_y += yinc
+        # hit a player ?
+        for other_player in players.values():
+            if (cb_x == other_player.xpos) and (cb_y == other_player.ypos):
+                return dict(key="shot", target=playerid, other_player=other_player.pk, damage=CB_DAMAGE, collided_at=(cb_x, cb_y))
+        # hit a colliding map tile?
+        if get_tile_properties(gmap, cb_x, cb_y)["collision"]:
+            return dict(key="shot", target=playerid, collided_at=(cb_x, cb_y))
+    return dict(key="shot", target=playerid, collided_at=(cb_x, cb_y))
+
+
 def get_actions_for_card(game, gmap, players, playerid, card):
     player = players[playerid]
 
@@ -144,7 +170,7 @@ def get_actions_for_card(game, gmap, players, playerid, card):
     cardid, cardrank = card_id_rank(card)
     rot = CARDS[cardid]["rot"]
     if rot != 0:
-        actions.append(dict(key="rotate", target=playerid, val=rot))
+        actions.append([dict(key="rotate", target=playerid, val=rot)])
         player.direction = (player.direction + rot) % 4
 
     for mov in range(abs(CARDS[cardid]["move"])):
@@ -155,22 +181,18 @@ def get_actions_for_card(game, gmap, players, playerid, card):
         yinc = DIRID2MOVE[player.direction][1] * inc
 
         if xinc != 0:
-            actions.extend(move_player_x(game, gmap, players, player, xinc))
+            actions.append(move_player_x(game, gmap, players, player, xinc))
         if yinc != 0:
-            actions.extend(move_player_y(game, gmap, players, player, yinc))
+            actions.append(move_player_y(game, gmap, players, player, yinc))
     return actions
 
 
 def move_player_x(game, gmap, players, player, inc):
     actions = []
-    bg = list(filter(lambda l: l["name"] == "background", gmap["layers"]))[0]
-    tile_id = bg["data"][player.ypos * bg["width"] + player.xpos + inc]
-    tile_props = gmap["tilesets"][0]["tiles"]
-    tile_prop = next(filter(lambda p: p["id"] == tile_id, tile_props))
-    if next(filter(lambda p: p["name"] == "collision", tile_prop["properties"]))["value"] == True:
-        damage = next(filter(lambda p: p["name"] == "damage", tile_prop["properties"]))["value"]
-        actions.append(dict(key="collision_x", target=player.pk, val=inc, damage=damage))
-        return actions
+    tile_prop = get_tile_properties(gmap, player.xpos + inc, player.ypos)
+    if tile_prop["collision"]:
+        damage = tile_prop["damage"]
+        return [dict(key="collision_x", target=player.pk, val=inc, damage=damage)]
     for pid, p2 in players.items():
         if (p2.xpos == player.xpos + inc) and (p2.ypos == player.ypos):
             actions.extend(move_player_x(game, gmap, players, p2, inc))
@@ -184,12 +206,9 @@ def move_player_x(game, gmap, players, player, inc):
 
 def move_player_y(game, gmap, players, player, inc):
     actions = []
-    bg = list(filter(lambda l: l["name"] == "background", gmap["layers"]))[0]
-    tile_id = bg["data"][(player.ypos + inc) * bg["width"] + player.xpos]
-    tile_props = gmap["tilesets"][0]["tiles"]
-    tile_prop = next(filter(lambda p: p["id"] == tile_id, tile_props))
-    if next(filter(lambda p: p["name"] == "collision", tile_prop["properties"]))["value"] == True:
-        damage = next(filter(lambda p: p["name"] == "damage", tile_prop["properties"]))["value"]
+    tile_prop = get_tile_properties(gmap, player.xpos, player.ypos + inc)
+    if tile_prop["collision"]:
+        damage = tile_prop["damage"]
         actions.append(dict(key="collision_y", target=player.pk, val=inc, damage=damage))
         return actions
     for pid, p2 in players.items():
@@ -201,6 +220,14 @@ def move_player_y(game, gmap, players, player, inc):
     player.ypos += inc
     actions.append(dict(key="move_y", target=player.pk, val=inc))
     return actions
+
+
+def get_tile_properties(gmap, x, y):
+    bg = list(filter(lambda l: l["name"] == "background", gmap["layers"]))[0]
+    tile_id = bg["data"][y * bg["width"] + x]
+    tile_props = gmap["tilesets"][0]["tiles"]
+    tile_prop = next(filter(lambda p: p["id"] == tile_id, tile_props))
+    return {item["name"]: item["value"] for item in tile_prop["properties"]}
 
 
 def load_inital_map(fname):
