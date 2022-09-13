@@ -72,7 +72,7 @@ def game(request, game_id, **kwargs):
         me=player.pk,
         countdown_duration=game.config.countdown,
         time_per_action=TIME_PER_ACTION,
-        countdown = None,
+        countdown=None,
     )
 
     player_states, actionstack = play_stack(game)
@@ -82,7 +82,7 @@ def game(request, game_id, **kwargs):
     if game.state in ["countdown", "select"]:
         if num_players_submitted == player_accounts.count():
             game.state = "animate"
-            game.save(update_fields=['state'])
+            game.save(update_fields=["state"])
 
             old_actionstack = actionstack
             cards_played = game.cards_played
@@ -127,19 +127,16 @@ def game(request, game_id, **kwargs):
                     p.time_submitted = datetime.datetime.now(pytz.utc)
                     p.save(update_fields=["time_submitted"])
 
-
     if game.state == "animate" and datetime.datetime.now(pytz.utc) > game.timestamp:
         game.state = "select"
         game.timestamp = None
         game.round += 1
-        game.save()
+        game.save(update_fields=["state", "timestamp", "round"])
 
         for p in player_accounts:  # increment next card pointer
             p.next_card += game.config.ncardsavail
             p.time_submitted = None
             p.save()
-        
-                
 
     payload["actionstack"] = actionstack
     payload["Ngameround"] = game.round

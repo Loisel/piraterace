@@ -144,7 +144,7 @@ def play_stack(game):
     actionstack = []
     # determine the rounds dynamically to avoid a race condition with respect to the
     # round counter
-    Nrounds = int(len(cardstack)/(len(players) * game.config.ncardslots))
+    Nrounds = int(len(cardstack) / (len(players) * game.config.ncardslots))
     # we do not generate the actions for the *current* round `Nround`!
     for rnd in range(Nrounds):
 

@@ -134,6 +134,7 @@ class BaseGame(PolymorphicModel):
     cards_played = ArrayField(models.IntegerField(null=True, blank=True), default=list)
     state = models.CharField(max_length=256, default="select")
 
+
 class ClassicGame(BaseGame):
     pass
 
