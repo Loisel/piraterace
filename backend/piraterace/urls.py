@@ -17,10 +17,10 @@ from django.contrib import admin
 from django.urls import re_path, path, include
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("pigame/", include("pigame.urls")),
-    path("auth/", include("djoser.urls")),
-    path("auth/", include("djoser.urls.jwt")),
+    path("api/admin/", admin.site.urls),
+    path("api/pigame/", include("pigame.urls")),
+    path("api/auth/", include("djoser.urls")),
+    path("api/auth/", include("djoser.urls.jwt")),
 ]
 
 
