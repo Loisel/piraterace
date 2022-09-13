@@ -112,7 +112,7 @@ def determine_checkpoint_locations(initmap):
 def play_stack(game):
     initial_map = load_inital_map(game.config.mapfile)
     stack = game.cards_played
-    Nrounds = game.round
+    # Nrounds = game.round
 
     players = {}
     for pid, x, y, direction, color, team in zip(
@@ -142,8 +142,11 @@ def play_stack(game):
     # print(f"full cardstack {cardstack}")
 
     actionstack = []
+    # determine the rounds dynamically to avoid a race condition with respect to the
+    # round counter
+    Nrounds = int(len(cardstack)/(len(players) * game.config.ncardslots))
     # we do not generate the actions for the *current* round `Nround`!
-    for rnd in range(Nrounds - 1):
+    for rnd in range(Nrounds):
 
         stack_start = rnd * game.config.ncardslots * len(players)
         stack_end = (rnd + 1) * game.config.ncardslots * len(players)
@@ -160,6 +163,8 @@ def play_stack(game):
         for player in players.values():
             if (player.xpos == checkpoints[player.next_checkpoint][0]) and (player.ypos == checkpoints[player.next_checkpoint][1]):
                 if player.next_checkpoint == len(checkpoints):
+                    game.state = "end"
+                    game.save(update_fields=["state"])
                     print("You win")
                 player.next_checkpoint += 1
         # add canon balls here

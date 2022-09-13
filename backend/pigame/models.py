@@ -132,7 +132,7 @@ class BaseGame(PolymorphicModel):
     time_started = models.DateTimeField(auto_now_add=True)
     timestamp = models.DateTimeField(blank=True, null=True)  # time when round finishes
     cards_played = ArrayField(models.IntegerField(null=True, blank=True), default=list)
-
+    state = models.CharField(max_length=256, default="select")
 
 class ClassicGame(BaseGame):
     pass

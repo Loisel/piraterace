@@ -72,54 +72,64 @@ def game(request, game_id, **kwargs):
         me=player.pk,
         countdown_duration=game.config.countdown,
         time_per_action=TIME_PER_ACTION,
+        countdown = None,
     )
 
-    # check if players submitted their cards an hence countdown should start:
-    COUNTDOWN_GRACE_TIME = 2
-    num_players_submitted = player_accounts.filter(time_submitted__isnull=False).count()
-    if not game.timestamp:
-        if game.config.countdown_mode == "d":
-            if num_players_submitted > 0:
-                game.timestamp = datetime.datetime.now(pytz.utc) + datetime.timedelta(
-                    seconds=game.config.countdown + COUNTDOWN_GRACE_TIME
-                )
-        elif game.config.countdown_mode == "s":
-            if num_players_submitted >= player_accounts.count() - 1:
-                game.timestamp = datetime.datetime.now(pytz.utc) + datetime.timedelta(
-                    seconds=game.config.countdown + COUNTDOWN_GRACE_TIME
-                )
-        else:
-            raise ValueError(f"game.config.countdown_mode {game.config.countdown_mode} not implemented here")
-        game.save(update_fields=["timestamp"])
-
-    if num_players_submitted == player_accounts.count():
-        game.timestamp = datetime.datetime.now(pytz.utc)
-
-    if game.timestamp:
-        dt = game.timestamp - datetime.datetime.now(pytz.utc) - datetime.timedelta(seconds=COUNTDOWN_GRACE_TIME)
-        payload["countdown"] = dt.total_seconds()
-    else:
-        payload["countdown"] = None
-
-    if game.timestamp and (datetime.datetime.now(pytz.utc) >= game.timestamp):
-        old_actionstack = play_stack(game)[1]
-        cards_played = game.cards_played
-        cards_played_next = determine_next_cards_played(
-            list(player_accounts.values_list("pk", flat=True)), game.config.player_ids, game.config.ncardslots
-        )
-        cards_played.extend(flatten_list_of_tuples(cards_played_next))
-        game.cards_played = cards_played
-        payload["countdown"] = None
-        game.save(update_fields=["cards_played"])
-    else:
-        old_actionstack = None
-
-    animation_time = 0
     player_states, actionstack = play_stack(game)
-    if old_actionstack:
-        animation_time = (len(actionstack) - len(old_actionstack)) * TIME_PER_ACTION
 
-    if game.timestamp and (datetime.datetime.now(pytz.utc) >= game.timestamp + datetime.timedelta(seconds=animation_time)):
+    num_players_submitted = player_accounts.filter(time_submitted__isnull=False).count()
+    print(f"Game state {game.state}, player submitted {num_players_submitted}")
+    if game.state in ["countdown", "select"]:
+        if num_players_submitted == player_accounts.count():
+            game.state = "animate"
+            game.save(update_fields=['state'])
+
+            old_actionstack = actionstack
+            cards_played = game.cards_played
+            cards_played_next = determine_next_cards_played(
+                list(player_accounts.values_list("pk", flat=True)), game.config.player_ids, game.config.ncardslots
+            )
+            cards_played.extend(flatten_list_of_tuples(cards_played_next))
+            game.cards_played = cards_played
+            game.save(update_fields=["cards_played"])
+            player_states, actionstack = play_stack(game)
+
+            animation_time = (len(actionstack) - len(old_actionstack)) * TIME_PER_ACTION
+            print(f"Animation time is {animation_time}, old stacksize {len(old_actionstack)}, new stacksize {len(actionstack)}")
+            game.timestamp = datetime.datetime.now(pytz.utc) + datetime.timedelta(seconds=animation_time)
+            game.save(update_fields=["timestamp"])
+        elif game.state == "select" and num_players_submitted > 0:
+            # check if players submitted their cards an hence countdown should start:
+            game.state = "countdown"
+            COUNTDOWN_GRACE_TIME = 2
+
+            if game.config.countdown_mode == "d":
+                if num_players_submitted > 0:
+                    game.timestamp = datetime.datetime.now(pytz.utc) + datetime.timedelta(
+                        seconds=game.config.countdown + COUNTDOWN_GRACE_TIME
+                    )
+            elif game.config.countdown_mode == "s":
+                if num_players_submitted >= player_accounts.count() - 1:
+                    game.timestamp = datetime.datetime.now(pytz.utc) + datetime.timedelta(
+                        seconds=game.config.countdown + COUNTDOWN_GRACE_TIME
+                    )
+            else:
+                raise ValueError(f"game.config.countdown_mode {game.config.countdown_mode} not implemented here")
+            game.save(update_fields=["state", "timestamp"])
+
+        elif game.state == "countdown":
+            if datetime.datetime.now(pytz.utc) <= game.timestamp:
+                dt = game.timestamp - datetime.datetime.now(pytz.utc) - datetime.timedelta(seconds=COUNTDOWN_GRACE_TIME)
+                payload["countdown"] = dt.total_seconds()
+                # print(f"Countdown is {dt.total_seconds()}")
+            else:
+                for p in player_accounts.filter(time_submitted__isnull=True):
+                    p.time_submitted = datetime.datetime.now(pytz.utc)
+                    p.save(update_fields=["time_submitted"])
+
+
+    if game.state == "animate" and datetime.datetime.now(pytz.utc) > game.timestamp:
+        game.state = "select"
         game.timestamp = None
         game.round += 1
         game.save()
@@ -128,8 +138,8 @@ def game(request, game_id, **kwargs):
             p.next_card += game.config.ncardsavail
             p.time_submitted = None
             p.save()
-
-        # payload["new_round"] = True
+        
+                
 
     payload["actionstack"] = actionstack
     payload["Ngameround"] = game.round
