@@ -128,7 +128,7 @@ def game(request, game_id, **kwargs):
                     p.time_submitted = datetime.datetime.now(pytz.utc)
                     p.save(update_fields=["time_submitted"])
 
-    if (game.state == "animate") and (datetime.datetime.now(pytz.utc) > game.timestamp if game.timestamp else True):
+    if (game.state == "animate") and (datetime.datetime.now(pytz.utc) > game.timestamp):
         game.state = "select"
         game.timestamp = None
         game.round += 1
