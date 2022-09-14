@@ -6,10 +6,11 @@ import types
 from piraterace.settings import MAPSDIR
 from piplayer.models import Account
 from pigame.models import (
-    DIRID2NAME,
-    CARDS,
-    DIRID2MOVE,
     card_id_rank,
+    CARDS,
+    DEFAULT_DECK,
+    DIRID2MOVE,
+    DIRID2NAME,
 )
 
 
@@ -54,13 +55,14 @@ def determine_next_cards_played(players_in_game, player_ids, ncardslots):
     returns list of (playerid, card) tuples
     """
 
-    print(f"player_ids {player_ids}, player_in_game {players_in_game}")
+    # print(f"player_ids {player_ids}, player_in_game {players_in_game}")
     cards_per_player = []
     for i in player_ids:
         if i in players_in_game:
             cards_per_player.append(get_cards_on_hand(Account.objects.get(pk=i), ncardslots))
-        else:
-            raise ValueError("Not implemented")
+        else:  # play random cards from default deck for zombie players
+            random_cards = [(i, random.choice(DEFAULT_DECK)) for _ in range(ncardslots)]
+            cards_per_player.append(random_cards)
 
     # sort by ranking...
     ret = []
@@ -112,7 +114,6 @@ def determine_checkpoint_locations(initmap):
 def play_stack(game):
     initial_map = load_inital_map(game.config.mapfile)
     stack = game.cards_played
-    # Nrounds = game.round
 
     players = {}
     for pid, x, y, direction, color, team in zip(

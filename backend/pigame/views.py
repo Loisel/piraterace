@@ -98,6 +98,7 @@ def game(request, game_id, **kwargs):
             print(f"Animation time is {animation_time}, old stacksize {len(old_actionstack)}, new stacksize {len(actionstack)}")
             game.timestamp = datetime.datetime.now(pytz.utc) + datetime.timedelta(seconds=animation_time)
             game.save(update_fields=["timestamp"])
+
         elif game.state == "select" and num_players_submitted > 0:
             # check if players submitted their cards an hence countdown should start:
             game.state = "countdown"
@@ -127,7 +128,7 @@ def game(request, game_id, **kwargs):
                     p.time_submitted = datetime.datetime.now(pytz.utc)
                     p.save(update_fields=["time_submitted"])
 
-    if game.state == "animate" and datetime.datetime.now(pytz.utc) > game.timestamp:
+    if (game.state == "animate") and (datetime.datetime.now(pytz.utc) > game.timestamp if game.timestamp else True):
         game.state = "select"
         game.timestamp = None
         game.round += 1
