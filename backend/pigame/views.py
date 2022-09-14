@@ -29,6 +29,7 @@ from pigame.game_logic import (
 )
 
 TIME_PER_ACTION = 1
+COUNTDOWN_GRACE_TIME = 2
 
 
 @api_view(["GET", "POST"])
@@ -102,7 +103,6 @@ def game(request, game_id, **kwargs):
         elif game.state == "select" and num_players_submitted > 0:
             # check if players submitted their cards an hence countdown should start:
             game.state = "countdown"
-            COUNTDOWN_GRACE_TIME = 2
 
             if game.config.countdown_mode == "d":
                 if num_players_submitted > 0:
