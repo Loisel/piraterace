@@ -4,6 +4,7 @@ from django.forms.models import model_to_dict
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.core import serializers
+from django.db import transaction
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
@@ -54,6 +55,7 @@ def player_cards(request, **kwargs):
 
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
+@transaction.atomic
 def game(request, game_id, **kwargs):
     game = get_object_or_404(BaseGame, pk=game_id)
     player = request.user.account
