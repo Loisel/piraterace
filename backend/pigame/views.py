@@ -13,7 +13,7 @@ import glob
 import random
 from piraterace.settings import MAPSDIR
 
-from pigame.models import BaseGame, ClassicGame, DEFAULT_DECK, GameConfig, CARDS, COLORS, card_id_rank
+from pigame.models import BaseGame, ClassicGame, DEFAULT_DECK, FREE_HEALTH_OFFSET, GameConfig, CARDS, COLORS, card_id_rank
 from piplayer.models import Account
 import datetime
 import pytz
@@ -76,6 +76,7 @@ def game(request, game_id, **kwargs):
         countdown_duration=game.config.countdown,
         time_per_action=TIME_PER_ACTION,
         countdown=None,
+        initial_health=game.config.ncardsavail + FREE_HEALTH_OFFSET,
     )
 
     player_states, actionstack = play_stack(game)
@@ -155,6 +156,7 @@ def game(request, game_id, **kwargs):
             next_checkpoint=p.next_checkpoint,
             color=p.color,
             team=p.team,
+            health=p.health,
         )
 
     return JsonResponse(payload)

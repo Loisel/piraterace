@@ -79,6 +79,7 @@ CHOICE_MODES = [
 ]
 
 COLORS = mcolors.TABLEAU_COLORS
+FREE_HEALTH_OFFSET = 3
 
 
 class GameConfig(models.Model):

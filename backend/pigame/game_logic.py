@@ -5,13 +5,7 @@ import types
 
 from piraterace.settings import MAPSDIR
 from piplayer.models import Account
-from pigame.models import (
-    card_id_rank,
-    CARDS,
-    DEFAULT_DECK,
-    DIRID2MOVE,
-    DIRID2NAME,
-)
+from pigame.models import card_id_rank, CARDS, DEFAULT_DECK, DIRID2MOVE, DIRID2NAME, FREE_HEALTH_OFFSET
 
 
 def argsort(seq):
@@ -135,6 +129,7 @@ def play_stack(game):
         p.next_checkpoint = 1
         p.color = color
         p.team = team
+        p.health = game.config.ncardsavail + FREE_HEALTH_OFFSET
         players[pid] = p
 
     cardstack = list(zip(stack[::2], stack[1::2]))
@@ -174,7 +169,7 @@ def play_stack(game):
 
 
 def shoot_cannon(game, gmap, players, player):
-    CB_DAMAGE = 10
+    CB_DAMAGE = 1
 
     xinc = DIRID2MOVE[player.direction][0]
     yinc = DIRID2MOVE[player.direction][1]
@@ -188,6 +183,7 @@ def shoot_cannon(game, gmap, players, player):
         # hit a player ?
         for other_player in players.values():
             if (cb_x == other_player.xpos) and (cb_y == other_player.ypos):
+                other_player.health -= CB_DAMAGE
                 return dict(key="shot", target=player.id, other_player=other_player.id, damage=CB_DAMAGE, collided_at=(cb_x, cb_y))
         # hit a colliding map tile?
         if get_tile_properties(gmap, cb_x, cb_y)["collision"]:
@@ -223,6 +219,7 @@ def move_player_x(game, gmap, players, player, inc):
     tile_prop = get_tile_properties(gmap, player.xpos + inc, player.ypos)
     if tile_prop["collision"]:
         damage = tile_prop["damage"]
+        player.health -= damage
         return [dict(key="collision_x", target=player.id, val=inc, damage=damage)]
     for pid, p2 in players.items():
         if (p2.xpos == player.xpos + inc) and (p2.ypos == player.ypos):
@@ -240,6 +237,7 @@ def move_player_y(game, gmap, players, player, inc):
     tile_prop = get_tile_properties(gmap, player.xpos, player.ypos + inc)
     if tile_prop["collision"]:
         damage = tile_prop["damage"]
+        player.health -= damage
         actions.append(dict(key="collision_y", target=player.id, val=inc, damage=damage))
         return actions
     for pid, p2 in players.items():

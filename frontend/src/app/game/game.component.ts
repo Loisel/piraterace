@@ -246,14 +246,15 @@ class GameScene extends Phaser.Scene {
     boat_id: number,
     target_x: number,
     target_y: number,
+    damage: number,
     tilewidth: number,
     tileheight: number,
     show_stars: boolean,
     time: number
   ) {
-    let boat = this.boats[boat_id];
-    let dX = target_x - boat.boat.x;
-    let dY = target_y - boat.boat.y;
+    let boat = this.boats[boat_id].getChildren()[0];
+    let dX = target_x - boat.x;
+    let dY = target_y - boat.y;
     // distance in number of tiles
     let dist = Math.round(
       Math.max(Math.abs(dX) / tilewidth, Math.abs(dY) / tileheight)
@@ -265,7 +266,7 @@ class GameScene extends Phaser.Scene {
     if (frame_delay >= this.anim_cutoff) {
       console.log('Shooting:', boat_id, 'at x/y', target_x, target_y);
 
-      let cannonball = this.add.circle(boat.boat.x, boat.boat.y, 10, 0);
+      let cannonball = this.add.circle(boat.x, boat.y, 10, 0);
       let iternum = 0;
       this.animationTimer = this.time.addEvent({
         callback: () => {
@@ -286,16 +287,28 @@ class GameScene extends Phaser.Scene {
     }
   }
 
+  update_healthbar(boat_id: number, damage: number, time: number) {
+    let bar = this.boats[boat_id].getChildren()[2];
+    this.animationTimer = this.time.addEvent({
+      callback: () => {
+        bar.decrease(damage);
+      },
+      callbackScope: this,
+      delay: time, // 1000 = 1 second
+      repeat: 0,
+    });
+  }
+
   rotate_boat(boat_id: number, angle: number, time: number) {
     time *= this.anim_frac;
     let frame_delay = time / this.move_frames;
-    let boat = this.boats[boat_id];
+    let boat = this.boats[boat_id].getChildren()[0];
     if (frame_delay < this.anim_cutoff) {
-      boat.boat.angle += angle;
+      boat.angle += angle;
     } else {
       this.animationTimer = this.time.addEvent({
         callback: () => {
-          boat.boat.angle += angle / this.move_frames;
+          boat.angle += angle / this.move_frames;
         },
         callbackScope: this,
         delay: frame_delay, // 1000 = 1 second
@@ -309,17 +322,13 @@ class GameScene extends Phaser.Scene {
     let frame_delay = time / this.move_frames;
     let boat = this.boats[boat_id];
     if (frame_delay < this.anim_cutoff) {
-      boat.boat.x += move_x;
-      boat.boat.y += move_y;
-      boat.bd.x += move_x;
-      boat.bd.y += move_y;
+      boat.incX(move_x);
+      boat.incY(move_y);
     } else {
       this.animationTimer = this.time.addEvent({
         callback: () => {
-          boat.boat.x += move_x / this.move_frames;
-          boat.boat.y += move_y / this.move_frames;
-          boat.bd.x += move_x / this.move_frames;
-          boat.bd.y += move_y / this.move_frames;
+          boat.incX(move_x / this.move_frames);
+          boat.incY(move_y / this.move_frames);
         },
         callbackScope: this,
         delay: frame_delay, // 1000 = 1 second
@@ -332,6 +341,7 @@ class GameScene extends Phaser.Scene {
     boat_id: number,
     shake_x: number,
     shake_y: number,
+    damage: number,
     time: number
   ) {
     time *= this.anim_frac;
@@ -342,10 +352,8 @@ class GameScene extends Phaser.Scene {
       this.animationTimer = this.time.addEvent({
         callback: () => {
           console.log('Collision forward steps');
-          boat.boat.x += shake_x / num_frames;
-          boat.boat.y += shake_y / num_frames;
-          boat.bd.x += shake_x / num_frames;
-          boat.bd.y += shake_y / num_frames;
+          boat.incX(shake_x / num_frames);
+          boat.incY(shake_y / num_frames);
         },
         callbackScope: this,
         delay: dt_frames,
@@ -354,10 +362,8 @@ class GameScene extends Phaser.Scene {
       this.animationTimer = this.time.addEvent({
         callback: () => {
           console.log('Collision backward steps');
-          boat.boat.x -= shake_x / num_frames;
-          boat.boat.y -= shake_y / num_frames;
-          boat.bd.x -= shake_x / num_frames;
-          boat.bd.y -= shake_y / num_frames;
+          boat.incX(-shake_x / num_frames);
+          boat.incY(-shake_y / num_frames);
         },
         callbackScope: this,
         delay: dt_frames * 3.5, // add a bit more to have backwards shakes shortly after forward moves
@@ -413,6 +419,12 @@ class GameScene extends Phaser.Scene {
                   action.target,
                   action.val * GI.map.tileheight * 0.3,
                   0,
+                  action.damage,
+                  animation_time_ms
+                );
+                this.update_healthbar(
+                  action.target,
+                  action.damage,
                   animation_time_ms
                 );
               } else if (action.key === 'collision_y') {
@@ -420,6 +432,12 @@ class GameScene extends Phaser.Scene {
                   action.target,
                   0,
                   action.val * GI.map.tileheight * 0.3,
+                  action.damage,
+                  animation_time_ms
+                );
+                this.update_healthbar(
+                  action.target,
+                  action.damage,
                   animation_time_ms
                 );
               } else if (action.key === 'shot') {
@@ -428,11 +446,19 @@ class GameScene extends Phaser.Scene {
                   action.target,
                   (action.collided_at[0] + 0.5) * GI.map.tilewidth,
                   (action.collided_at[1] + 0.5) * GI.map.tilewidth,
+                  action.damage,
                   GI.map.tilewidth,
                   GI.map.tileheight,
                   show_stars,
                   animation_time_ms
                 );
+                if (action.other_player !== undefined) {
+                  this.update_healthbar(
+                    action.other_player,
+                    action.damage,
+                    animation_time_ms
+                  );
+                }
               } else {
                 console.log('Error, key not found.');
               }
@@ -496,10 +522,20 @@ class GameScene extends Phaser.Scene {
       boat.scaleX = boat.scaleY;
       boat.angle = player['start_direction'] * 90;
 
-      this.boats[playerid] = {
-        boat: boat,
-        bd: backdrop,
-      };
+      let hp = new HealthBar(
+        this,
+        (player['start_pos_x'] + 0.1) * GI.map.tilewidth,
+        (player['start_pos_y'] + 0.1) * GI.map.tileheight,
+        GI.map.tilewidth * 0.8,
+        GI.map.tileheight * 0.12,
+        GI.initial_health
+      );
+
+      let group = this.add.group();
+      group.add(boat);
+      group.add(backdrop);
+      group.add(hp);
+      this.boats[playerid] = group;
     });
 
     //return;
@@ -582,4 +618,66 @@ class GameScene extends Phaser.Scene {
   }
 
   update() {}
+}
+
+class HealthBar extends Phaser.GameObjects.Container {
+  value: number;
+  initial_health: number;
+  width: number;
+  height: number;
+  bar: Phaser.GameObjects.Graphics;
+  constructor(scene, x, y, width, height, initial_health) {
+    super(scene);
+    this.scene = scene;
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+
+    this.bar = this.scene.add.graphics();
+    this.add(this.bar);
+
+    this.initial_health = initial_health;
+    this.value = initial_health;
+
+    this.draw();
+    this.scene.add.existing(this);
+  }
+
+  decrease(amount) {
+    this.value -= amount;
+
+    if (this.value < 0) {
+      this.value = 0;
+    }
+    this.draw();
+    return this.value === 0;
+  }
+
+  setHealth(value) {
+    this.value = value;
+    this.draw();
+  }
+
+  draw() {
+    this.bar.clear();
+
+    //  BG
+    this.bar.fillStyle(0x000000);
+    this.bar.fillRect(0, 0, this.width, this.height);
+
+    //  Health
+
+    this.bar.fillStyle(0xffffff);
+    this.bar.fillRect(2, 2, this.width - 4, this.height - 2);
+
+    if (this.value < this.initial_health * 0.3) {
+      this.bar.fillStyle(0xff0000);
+    } else {
+      this.bar.fillStyle(0x00ff00);
+    }
+
+    var d = Math.floor((this.value / this.initial_health) * (this.width - 4));
+    this.bar.fillRect(2, 2, d, this.height - 2);
+  }
 }
