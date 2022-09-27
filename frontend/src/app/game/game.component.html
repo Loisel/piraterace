@@ -20,8 +20,8 @@
           (ionItemReorder)="onCardsReorder($event)"
           disabled="false"
         >
-          <ion-reorder *ngFor="let card of cardsinfo">
-            <ion-item>
+          <ion-reorder *ngFor="let card of cardsinfo; let i = index">
+            <ion-item [disabled]="healthCheck(i)">
               <ion-thumbnail>
                 <ion-img [src]="CARDS_URL + card[2].url"></ion-img>
               </ion-thumbnail>

@@ -16,13 +16,6 @@ def flatten_list_of_tuples(lot):
     return [i for j in lot for i in j]
 
 
-def switch_cards_on_hand(player, src, target):
-    tmp = player.deck[player.next_card + src]
-    player.deck[player.next_card + src] = player.deck[player.next_card + target]
-    player.deck[player.next_card + target] = tmp
-    player.save(update_fields=["deck"])
-
-
 def get_cards_on_hand(player, ncards):
     """
     get next ncards that a player can draw from his deck

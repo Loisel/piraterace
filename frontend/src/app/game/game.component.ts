@@ -133,6 +133,10 @@ export class GameComponent {
     });
   }
 
+  healthCheck(i: number) {
+    return i >= this.gameinfo.players[this.gameinfo.me]['health'];
+  }
+
   onCardsReorder({ detail }) {
     console.log(detail);
     this.httpService.switchPlayerCards(detail.from, detail.to).subscribe(
@@ -671,12 +675,14 @@ class HealthBar extends Phaser.GameObjects.Container {
     this.bar.fillStyle(0xffffff);
     this.bar.fillRect(2, 2, this.width - 4, this.height - 2);
 
-    if (this.value < this.initial_health * 0.3) {
+    console.log('initial health:', this.initial_health, 'value:', this.value);
+    if (this.value <= this.initial_health * 0.3) {
       this.bar.fillStyle(0xff0000);
+    } else if (this.value <= this.initial_health * 0.6) {
+      this.bar.fillStyle(0xffe900);
     } else {
       this.bar.fillStyle(0x00ff00);
     }
-
     var d = Math.floor((this.value / this.initial_health) * (this.width - 4));
     this.bar.fillRect(2, 2, d, this.height - 2);
   }

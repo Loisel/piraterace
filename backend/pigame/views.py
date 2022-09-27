@@ -25,7 +25,6 @@ from pigame.game_logic import (
     flatten_list_of_tuples,
     load_inital_map,
     play_stack,
-    switch_cards_on_hand,
     verify_map,
 )
 
@@ -42,8 +41,16 @@ def player_cards(request, **kwargs):
         return JsonResponse(f"You already submitted your cards at {player.time_submitted}", status=404, safe=False)
 
     if request.method == "POST":
+        player_states, actionstack = play_stack(player.game)
+        player_state = player_states[player.pk]
         src, target = request.data
-        switch_cards_on_hand(player, src, target)
+        if any([_ >= player_state.health for _ in [src, target]]):
+            return JsonResponse(f"You are not allowed to switch cards because your boat is damaged.", status=404, safe=False)
+
+        tmp = player.deck[player.next_card + src]
+        player.deck[player.next_card + src] = player.deck[player.next_card + target]
+        player.deck[player.next_card + target] = tmp
+        player.save(update_fields=["deck"])
 
     cards = []
     for playerid, card in get_cards_on_hand(player, player.game.config.ncardsavail):
