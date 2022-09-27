@@ -34,7 +34,7 @@ services:
   nginx:
     build: nginx
     ports:
-      - 1337:80
+      - 127.0.0.1:1337:80
     depends_on:
       - backend
     volumes:

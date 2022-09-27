@@ -5,3 +5,7 @@
   roles:
      - role: dockerhost
      - role: hetzner
+     - role: sslproxy
+       letsencrypt_email: jonas.hahn@ecodia.de
+       domain_name: dev.piraterace.com
+       backend_port: 1337
