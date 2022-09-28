@@ -4,33 +4,30 @@ PirateRace is a turn based multiplayer 2D tile game with a nasty random fate com
 
 ## Technologies
 
-- Backend: Python, Django 
-- Frontend: Javascript, Angular 2 + Phaser 
+- Backend: Python, Django
+- Frontend: Ionic + Angular + Phaser
 - Hosting: Nginx
 - Deployment: Terraform, Ansible, docker-compose
 
 ## Developer Setup
 
-### Initialize Backend
+### Initialize Containers
 
 ```
-docker-compose build backend
+docker-compose pull
+docker-compose build
 maint/migrate.sh
 maint/init_superuser.sh
 docker-compose up backend
 ```
 
-### Initialize Frontend
-```
-docker-compose build frontend
-maint/run_npm_install.sh
-docker-compose up frontend
-```
-
 ### Start all components
 
 ```
-docker-compose stop
+docker-compose down
+maint/backend_collectstatic.sh
+maint/backend_migrate.sh
+maint/frontend_npm_install.sh
 docker-compose up -d
 ```
 

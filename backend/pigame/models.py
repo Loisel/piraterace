@@ -61,7 +61,6 @@ def card_id_rank(cardval):
 
 
 DEFAULT_DECK = gen_default_deck()
-print(f"DEFAULT_DECK: {DEFAULT_DECK}")
 
 maps = dict(
     default=dict(
