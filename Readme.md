@@ -16,9 +16,6 @@ PirateRace is a turn based multiplayer 2D tile game with a nasty random fate com
 ```
 docker-compose pull
 docker-compose build
-maint/migrate.sh
-maint/init_superuser.sh
-docker-compose up backend
 ```
 
 ### Start all components
