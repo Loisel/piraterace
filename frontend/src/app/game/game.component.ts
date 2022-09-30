@@ -343,6 +343,28 @@ class GameScene extends Phaser.Scene {
     }
   }
 
+  flush_down_boat(boat_id: number, time: number) {
+    let GI = this.component.gameinfo;
+    let GIplayer = this.component.gameinfo.players[boat_id];
+    time *= this.anim_frac;
+    let N = 8;
+    let frame_delay = time / N;
+    let angle = (2 * Math.PI) / N;
+    let boat = this.boats[boat_id];
+    if (frame_delay < this.anim_cutoff) {
+    } else {
+      this.animationTimer = this.time.addEvent({
+        callback: () => {
+          boat.scaleXY(-1 / N, -1 / N);
+          boat.rotate(angle);
+        },
+        callbackScope: this,
+        delay: frame_delay, // 1000 = 1 second
+        repeat: N - 1,
+      });
+    }
+  }
+
   respawn_boat(boat_id: number, time: number) {
     let GI = this.component.gameinfo;
     let GIplayer = this.component.gameinfo.players[boat_id];
@@ -356,8 +378,7 @@ class GameScene extends Phaser.Scene {
     if (frame_delay < this.anim_cutoff) {
     } else {
       let N = this.move_frames;
-      //boat.scaleXY(2**N,2**N);
-      boat.scaleXY(N, N);
+      boat.scaleXY(N + 1, N + 1);
       this.animationTimer = this.time.addEvent({
         callback: () => {
           boat.scaleXY(-1, -1);
@@ -492,6 +513,9 @@ class GameScene extends Phaser.Scene {
                   );
                 }
               } else if (action.key === 'death') {
+                if (action.type === 'void') {
+                  this.flush_down_boat(action.target, animation_time_ms);
+                }
               } else if (action.key === 'respawn') {
                 this.respawn_boat(action.target, animation_time_ms);
               } else {
