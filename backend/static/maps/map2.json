@@ -9274,19 +9274,6 @@
                         }]
                 }],
          "tilewidth":48
-        }, 
-        {
-         "columns":8,
-         "firstgid":481,
-         "image":"pipoya\/48x48\/pipo-map001.png",
-         "imageheight":816,
-         "imagewidth":384,
-         "margin":0,
-         "name":"second",
-         "spacing":0,
-         "tilecount":136,
-         "tileheight":48,
-         "tilewidth":48
         }],
  "tilewidth":48,
  "type":"map",
