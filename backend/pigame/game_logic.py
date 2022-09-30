@@ -147,8 +147,6 @@ def play_stack(game):
                 actions = get_actions_for_card(game, initial_map, players, players[playerid], card)
                 actionstack.extend(actions)
 
-        [print(a) for a in actionstack]
-
         # cannons
         cannon_actions = []
         for p in players.values():
@@ -177,6 +175,8 @@ def play_stack(game):
                 p.ypos = p.start_loc_y
                 respawn_actions.append(dict(key="respawn", target=p.id))
         actionstack.append(respawn_actions)
+
+        [print(i, a) for i, a in enumerate(actionstack)]
 
     return players, actionstack
 
@@ -224,7 +224,8 @@ def get_actions_for_card(game, gmap, players, player, card):
         player.direction = (player.direction + rot) % 4
 
     for mov in range(abs(CARDS[cardid]["move"])):
-        # here collisions have to happen
+        if player.health <= 0:
+            break
         inc = int(CARDS[cardid]["move"] / abs(CARDS[cardid]["move"]))
 
         xinc = DIRID2MOVE[player.direction][0] * inc
