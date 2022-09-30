@@ -226,6 +226,7 @@ class GameScene extends Phaser.Scene {
   }
 
   damage_stars(target_x: number, target_y: number, time: number) {
+    //console.log('damage_stars @ ', target_x, target_y);
     time *= this.anim_frac;
     let frame_delay = time / this.move_frames;
     if (frame_delay >= this.anim_cutoff) {
@@ -293,11 +294,20 @@ class GameScene extends Phaser.Scene {
     }
   }
 
-  update_healthbar(boat_id: number, damage: number, time: number) {
+  update_healthbar(
+    boat_id: number,
+    damage: number,
+    time: number,
+    value: number = undefined
+  ) {
     let bar = this.boats[boat_id].getChildren()[2];
     this.animationTimer = this.time.addEvent({
       callback: () => {
-        bar.decrease(damage);
+        if (value) {
+          bar.setHealth(value);
+        } else {
+          bar.decrease(damage);
+        }
       },
       callbackScope: this,
       delay: time, // 1000 = 1 second
@@ -357,6 +367,54 @@ class GameScene extends Phaser.Scene {
         callback: () => {
           boat.scaleXY(-1 / N, -1 / N);
           boat.rotate(angle);
+        },
+        callbackScope: this,
+        delay: frame_delay, // 1000 = 1 second
+        repeat: N - 1,
+      });
+    }
+  }
+
+  death_by_collision(boat_id: number, time: number) {
+    let GI = this.component.gameinfo;
+    let GIplayer = this.component.gameinfo.players[boat_id];
+    time *= this.anim_frac;
+    let N = 8;
+    let frame_delay = time / N;
+    let boat_group = this.boats[boat_id];
+
+    let boat = boat_group.getChildren()[0];
+    this.damage_stars(boat.x, boat.y, time);
+
+    if (frame_delay < this.anim_cutoff) {
+    } else {
+      this.animationTimer = this.time.addEvent({
+        callback: () => {
+          boat_group.scaleXY(-1 / N, -1 / N);
+        },
+        callbackScope: this,
+        delay: frame_delay, // 1000 = 1 second
+        repeat: N - 1,
+      });
+    }
+  }
+
+  death_by_cannon(boat_id: number, time: number) {
+    let GI = this.component.gameinfo;
+    let GIplayer = this.component.gameinfo.players[boat_id];
+    time *= this.anim_frac;
+    let N = 8;
+    let frame_delay = time / N;
+    let boat_group = this.boats[boat_id];
+
+    let boat = boat_group.getChildren()[0];
+    this.damage_stars(boat.x, boat.y, time);
+
+    if (frame_delay < this.anim_cutoff) {
+    } else {
+      this.animationTimer = this.time.addEvent({
+        callback: () => {
+          boat_group.scaleXY(-1 / N, -1 / N);
         },
         callbackScope: this,
         delay: frame_delay, // 1000 = 1 second
@@ -515,9 +573,21 @@ class GameScene extends Phaser.Scene {
               } else if (action.key === 'death') {
                 if (action.type === 'void') {
                   this.flush_down_boat(action.target, animation_time_ms);
+                } else if (action.type === 'collision') {
+                  this.death_by_collision(action.target, animation_time_ms);
+                } else if (action.type === 'cannon') {
+                  this.death_by_cannon(action.target, animation_time_ms);
+                } else {
+                  console.log('unknown type of death: ', action.type);
                 }
               } else if (action.key === 'respawn') {
                 this.respawn_boat(action.target, animation_time_ms);
+                this.update_healthbar(
+                  action.target,
+                  0,
+                  animation_time_ms,
+                  GI.players[action.target]['health']
+                );
               } else {
                 console.log('Error, key not found.');
               }
@@ -715,6 +785,7 @@ class HealthBar extends Phaser.GameObjects.Container {
   }
 
   setHealth(value) {
+    //console.log('Set healthbar value... from ', this.value, ' to ', value);
     this.value = value;
     this.draw();
   }
