@@ -143,25 +143,46 @@ def play_stack(game):
         # print(f"this_round_cards: {this_round_cards}")
 
         for playerid, card in this_round_cards:
-            actions = get_actions_for_card(game, initial_map, players, players[playerid], card)
-            actionstack.extend(actions)
+            if players[playerid].health > 0:
+                actions = get_actions_for_card(game, initial_map, players, players[playerid], card)
+                actionstack.extend(actions)
+
+        [print(a) for a in actionstack]
 
         # cannons
-        actionstack.append([shoot_cannon(game, initial_map, players, p) for p in players.values()])
+        cannon_actions = []
+        for p in players.values():
+            if p.health > 0:
+                cannon_actions.extend(shoot_cannon(game, initial_map, players, p))
+        actionstack.append(cannon_actions)
 
         for player in players.values():
-            if (player.xpos == checkpoints[player.next_checkpoint][0]) and (player.ypos == checkpoints[player.next_checkpoint][1]):
+            if (
+                (player.xpos == checkpoints[player.next_checkpoint][0])
+                and (player.ypos == checkpoints[player.next_checkpoint][1])
+                and (player.health > 0)
+            ):
                 if player.next_checkpoint == len(checkpoints):
                     game.state = "end"
                     game.save(update_fields=["state"])
                     print("You win")
                 player.next_checkpoint += 1
-        # add canon balls here
+
+        # respawns
+        respawn_actions = []
+        for p in players.values():
+            if p.health <= 0:
+                p.health = game.config.ncardsavail
+                p.xpos = p.start_loc_x
+                p.ypos = p.start_loc_y
+                respawn_actions.append(dict(key="respawn", target=p.id))
+        actionstack.append(respawn_actions)
 
     return players, actionstack
 
 
 def shoot_cannon(game, gmap, players, player):
+    actions = []
     CB_DAMAGE = 1
 
     xinc = DIRID2MOVE[player.direction][0]
@@ -177,11 +198,20 @@ def shoot_cannon(game, gmap, players, player):
         for other_player in players.values():
             if (cb_x == other_player.xpos) and (cb_y == other_player.ypos):
                 other_player.health -= CB_DAMAGE
-                return dict(key="shot", target=player.id, other_player=other_player.id, damage=CB_DAMAGE, collided_at=(cb_x, cb_y))
+                actions.append(
+                    dict(key="shot", target=player.id, other_player=other_player.id, damage=CB_DAMAGE, collided_at=(cb_x, cb_y))
+                )
+                if other_player.health <= 0:
+                    actions.append(dict(key="death", target=other_player.id, type="cannon"))
+
+                return actions
         # hit a colliding map tile?
         if get_tile_properties(gmap, cb_x, cb_y)["collision"]:
-            return dict(key="shot", target=player.id, collided_at=(cb_x, cb_y))
-    return dict(key="shot", target=player.id, collided_at=(cb_x, cb_y))
+            actions.append(dict(key="shot", target=player.id, collided_at=(cb_x, cb_y)))
+            return actions
+
+    actions.append(dict(key="shot", target=player.id, collided_at=(cb_x, cb_y)))
+    return actions
 
 
 def get_actions_for_card(game, gmap, players, player, card):
@@ -213,7 +243,23 @@ def move_player_x(game, gmap, players, player, inc):
     if tile_prop["collision"]:
         damage = tile_prop["damage"]
         player.health -= damage
-        return [dict(key="collision_x", target=player.id, val=inc, damage=damage)]
+        actions.append(dict(key="collision_x", target=player.id, val=inc, damage=damage))
+        if player.health <= 0:
+            actions.append(dict(key="death", target=player.id, type="collision"))
+        return actions
+
+    if tile_prop["void"]:
+        player.health = 0
+        actions.append(dict(key="move_x", target=player.id, val=inc))
+        actions.append(dict(key="death", target=player.id, type="void"))
+        return actions
+
+    if (player.xpos + inc < 0) or (player.xpos + inc >= gmap["width"]):
+        player.health = 0
+        actions.append(dict(key="move_x", target=player.id, val=inc))
+        actions.append(dict(key="death", target=player.id, type="void"))
+        return actions
+
     for pid, p2 in players.items():
         if (p2.xpos == player.xpos + inc) and (p2.ypos == player.ypos):
             actions.extend(move_player_x(game, gmap, players, p2, inc))
@@ -228,11 +274,27 @@ def move_player_x(game, gmap, players, player, inc):
 def move_player_y(game, gmap, players, player, inc):
     actions = []
     tile_prop = get_tile_properties(gmap, player.xpos, player.ypos + inc)
+    print("tp", tile_prop)
     if tile_prop["collision"]:
         damage = tile_prop["damage"]
         player.health -= damage
         actions.append(dict(key="collision_y", target=player.id, val=inc, damage=damage))
+        if player.health <= 0:
+            actions.append(dict(key="death", target=player.id, type="collision"))
         return actions
+
+    if tile_prop["void"]:
+        player.health = 0
+        actions.append(dict(key="move_y", target=player.id, val=inc))
+        actions.append(dict(key="death", target=player.id, type="void"))
+        return actions
+
+    if (player.ypos + inc < 0) or (player.ypos + inc >= gmap["height"]):
+        player.health = 0
+        actions.append(dict(key="move_y", target=player.id, val=inc))
+        actions.append(dict(key="death", target=player.id, type="void"))
+        return actions
+
     for pid, p2 in players.items():
         if (p2.xpos == player.xpos) and (p2.ypos == player.ypos + inc):
             actions.extend(move_player_y(game, gmap, players, p2, inc))
@@ -246,10 +308,19 @@ def move_player_y(game, gmap, players, player, inc):
 
 def get_tile_properties(gmap, x, y):
     bg = list(filter(lambda l: l["name"] == "background", gmap["layers"]))[0]
+    # for j in range(bg["height"]):
+    #    print(f'bg', bg["data"][j * bg["width"]:(j+1)*bg["width"]])
+    if (x < 0) or (x >= bg["width"]) or (y < 0) or (y >= bg["height"]):
+        return dict(void=True, collision=False, damage=0)
     tile_id = bg["data"][y * bg["width"] + x]
-    tile_props = gmap["tilesets"][0]["tiles"]
-    tile_prop = next(filter(lambda p: p["id"] == tile_id, tile_props))
-    return {item["name"]: item["value"] for item in tile_prop["properties"]}
+    for tileset in gmap["tilesets"][::-1]:
+        if tile_id >= tileset["firstgid"]:
+            tileset_id = tile_id - tileset["firstgid"]
+            tile_props = tileset["tiles"]
+            tile_prop = next(filter(lambda p: p["id"] == tileset_id, tile_props))
+            # print("bg", x, y, tile_id, tileset_id, "prop", tile_prop)
+            return {item["name"]: item["value"] for item in tile_prop["properties"]}
+    raise ValueError(f"could not find tile_id {tile_id} in map")
 
 
 def load_inital_map(fname):

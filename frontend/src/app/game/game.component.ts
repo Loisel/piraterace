@@ -341,6 +341,32 @@ class GameScene extends Phaser.Scene {
     }
   }
 
+  respawn_boat(boat_id: number, time: number) {
+    let GI = this.component.gameinfo;
+    let GIplayer = this.component.gameinfo.players[boat_id];
+    time *= this.anim_frac;
+    let frame_delay = time / this.move_frames;
+    let boat = this.boats[boat_id];
+    boat.setXY(
+      (GIplayer['pos_x'] + 0.5) * GI.map.tilewidth,
+      (GIplayer['pos_y'] + 0.5) * GI.map.tileheight
+    );
+    if (frame_delay < this.anim_cutoff) {
+    } else {
+      let N = this.move_frames;
+      //boat.scaleXY(2**N,2**N);
+      boat.scaleXY(N, N);
+      this.animationTimer = this.time.addEvent({
+        callback: () => {
+          boat.scaleXY(-1, -1);
+        },
+        callbackScope: this,
+        delay: frame_delay, // 1000 = 1 second
+        repeat: this.move_frames - 1,
+      });
+    }
+  }
+
   collision_boat(
     boat_id: number,
     shake_x: number,
@@ -463,6 +489,9 @@ class GameScene extends Phaser.Scene {
                     animation_time_ms
                   );
                 }
+              } else if (action.key === 'death') {
+              } else if (action.key === 'respawn') {
+                this.respawn_boat(action.target, animation_time_ms);
               } else {
                 console.log('Error, key not found.');
               }
@@ -528,8 +557,8 @@ class GameScene extends Phaser.Scene {
 
       let hp = new HealthBar(
         this,
-        (player['start_pos_x'] + 0.1) * GI.map.tilewidth,
-        (player['start_pos_y'] + 0.1) * GI.map.tileheight,
+        (player['start_pos_x'] + 0.5) * GI.map.tilewidth,
+        (player['start_pos_y'] + 0.5) * GI.map.tileheight,
         GI.map.tilewidth * 0.8,
         GI.map.tileheight * 0.12,
         GI.initial_health
@@ -630,6 +659,7 @@ class HealthBar extends Phaser.GameObjects.Container {
   width: number;
   height: number;
   bar: Phaser.GameObjects.Graphics;
+  scene: GameScene;
   constructor(scene, x, y, width, height, initial_health) {
     super(scene);
     this.scene = scene;
@@ -665,15 +695,23 @@ class HealthBar extends Phaser.GameObjects.Container {
 
   draw() {
     this.bar.clear();
+    let GI = this.scene.component.gameinfo;
+    const xoffset = -GI.map.tilewidth * 0.4;
+    const yoffset = GI.map.tileheight * 0.3;
 
     //  BG
     this.bar.fillStyle(0x000000);
-    this.bar.fillRect(0, 0, this.width, this.height);
+    this.bar.fillRect(xoffset, yoffset, this.width, this.height);
 
     //  Health
 
     this.bar.fillStyle(0xffffff);
-    this.bar.fillRect(2, 2, this.width - 4, this.height - 2);
+    this.bar.fillRect(
+      xoffset + 2,
+      yoffset + 2,
+      this.width - 4,
+      this.height - 2
+    );
 
     console.log('initial health:', this.initial_health, 'value:', this.value);
     if (this.value <= this.initial_health * 0.3) {
@@ -684,6 +722,6 @@ class HealthBar extends Phaser.GameObjects.Container {
       this.bar.fillStyle(0x00ff00);
     }
     var d = Math.floor((this.value / this.initial_health) * (this.width - 4));
-    this.bar.fillRect(2, 2, d, this.height - 2);
+    this.bar.fillRect(xoffset + 2, yoffset + 2, d, this.height - 2);
   }
 }

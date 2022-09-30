@@ -10,76 +10,155 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('contenttypes', '0002_remove_content_type_name'),
+        ("contenttypes", "0002_remove_content_type_name"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='BaseGame',
+            name="BaseGame",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('mode', models.CharField(choices=[('c', 'Classic')], default='c', max_length=1)),
-                ('mapfile', models.CharField(max_length=256)),
-                ('round', models.PositiveIntegerField(default=1)),
-                ('time_started', models.DateTimeField(auto_now_add=True)),
-                ('timestamp', models.DateTimeField(blank=True, null=True)),
-                ('cards_played', django.contrib.postgres.fields.ArrayField(base_field=models.IntegerField(blank=True, null=True), default=list, size=None)),
-                ('state', models.CharField(default='select', max_length=256)),
-                ('polymorphic_ctype', models.ForeignKey(editable=False, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='polymorphic_%(app_label)s.%(class)s_set+', to='contenttypes.contenttype')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("mode", models.CharField(choices=[("c", "Classic")], default="c", max_length=1)),
+                ("mapfile", models.CharField(max_length=256)),
+                ("round", models.PositiveIntegerField(default=1)),
+                ("time_started", models.DateTimeField(auto_now_add=True)),
+                ("timestamp", models.DateTimeField(blank=True, null=True)),
+                (
+                    "cards_played",
+                    django.contrib.postgres.fields.ArrayField(
+                        base_field=models.IntegerField(blank=True, null=True), default=list, size=None
+                    ),
+                ),
+                ("state", models.CharField(default="select", max_length=256)),
+                (
+                    "polymorphic_ctype",
+                    models.ForeignKey(
+                        editable=False,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="polymorphic_%(app_label)s.%(class)s_set+",
+                        to="contenttypes.contenttype",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
-                'base_manager_name': 'objects',
+                "abstract": False,
+                "base_manager_name": "objects",
             },
         ),
         migrations.CreateModel(
-            name='ClassicGame',
+            name="ClassicGame",
             fields=[
-                ('basegame_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='pigame.basegame')),
+                (
+                    "basegame_ptr",
+                    models.OneToOneField(
+                        auto_created=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
+                        primary_key=True,
+                        serialize=False,
+                        to="pigame.basegame",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
-                'base_manager_name': 'objects',
+                "abstract": False,
+                "base_manager_name": "objects",
             },
-            bases=('pigame.basegame',),
+            bases=("pigame.basegame",),
         ),
         migrations.CreateModel(
-            name='TeamsGame',
+            name="TeamsGame",
             fields=[
-                ('basegame_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='pigame.basegame')),
-                ('fog_of_war', models.BooleanField(default=False)),
+                (
+                    "basegame_ptr",
+                    models.OneToOneField(
+                        auto_created=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
+                        primary_key=True,
+                        serialize=False,
+                        to="pigame.basegame",
+                    ),
+                ),
+                ("fog_of_war", models.BooleanField(default=False)),
             ],
             options={
-                'abstract': False,
-                'base_manager_name': 'objects',
+                "abstract": False,
+                "base_manager_name": "objects",
             },
-            bases=('pigame.basegame',),
+            bases=("pigame.basegame",),
         ),
         migrations.CreateModel(
-            name='GameConfig',
+            name="GameConfig",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('player_ids', django.contrib.postgres.fields.ArrayField(base_field=models.IntegerField(), default=list, size=None)),
-                ('player_colors', django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=7), default=list, size=None)),
-                ('player_teams', django.contrib.postgres.fields.ArrayField(base_field=models.IntegerField(), default=list, size=None)),
-                ('player_ready', django.contrib.postgres.fields.ArrayField(base_field=models.BooleanField(default=False), default=list, size=None)),
-                ('player_start_x', django.contrib.postgres.fields.ArrayField(base_field=models.PositiveSmallIntegerField(), default=list, size=None)),
-                ('player_start_y', django.contrib.postgres.fields.ArrayField(base_field=models.PositiveSmallIntegerField(), default=list, size=None)),
-                ('player_start_directions', django.contrib.postgres.fields.ArrayField(base_field=models.PositiveSmallIntegerField(), default=list, size=None)),
-                ('nmaxplayers', models.PositiveSmallIntegerField(default=1)),
-                ('mode', models.CharField(choices=[('c', 'Classic')], default='c', max_length=1)),
-                ('mapfile', models.CharField(max_length=256)),
-                ('nlives', models.PositiveSmallIntegerField(default=3)),
-                ('damage_on_hit', models.PositiveSmallIntegerField(default=10)),
-                ('npause_on_repair', models.PositiveSmallIntegerField(default=1)),
-                ('npause_on_destroy', models.PositiveSmallIntegerField(default=1)),
-                ('ncardslots', models.PositiveSmallIntegerField(default=5)),
-                ('ncardsavail', models.PositiveSmallIntegerField(default=7)),
-                ('allow_transfer', models.BooleanField(default=False)),
-                ('creator_userid', models.PositiveIntegerField()),
-                ('countdown_mode', models.CharField(choices=[('d', 'Default, count from first finished'), ('s', 'Count from second to last finished')], default='d', max_length=1)),
-                ('countdown', models.PositiveIntegerField(default=30)),
-                ('game', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='config', to='pigame.basegame')),
+                ("id", models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                (
+                    "player_ids",
+                    django.contrib.postgres.fields.ArrayField(base_field=models.IntegerField(), default=list, size=None),
+                ),
+                (
+                    "player_colors",
+                    django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=7), default=list, size=None),
+                ),
+                (
+                    "player_teams",
+                    django.contrib.postgres.fields.ArrayField(base_field=models.IntegerField(), default=list, size=None),
+                ),
+                (
+                    "player_ready",
+                    django.contrib.postgres.fields.ArrayField(
+                        base_field=models.BooleanField(default=False), default=list, size=None
+                    ),
+                ),
+                (
+                    "player_start_x",
+                    django.contrib.postgres.fields.ArrayField(
+                        base_field=models.PositiveSmallIntegerField(), default=list, size=None
+                    ),
+                ),
+                (
+                    "player_start_y",
+                    django.contrib.postgres.fields.ArrayField(
+                        base_field=models.PositiveSmallIntegerField(), default=list, size=None
+                    ),
+                ),
+                (
+                    "player_start_directions",
+                    django.contrib.postgres.fields.ArrayField(
+                        base_field=models.PositiveSmallIntegerField(), default=list, size=None
+                    ),
+                ),
+                ("nmaxplayers", models.PositiveSmallIntegerField(default=1)),
+                ("mode", models.CharField(choices=[("c", "Classic")], default="c", max_length=1)),
+                ("mapfile", models.CharField(max_length=256)),
+                ("nlives", models.PositiveSmallIntegerField(default=3)),
+                ("damage_on_hit", models.PositiveSmallIntegerField(default=10)),
+                ("npause_on_repair", models.PositiveSmallIntegerField(default=1)),
+                ("npause_on_destroy", models.PositiveSmallIntegerField(default=1)),
+                ("ncardslots", models.PositiveSmallIntegerField(default=5)),
+                ("ncardsavail", models.PositiveSmallIntegerField(default=7)),
+                ("allow_transfer", models.BooleanField(default=False)),
+                ("creator_userid", models.PositiveIntegerField()),
+                (
+                    "countdown_mode",
+                    models.CharField(
+                        choices=[("d", "Default, count from first finished"), ("s", "Count from second to last finished")],
+                        default="d",
+                        max_length=1,
+                    ),
+                ),
+                ("countdown", models.PositiveIntegerField(default=30)),
+                (
+                    "game",
+                    models.OneToOneField(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="config",
+                        to="pigame.basegame",
+                    ),
+                ),
             ],
         ),
     ]
