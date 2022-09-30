@@ -61,7 +61,7 @@ export class GamelistComponent implements OnInit {
     );
   }
 
-  newGameMaker(id: number): void {
+  newGameMaker(): void {
     console.log('NewGameMaker');
     this.httpService.get_create_new_gameMaker().subscribe(
       (ret) => {

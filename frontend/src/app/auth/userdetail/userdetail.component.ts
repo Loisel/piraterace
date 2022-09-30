@@ -9,7 +9,7 @@ import { AuthService } from '../../services/auth.service';
 export class UserdetailComponent implements OnInit {
   userdetail: any = null;
 
-  constructor(private authService: AuthService) {
+  constructor(public authService: AuthService) {
     this.load_userdetails();
   }
 

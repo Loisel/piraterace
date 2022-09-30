@@ -3,4 +3,5 @@ export interface NewGameMaker {
   selected_map: string;
   map_info: any;
   startinglocs: any;
+  Nmaxplayers: number;
 }

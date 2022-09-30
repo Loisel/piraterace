@@ -137,20 +137,22 @@ export class GameComponent {
     return i >= this.gameinfo.players[this.gameinfo.me]['health'];
   }
 
-  onCardsReorder({ detail }) {
-    console.log(detail);
-    this.httpService.switchPlayerCards(detail.from, detail.to).subscribe(
-      (result) => {
-        console.log('switch cards:', result);
-        this.cardsinfo = result;
-        detail.complete(true);
-      },
-      (error) => {
-        console.log('failed reorder cards: ', error);
-        this.presentToast(error.error, 'danger');
-        detail.complete(false);
-      }
-    );
+  onCardsReorder(event) {
+    console.log(event.detail);
+    this.httpService
+      .switchPlayerCards(event.detail.from, event.detail.to)
+      .subscribe(
+        (result) => {
+          console.log('switch cards:', result);
+          this.cardsinfo = result;
+          event.detail.complete(true);
+        },
+        (error) => {
+          console.log('failed reorder cards: ', error);
+          this.presentToast(error.error, 'danger');
+          event.detail.complete(false);
+        }
+      );
   }
 
   submitCards() {

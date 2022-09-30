@@ -20,9 +20,8 @@ export class AuthService {
   refreshUserURL = `${environment.API_URL}/auth/jwt/refresh`;
   userDetailURL = `${environment.API_URL}/auth/users/me`;
 
-  isAuthenticated: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
-    null
-  );
+  public isAuthenticated: BehaviorSubject<boolean> =
+    new BehaviorSubject<boolean>(null);
   private token: BehaviorSubject<string> = new BehaviorSubject<string>(
     'uninitialized'
   );

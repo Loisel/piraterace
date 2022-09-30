@@ -9,7 +9,7 @@ import { AuthService } from './services/auth.service';
   styleUrls: ['app.component.scss'],
 })
 export class AppComponent {
-  constructor(private menu: MenuController, private authService: AuthService) {}
+  constructor(private menu: MenuController, public authService: AuthService) {}
 
   ngOnInit() {}
 }
