@@ -1,5 +1,7 @@
 volumes
 
+deployment/terraform/terraform.tfvars
+
 *.pyc
 *.bak
 *.html.py
