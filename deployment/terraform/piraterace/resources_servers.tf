@@ -27,9 +27,9 @@ resource "hcloud_server" "piraterace_dev" {
   public_net {
     ipv4 = hcloud_primary_ip.piraterace_dev.id
   }
-  delete_protection = true
-  rebuild_protection = true
+  delete_protection = false
+  rebuild_protection = false
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = false
   }
 }
