@@ -281,6 +281,17 @@ def update_gm_player_info(request, gameconfig_id):
     return redirect(reverse("pigame:view_gameconfig", kwargs={"gameconfig_id": gm.pk}))
 
 
+def clean_up_configs(player):
+    # clean up other open configs
+    other_game_cfgs = GameConfig.objects.filter(game=None).filter(player_ids__contains=[player.pk])
+    for cfg in other_game_cfgs:
+        if player.pk == cfg.creator_userid:
+            cfg.delete()
+        else:
+            cfg.del_player(player.pk)
+            cfg.save()
+
+
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
 def join_gameconfig(request, gameconfig_id, **kwargs):
@@ -293,11 +304,10 @@ def join_gameconfig(request, gameconfig_id, **kwargs):
         return JsonResponse(f"Game Full ({len(config.player_ids)}/{config.nmaxplayers})", status=404, safe=False)
 
     player = request.user.account
+    clean_up_configs(player)
+
     config.add_player(player)
     config.save()
-
-    player.gameconfig = config
-    player.save(update_fields=["gameconfig"])
 
     return redirect(reverse("pigame:view_gameconfig", kwargs={"gameconfig_id": config.pk}))
 
@@ -308,26 +318,10 @@ def leave_gameconfig(request, **kwargs):
     player = request.user.account
 
     if player.game:
-        return JsonResponse(f"You are already in a game that started with id {request.user.account.game}", status=404, safe=False)
+        return JsonResponse(f"Game {player.game.pk} running.", safe=False)
 
-    if player.gameconfig is None:
-        return JsonResponse(f"You are not registered in any gameconfig", status=404, safe=False)
-
-    gameconfig_id = player.gameconfig.pk
-
-    try:
-        player.gameconfig.del_player(player)
-        player.gameconfig.save()
-    except Exception as e:
-        return JsonResponse(f"Error leaving Game Config {e}", status=404, safe=False)
-
-    if player.pk == player.gameconfig.creator_userid:
-        player.gameconfig.delete()
-
-    player.gameconfig = None
-    player.save(update_fields=["gameconfig"])
-
-    return JsonResponse({"success": f"Detached from gameconfig {gameconfig_id}"})
+    clean_up_configs(player)
+    return JsonResponse({"success": f"Detached from gameconfig."})
 
 
 @api_view(["POST"])
@@ -337,6 +331,7 @@ def create_gameconfig(request, **kwargs):
         return JsonResponse(f"You are already in game {request.user.account.game}", status=404, safe=False)
     player = request.user.account
 
+    clean_up_configs(player)
     data = request.data
 
     mapfile = data["selected_map"]
@@ -354,9 +349,6 @@ def create_gameconfig(request, **kwargs):
     )
     gameconfig.add_player(player)
     gameconfig.save()
-
-    player.gameconfig = gameconfig
-    player.save(update_fields=["gameconfig"])
 
     payload = model_to_dict(gameconfig)
     return redirect(reverse("pigame:view_gameconfig", kwargs={"gameconfig_id": gameconfig.pk}))

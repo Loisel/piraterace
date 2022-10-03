@@ -9,7 +9,6 @@ from pigame.models import BaseGame, GameConfig
 
 class Account(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    gameconfig = models.ForeignKey(GameConfig, on_delete=models.SET_NULL, null=True, blank=True)
     game = models.ForeignKey(BaseGame, on_delete=models.SET_NULL, null=True, blank=True)
     deck = ArrayField(models.IntegerField(null=True, blank=True), null=True, blank=True)
 
