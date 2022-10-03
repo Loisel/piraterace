@@ -9,6 +9,7 @@ export interface GameConfig {
   player_colors: string[];
   player_teams: number[];
   player_ready: boolean[];
+  creator_userid: number;
   caller_idx: number;
   caller_id: number;
   player_color_choices: string[];

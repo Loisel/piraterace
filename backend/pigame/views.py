@@ -288,7 +288,7 @@ def clean_up_configs(player):
         if player.pk == cfg.creator_userid:
             cfg.delete()
         else:
-            cfg.del_player(player.pk)
+            cfg.del_player(player)
             cfg.save()
 
 
