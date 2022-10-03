@@ -1,18 +1,19 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { GameMaker } from '../model/gamemaker';
-import { NewGameMaker } from '../model/newgamemaker';
+import { GameConfig } from '../model/gameconfig';
+import { NewGameConfig } from '../model/newgameconfig';
 import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class HttpService {
-  gamesURL = `${environment.API_URL}/pigame/list_gamemakers`;
-  view_gameMakerURL = `${environment.API_URL}/pigame/view_gamemaker`;
-  create_gameMakerURL = `${environment.API_URL}/pigame/create_gamemaker`;
-  create_new_gameMakerURL = `${environment.API_URL}/pigame/create_new_gamemaker`;
-  join_gameMakerURL = `${environment.API_URL}/pigame/join_gamemaker`;
+  gamesURL = `${environment.API_URL}/pigame/list_gameconfigs`;
+  view_gameConfigURL = `${environment.API_URL}/pigame/view_gameconfig`;
+  create_gameConfigURL = `${environment.API_URL}/pigame/create_gameconfig`;
+  create_new_gameConfigURL = `${environment.API_URL}/pigame/create_new_gameconfig`;
+  join_gameConfigURL = `${environment.API_URL}/pigame/join_gameconfig`;
+  leave_gameConfigURL = `${environment.API_URL}/pigame/leave_gameconfig`;
   create_gameURL = `${environment.API_URL}/pigame/create_game`;
   get_gameURL = `${environment.API_URL}/pigame/game`;
   player_cardsURL = `${environment.API_URL}/pigame/player_cards`;
@@ -22,19 +23,25 @@ export class HttpService {
 
   constructor(private httpClient: HttpClient) {}
   getGamesList() {
-    return this.httpClient.get<GameMaker[]>(this.gamesURL);
+    return this.httpClient.get<GameConfig[]>(this.gamesURL);
   }
-  getGameMaker(id: number) {
-    return this.httpClient.get<GameMaker>(`${this.view_gameMakerURL}/${id}`);
+  getGameConfig(id: number) {
+    return this.httpClient.get<GameConfig>(`${this.view_gameConfigURL}/${id}`);
   }
-  createGameMaker(data: NewGameMaker) {
-    return this.httpClient.post<GameMaker>(`${this.create_gameMakerURL}`, data);
+  createGameConfig(data: NewGameConfig) {
+    return this.httpClient.post<GameConfig>(
+      `${this.create_gameConfigURL}`,
+      data
+    );
   }
   createGame(game_id: number) {
     return this.httpClient.get(`${this.create_gameURL}/${game_id}`);
   }
-  joinGameMaker(id: number) {
-    return this.httpClient.get<GameMaker>(`${this.join_gameMakerURL}/${id}`);
+  joinGameConfig(id: number) {
+    return this.httpClient.get<GameConfig>(`${this.join_gameConfigURL}/${id}`);
+  }
+  leaveGameConfig() {
+    return this.httpClient.get(`${this.leave_gameConfigURL}`);
   }
   getGame(id: number) {
     return this.httpClient.get(`${this.get_gameURL}/${id}`);
@@ -53,13 +60,14 @@ export class HttpService {
     console.log(data);
     return this.httpClient.post(`${this.player_infoURL}/${id}`, data);
   }
-  get_create_new_gameMaker() {
-    return this.httpClient.get<NewGameMaker>(`${this.create_new_gameMakerURL}`);
+  get_create_new_gameConfig() {
+    return this.httpClient.get<NewGameConfig>(
+      `${this.create_new_gameConfigURL}`
+    );
   }
-  post_create_new_gameMaker(data: NewGameMaker) {
-    console.log('Sending new gamemaker post', data);
-    return this.httpClient.post<NewGameMaker>(
-      `${this.create_new_gameMakerURL}`,
+  post_create_new_gameConfig(data: NewGameConfig) {
+    return this.httpClient.post<NewGameConfig>(
+      `${this.create_new_gameConfigURL}`,
       data
     );
   }

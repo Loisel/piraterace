@@ -4,12 +4,12 @@ from django.contrib.postgres.fields import ArrayField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from pigame.models import BaseGame
+from pigame.models import BaseGame, GameConfig
 
 
 class Account(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    # game_lobby = models.ForeignKey(GameConfig, on_delete=models.CASCADE)
+    gameconfig = models.ForeignKey(GameConfig, on_delete=models.SET_NULL, null=True, blank=True)
     game = models.ForeignKey(BaseGame, on_delete=models.SET_NULL, null=True, blank=True)
     deck = ArrayField(models.IntegerField(null=True, blank=True), null=True, blank=True)
 

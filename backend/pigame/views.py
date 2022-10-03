@@ -178,6 +178,7 @@ def leave_game(request, **kwargs):
     else:
         gameid = account.game.pk
         account.game = None
+        account.gameconfig = None
         account.save(update_fields=["game"])
         return JsonResponse(f"Left Game {gameid}", safe=False)
 
@@ -201,8 +202,8 @@ def submit_cards(request, **kwargs):
 
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
-def create_game(request, gamemaker_id, **kwargs):
-    config = get_object_or_404(GameConfig, pk=gamemaker_id)
+def create_game(request, gameconfig_id, **kwargs):
+    config = get_object_or_404(GameConfig, pk=gameconfig_id)
     if request.user.account.pk != config.creator_userid:
         return JsonResponse(f"Only the user who opened the game may start it", status=404, safe=False)
 
@@ -238,26 +239,36 @@ def create_game(request, gamemaker_id, **kwargs):
 
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
-def view_gamemaker(request, gamemaker_id):
+def view_gameconfig(request, gameconfig_id):
     caller = request.user.account
-    gm = model_to_dict(get_object_or_404(GameConfig, pk=gamemaker_id))
-    players = Account.objects.filter(pk__in=gm["player_ids"])
-    gm["player_names"] = [p.user.username for p in players]
 
-    ## colors_to_pick = [c for c in COLORS.keys() if c not in gm["player_colors"]]
+    try:
+        game_config = GameConfig.objects.get(pk=gameconfig_id)
+    except Exception as e:
+        print(f"Could not find game_config with id {gameconfig_id} -> {e}")
+        return JsonResponse(f"Game config does not exist anymore", status=404, safe=False)
+
+    cfg = model_to_dict(game_config)
+    cfg["player_names"] = [Account.objects.get(pk=pid).user.username for pid in cfg["player_ids"]]
+    cfg["all_ready"] = all(game_config.player_ready)
+
+    ## colors_to_pick = [c for c in COLORS.keys() if c not in cfg["player_colors"]]
     ## the callers color can also be chosen
-    ## colors_to_pick.append(gm["player_colors"][gm["player_ids"].index(caller.pk)])
-    gm["player_color_choices"] = COLORS
-    gm["caller_idx"] = gm["player_ids"].index(caller.pk)
+    ## colors_to_pick.append(cfg["player_colors"][cfg["player_ids"].index(caller.pk)])
+    cfg["player_color_choices"] = COLORS
+    cfg["caller_id"] = caller.pk
+    cfg["caller_idx"] = cfg["player_ids"].index(caller.pk)
+    cfg["map_info"] = load_inital_map(cfg["mapfile"])
+    cfg["startinglocs"] = list(filter(lambda l: l["name"] == "startinglocs", cfg["map_info"]["layers"]))[0]
 
-    return JsonResponse(gm)
+    return JsonResponse(cfg)
 
 
 @api_view(["POST"])
 @permission_classes((IsAuthenticated,))
-def update_gm_player_info(request, gamemaker_id):
+def update_gm_player_info(request, gameconfig_id):
     caller = request.user.account
-    gm = get_object_or_404(GameConfig, pk=gamemaker_id)
+    gm = get_object_or_404(GameConfig, pk=gameconfig_id)
 
     data = request.data
     idx = gm.player_ids.index(caller.pk)
@@ -267,24 +278,61 @@ def update_gm_player_info(request, gamemaker_id):
     gm.player_ready[idx] = data["ready"]
     gm.save()
 
-    return redirect(reverse("pigame:view_gamemaker", kwargs={"gamemaker_id": gm.pk}))
+    return redirect(reverse("pigame:view_gameconfig", kwargs={"gameconfig_id": gm.pk}))
 
 
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
-def join_gamemaker(request, gamemaker_id, **kwargs):
+def join_gameconfig(request, gameconfig_id, **kwargs):
     if request.user.account.game:
         return JsonResponse(f"You are already in game {request.user.account.game}", status=404, safe=False)
-    maker = get_object_or_404(GameConfig, pk=gamemaker_id)
+
+    config = get_object_or_404(GameConfig, pk=gameconfig_id)
+
+    if len(config.player_ids) >= config.nmaxplayers:
+        return JsonResponse(f"Game Full ({len(config.player_ids)}/{config.nmaxplayers})", status=404, safe=False)
+
     player = request.user.account
-    maker.add_player(player)
-    maker.save()
-    return redirect(reverse("pigame:view_gamemaker", kwargs={"gamemaker_id": maker.pk}))
+    config.add_player(player)
+    config.save()
+
+    player.gameconfig = config
+    player.save(update_fields=["gameconfig"])
+
+    return redirect(reverse("pigame:view_gameconfig", kwargs={"gameconfig_id": config.pk}))
+
+
+@api_view(["GET"])
+@permission_classes((IsAuthenticated,))
+def leave_gameconfig(request, **kwargs):
+    player = request.user.account
+
+    if player.game:
+        return JsonResponse(f"You are already in a game that started with id {request.user.account.game}", status=404, safe=False)
+
+    if player.gameconfig is None:
+        return JsonResponse(f"You are not registered in any gameconfig", status=404, safe=False)
+
+    gameconfig_id = player.gameconfig.pk
+
+    try:
+        player.gameconfig.del_player(player)
+        player.gameconfig.save()
+    except Exception as e:
+        return JsonResponse(f"Error leaving Game Config {e}", status=404, safe=False)
+
+    if player.pk == player.gameconfig.creator_userid:
+        player.gameconfig.delete()
+
+    player.gameconfig = None
+    player.save(update_fields=["gameconfig"])
+
+    return JsonResponse({"success": f"Detached from gameconfig {gameconfig_id}"})
 
 
 @api_view(["POST"])
 @permission_classes((IsAuthenticated,))
-def create_gamemaker(request, **kwargs):
+def create_gameconfig(request, **kwargs):
     if request.user.account.game:
         return JsonResponse(f"You are already in game {request.user.account.game}", status=404, safe=False)
     player = request.user.account
@@ -298,17 +346,25 @@ def create_gamemaker(request, **kwargs):
     if errs:
         return JsonResponse(errs, status=404, safe=False)
 
-    game = GameConfig(creator_userid=player.pk, mapfile=mapfile, player_ids=[])
-    game.add_player(player)
-    game.save()
+    gameconfig = GameConfig(
+        creator_userid=player.pk,
+        mapfile=mapfile,
+        player_ids=[],
+        nmaxplayers=data["Nmaxplayers"],
+    )
+    gameconfig.add_player(player)
+    gameconfig.save()
 
-    payload = model_to_dict(game)
-    return redirect(reverse("pigame:view_gamemaker", kwargs={"gamemaker_id": game.pk}))
+    player.gameconfig = gameconfig
+    player.save(update_fields=["gameconfig"])
+
+    payload = model_to_dict(gameconfig)
+    return redirect(reverse("pigame:view_gameconfig", kwargs={"gameconfig_id": gameconfig.pk}))
 
 
 @api_view(["GET", "POST"])
 @permission_classes((IsAuthenticated,))
-def create_new_gamemaker(request, **kwargs):
+def create_new_gameconfig(request, **kwargs):
     if request.user.account.game:
         return JsonResponse(f"You are already in game {request.user.account.game}", status=404, safe=False)
 
@@ -327,16 +383,16 @@ def create_new_gamemaker(request, **kwargs):
     if ret["selected_map"]:
         ret["map_info"] = load_inital_map(ret["selected_map"])
         startinglocslayer = list(filter(lambda l: l["name"] == "startinglocs", ret["map_info"]["layers"]))[0]
-        ret["Nmaxplayers"] = len(startinglocslayer["objects"])
         ret["startinglocs"] = startinglocslayer
+        ret["Nmaxplayers"] = len(startinglocslayer["objects"])
 
     return JsonResponse(ret)
 
 
-def list_gamemakers(request):
+def list_gameconfigs(request):
     games = GameConfig.objects.filter(game=None)
     ret = dict(
-        gameMakers=list(games.values()),
+        gameconfigs=list(games.values()),
         reconnect_game=None,
     )
     try:
