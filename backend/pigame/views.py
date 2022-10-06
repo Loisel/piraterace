@@ -47,9 +47,15 @@ def player_cards(request, **kwargs):
         if any([_ >= player_state.health for _ in [src, target]]):
             return JsonResponse(f"You are not allowed to switch cards because your boat is damaged.", status=404, safe=False)
 
-        tmp = player.deck[player.next_card + src]
-        player.deck[player.next_card + src] = player.deck[player.next_card + target]
-        player.deck[player.next_card + target] = tmp
+        # switch cards
+        # tmp = player.deck[player.next_card + src]
+        # player.deck[player.next_card + src] = player.deck[player.next_card + target]
+        # player.deck[player.next_card + target] = tmp
+
+        # or move card into place
+        tmp = player.deck.pop(player.next_card + src)
+        player.deck.insert(player.next_card + target, tmp)
+
         player.save(update_fields=["deck"])
 
     cards = []
