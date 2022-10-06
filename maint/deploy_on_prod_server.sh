@@ -8,4 +8,5 @@ $PROJECT_ROOT/maint/frontend_npm_install.sh
 
 cd $PROJECT_ROOT
 docker-compose run --rm frontend sh -c "ionic build --prod"
+docker-compose -f $PROJECT_ROOT/docker-compose-prod.yml down
 docker-compose -f $PROJECT_ROOT/docker-compose-prod.yml up -d

@@ -1,17 +1,16 @@
 <ion-content class="background">
   <ion-grid>
     <ion-row>
-      <ion-col size-xs="9" size-sm="10" size-md="10" size-lg="11" id="game_col">
+      <ion-col size-xs="9" size-sm="10" id="game_col">
         <div id="piraterace-game" #game_div></div>
       </ion-col>
-      <ion-col size-xs="3" size-sm="2" size-md="2" size-lg="1" id="card-column">
+      <ion-col size-xs="3" size-sm="2" id="card-column">
         <ion-card>
           <ion-card-header>
             <ion-card-subtitle>
               Round {{ Ngameround | async }}
               <button
                 class="ion-float-right ion-float-bottom"
-                [button]="true"
                 (click)="leaveGame()"
               >
                 <ion-icon name="exit-outline" color="danger"></ion-icon>
@@ -43,7 +42,6 @@
 
             <ion-button
               id="submit_cards_button"
-              [button]="true"
               (click)="submitCards()"
               color="success"
             >

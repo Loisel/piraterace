@@ -28,6 +28,7 @@ SECRET_KEY = "django-insecure-nl*dg!vozu2nan9srz*7$+wxxpo#rlt=&z#18*-u0z@ehhbipi
 DEBUG = True
 
 ALLOWED_HOSTS = ["localhost", "dev.piraterace.com"]
+CSRF_TRUSTED_ORIGINS = ["http://localhost", "http://dev.piraterace.com", "https://dev.piraterace.com"]
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8100",
