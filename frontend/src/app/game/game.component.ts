@@ -599,13 +599,16 @@ class GameScene extends Phaser.Scene {
       });
     }
 
-    this.animationTimer = this.time.addEvent({
-      callback: () => {
-        this.drawCheckpoints();
-      },
-      callbackScope: this,
-      delay: (actionstack.length - this.last_played_action) * animation_time_ms, // 1000 = 1 second
-    });
+    if (this.last_played_action < actionstack.length) {
+      this.animationTimer = this.time.addEvent({
+        callback: () => {
+          this.drawCheckpoints();
+        },
+        callbackScope: this,
+        delay:
+          (actionstack.length - this.last_played_action) * animation_time_ms, // 1000 = 1 second
+      });
+    }
 
     this.last_played_action = actionstack.length;
   }
