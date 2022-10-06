@@ -4,16 +4,16 @@ import Phaser from 'phaser';
 import { ToastController } from '@ionic/angular';
 
 import { HttpService } from '../../services/http.service';
-import { NewGameMaker } from '../../model/newgamemaker';
+import { NewGameConfig } from '../../model/newgameconfig';
 import { environment } from '../../../environments/environment';
 
 @Component({
-  selector: 'app-newgamemaker',
-  templateUrl: './newgamemaker.component.html',
-  styleUrls: ['./newgamemaker.component.scss'],
+  selector: 'app-newgameconfig',
+  templateUrl: './newgameconfig.component.html',
+  styleUrls: ['./newgameconfig.component.scss'],
 })
-export class NewGameMakerComponent {
-  data: NewGameMaker = null;
+export class NewGameConfigComponent {
+  data: NewGameConfig = null;
   phaserGame: Phaser.Game = null;
 
   constructor(
@@ -24,8 +24,8 @@ export class NewGameMakerComponent {
   ) {}
 
   ionViewWillEnter() {
-    this.httpService.get_create_new_gameMaker().subscribe((response) => {
-      console.log('Get get_create_new_gameMaker', response);
+    this.httpService.get_create_new_gameConfig().subscribe((response) => {
+      console.log('Get get_create_new_gameConfig', response);
       this.data = response;
     });
   }
@@ -40,22 +40,22 @@ export class NewGameMakerComponent {
     this.data.selected_map = e.target.value;
 
     this.httpService
-      .post_create_new_gameMaker(this.data)
+      .post_create_new_gameConfig(this.data)
       .subscribe((response) => {
-        console.log('post post_create_new_gameMaker', response);
+        console.log('post post_create_new_gameConfig', response);
         this.data = response;
         this.draw_phaser_snapshot();
       });
   }
 
-  createGameMaker(event) {
-    // create a GameMaker
-    console.log('Create a gameMaker');
-    this.httpService.createGameMaker(this.data).subscribe(
-      (gameMaker) => {
+  createGameConfig(event) {
+    // create a GameConfig
+    console.log('Create a gameConfig');
+    this.httpService.createGameConfig(this.data).subscribe(
+      (gameConfig) => {
         this.remove_phaser_snapshot();
-        console.log('New GameMaker response:', gameMaker);
-        this.router.navigate(['../view_gamemaker', gameMaker.id], {
+        console.log('New GameConfig response:', gameConfig);
+        this.router.navigate(['../view_gameconfig', gameConfig.id], {
           relativeTo: this.route,
         });
       },

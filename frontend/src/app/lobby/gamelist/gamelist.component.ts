@@ -3,7 +3,7 @@ import { ToastController } from '@ionic/angular';
 import { Router, ActivatedRoute } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 
-import { GameMaker } from '../../model/gamemaker';
+import { GameConfig } from '../../model/gameconfig';
 import { HttpService } from '../../services/http.service';
 import { environment } from '../../../environments/environment';
 
@@ -13,7 +13,7 @@ import { environment } from '../../../environments/environment';
   styleUrls: ['./gamelist.component.scss'],
 })
 export class GamelistComponent implements OnInit {
-  gameMakers: GameMaker[] = [];
+  gameConfigs: GameConfig[] = [];
   reconnectGameId = new BehaviorSubject<number>(null);
   updateTimer: ReturnType<typeof setInterval>;
 
@@ -27,9 +27,9 @@ export class GamelistComponent implements OnInit {
   ngOnInit() {}
 
   ionViewWillEnter() {
-    this.updateGameMakers();
+    this.updateGameConfigs();
     this.updateTimer = setInterval(() => {
-      this.updateGameMakers();
+      this.updateGameConfigs();
     }, 2000);
   }
 
@@ -37,20 +37,20 @@ export class GamelistComponent implements OnInit {
     clearInterval(this.updateTimer);
   }
 
-  updateGameMakers() {
+  updateGameConfigs() {
     this.httpService.getGamesList().subscribe((ret) => {
       console.log(ret);
-      this.gameMakers = ret['gameMakers'];
+      this.gameConfigs = ret['gameconfigs'];
       this.reconnectGameId.next(ret['reconnect_game']);
     });
   }
 
-  joinGameMaker(id: number): void {
+  joinGameConfig(id: number): void {
     console.log('Join');
-    this.httpService.joinGameMaker(id).subscribe(
+    this.httpService.joinGameConfig(id).subscribe(
       (ret) => {
         console.log(ret);
-        this.router.navigate(['view_gamemaker', ret.id], {
+        this.router.navigate(['view_gameconfig', ret.id], {
           relativeTo: this.route,
         });
       },
@@ -61,12 +61,12 @@ export class GamelistComponent implements OnInit {
     );
   }
 
-  newGameMaker(): void {
-    console.log('NewGameMaker');
-    this.httpService.get_create_new_gameMaker().subscribe(
+  newGameConfig(): void {
+    console.log('NewGameConfig');
+    this.httpService.get_create_new_gameConfig().subscribe(
       (ret) => {
         console.log(ret);
-        this.router.navigate(['newgamemaker'], {
+        this.router.navigate(['newgameconfig'], {
           relativeTo: this.route,
         });
       },

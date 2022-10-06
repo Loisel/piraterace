@@ -1,8 +1,8 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes, ActivatedRoute } from '@angular/router';
 import { GamelistComponent } from './gamelist/gamelist.component';
-import { GameMakerComponent } from './gamemaker/gamemaker.component';
-import { NewGameMakerComponent } from './newgamemaker/newgamemaker.component';
+import { GameConfigComponent } from './gameconfig/gameconfig.component';
+import { NewGameConfigComponent } from './newgameconfig/newgameconfig.component';
 
 const routes: Routes = [
   {
@@ -10,12 +10,12 @@ const routes: Routes = [
     component: GamelistComponent,
   },
   {
-    path: 'newgamemaker',
-    component: NewGameMakerComponent,
+    path: 'newgameconfig',
+    component: NewGameConfigComponent,
   },
   {
-    path: 'view_gamemaker/:id',
-    component: GameMakerComponent,
+    path: 'view_gameconfig/:id',
+    component: GameConfigComponent,
   },
 ];
 

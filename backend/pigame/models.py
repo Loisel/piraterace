@@ -131,6 +131,18 @@ class GameConfig(models.Model):
             self.player_ready.append(False)
         return self.player_ids.index(player.pk)
 
+    def del_player(self, player):
+        if player.pk not in self.player_ids:
+            raise ValueError(f"Player {player} not in game config")
+            return False
+        else:
+            idx = self.player_ids.index(player.pk)
+            self.player_ids.pop(idx)
+            self.player_colors.pop(idx)
+            self.player_teams.pop(idx)
+            self.player_ready.pop(idx)
+        return True
+
 
 class BaseGame(PolymorphicModel):
 
