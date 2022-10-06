@@ -2,7 +2,6 @@
   <ion-grid>
     <ion-row class="ion-justify-content-center">
       <ion-col class="foreground" size-lg="6" size-md="8" size-xs="12">
-
         <h2>Games</h2>
 
         <ion-item
@@ -10,7 +9,7 @@
           [button]="true"
           (click)="reconnectGame()"
           color="primary"
-          >
+        >
           <ion-icon name="play-circle-outline" size="large"></ion-icon>
           Reconnect Game
         </ion-item>
@@ -21,7 +20,7 @@
             [button]="true"
             *ngFor="let game of gameMakers"
             (click)="joinGameMaker(game.id)"
-            >
+          >
             <span>{{ game.id }}</span>
             <span class="badge">{{ game.mode }}</span>
             <span class="name">{{ game.mapfile }}</span>
@@ -30,7 +29,7 @@
             [disabled]="reconnectGameId | async"
             [button]="true"
             (click)="newGameMaker()"
-            >
+          >
             <ion-icon name="add-outline" size="large"></ion-icon>
             Create New Game
           </ion-item>
