@@ -1,10 +1,10 @@
 <ion-content class="background">
   <ion-grid>
     <ion-row>
-      <ion-col size-xs="9" size-sm="9" size-md="10" id="game_col">
+      <ion-col size-xs="9" size-sm="10" size-md="10" size-lg="11" id="game_col">
         <div id="piraterace-game" #game_div></div>
       </ion-col>
-      <ion-col size-xs="3" size-sm="3" size-md="2" id="card-column">
+      <ion-col size-xs="3" size-sm="2" size-md="2" size-lg="1" id="card-column">
         <ion-card>
           <ion-card-header>
             <ion-card-subtitle>
@@ -25,35 +25,31 @@
               disabled="false"
             >
               <ion-reorder *ngFor="let card of cardsinfo; let i = index">
-                <ion-item
-                  [disabled]="healthCheck(i)"
-                  style="height: 10vh !important"
-                >
+                <ion-item class="gamecard-item" [disabled]="healthCheck(i)">
                   <ion-img
+                    class="gamecard-img"
                     [src]="CARDS_URL + card[2].url"
-                    style="height: 10vh !important"
                   ></ion-img>
                   <ion-badge>{{ card[1] }}</ion-badge>
                 </ion-item>
               </ion-reorder>
             </ion-reorder-group>
 
-            <ion-item
+            <ion-progress-bar
+              id="time-progress-bar"
+              [value]="countDownTimer | async"
+              color="danger"
+            ></ion-progress-bar>
+
+            <ion-button
               id="submit_cards_button"
               [button]="true"
               (click)="submitCards()"
+              color="success"
             >
-              <ion-icon name="send-outline" color="success"></ion-icon>
-              <ion-label>Submit Cards</ion-label>
-            </ion-item>
-
-            <ion-item>
-              <ion-progress-bar
-                id="time-progress-bar"
-                [value]="countDownTimer | async"
-                color="danger"
-              ></ion-progress-bar>
-            </ion-item>
+              <ion-icon name="send-outline"></ion-icon>
+              <ion-label id="submit_cards_label">Submit Cards</ion-label>
+            </ion-button>
           </ion-card-content>
         </ion-card>
       </ion-col>

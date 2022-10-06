@@ -13,6 +13,9 @@ ion-card-header {
   padding-bottom: 0px;
   padding-top: 5px;
 }
+ion-card-content {
+  padding: 0px;
+}
 
 #card-column {
   padding-top: 0px !important;
@@ -22,10 +25,25 @@ ion-card-header {
 }
 
 #time-progress-bar {
-  //height: 70vh;
-  //transform: rotate(90deg);
+  height: 1em;
 }
 
 #submit_cards_button ion-icon {
   padding-right: 0.2em;
+  font-size: 1em;
+}
+#submit_cards_label {
+  font-size: 0.8em;
+}
+
+.gamecard-item {
+  --min-height: 16px; // reduce default ion-item default height otherwise images are cropped
+  height: 8vh;
+  .gamecard-img::part(image) {
+    height: 8vh;
+    min-width: 5vw;
+  }
+  ion-badge {
+    font-size: small;
+  }
 }
