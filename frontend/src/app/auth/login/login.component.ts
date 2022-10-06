@@ -42,7 +42,11 @@ export class LoginComponent implements OnInit {
   }
 
   showPassword() {
-    this.passwordType = 'text';
+    if (this.passwordType === 'password') {
+      this.passwordType = 'text';
+    } else {
+      this.passwordType = 'password';
+    }
   }
 
   onSubmit(values) {

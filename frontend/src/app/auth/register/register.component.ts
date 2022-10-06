@@ -55,7 +55,11 @@ export class RegisterComponent implements OnInit {
   }
 
   showPassword() {
-    this.passwordType = 'text';
+    if (this.passwordType === 'password') {
+      this.passwordType = 'text';
+    } else {
+      this.passwordType = 'password';
+    }
   }
 
   async onSubmit(values) {
