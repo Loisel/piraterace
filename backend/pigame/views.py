@@ -78,7 +78,6 @@ def game(request, game_id, **kwargs):
     checkpoints = determine_checkpoint_locations(initmap)
 
     payload = dict(
-        text="hallo",
         game_id=game_id,
         time_started=game.time_started,
         cards_played=game.cards_played,
@@ -233,6 +232,7 @@ def create_game(request, gameconfig_id, **kwargs):
         p.deck = DEFAULT_DECK
         random.shuffle(p.deck)
         p.next_card = 0
+        p.time_submitted = None
         p.save()
 
     payload = dict(
