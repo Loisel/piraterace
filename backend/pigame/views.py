@@ -154,7 +154,14 @@ def game(request, game_id, **kwargs):
             p.time_submitted = None
             p.save()
 
-    payload["actionstack"] = actionstack
+    # filter out empty actions from actionstack
+    payload["actionstack"] = []
+    for a in actionstack:
+        if len(a) > 0:
+            payload["actionstack"].append(a)
+
+    [print(i, a) for i, a in enumerate(payload["actionstack"])]
+
     payload["Ngameround"] = game.round
     payload["players"] = {}
     for p in player_states.values():

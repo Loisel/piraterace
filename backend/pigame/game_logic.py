@@ -142,17 +142,23 @@ def play_stack(game):
         this_round_cards = cardstack[stack_start:stack_end]
         # print(f"this_round_cards: {this_round_cards}")
 
-        for playerid, card in this_round_cards:
-            if players[playerid].health > 0:
-                actions = get_actions_for_card(game, initial_map, players, players[playerid], card)
-                actionstack.extend(actions)
+        for icard in range(game.config.ncardslots):
+            for iplayer in range(len(players)):
+                playerid, card = this_round_cards[icard * len(players) + iplayer]
+                if players[playerid].health > 0:
+                    actions = get_actions_for_card(game, initial_map, players, players[playerid], card)
+                    actionstack.extend(actions)
 
-        # cannons
-        cannon_actions = []
-        for p in players.values():
-            if p.health > 0:
-                cannon_actions.extend(shoot_cannon(game, initial_map, players, p))
-        actionstack.append(cannon_actions)
+            # board moves
+            board_moves_actions = board_moves(game, initial_map, players)
+            actionstack.append(board_moves_actions)
+
+            # cannons
+            cannon_actions = []
+            for p in players.values():
+                if p.health > 0:
+                    cannon_actions.extend(shoot_cannon(game, initial_map, players, p))
+            actionstack.append(cannon_actions)
 
         for player in players.values():
             if (
@@ -176,9 +182,27 @@ def play_stack(game):
                 respawn_actions.append(dict(key="respawn", target=p.id))
         actionstack.append(respawn_actions)
 
-        [print(i, a) for i, a in enumerate(actionstack)]
+        # [print(i, a) for i, a in enumerate(actionstack)]
 
     return players, actionstack
+
+
+def board_moves(game, gmap, players):
+    # TODO: disable collisions for board_moves
+    actions = []
+    for pid, p in players.items():
+        if p.health <= 0:
+            break
+        tile_prop = get_tile_properties(gmap, p.xpos, p.ypos)
+        if tile_prop["vortex"] != 0:
+            actions.append(dict(key="rotate", target=pid, val=tile_prop["vortex"]))
+            p.direction = (p.direction + tile_prop["vortex"]) % 4
+
+        if tile_prop["current_x"] != 0:
+            actions.extend(move_player_x(game, gmap, players, p, tile_prop["current_x"]))
+        if tile_prop["current_y"] != 0:
+            actions.extend(move_player_y(game, gmap, players, p, -tile_prop["current_y"]))
+    return actions
 
 
 def shoot_cannon(game, gmap, players, player):
