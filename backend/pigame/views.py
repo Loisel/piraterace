@@ -80,6 +80,7 @@ def game(request, game_id, **kwargs):
     payload = dict(
         game_id=game_id,
         time_started=game.time_started,
+        cardslots=game.config.ncardslots,
         cards_played=game.cards_played,
         map=initmap,
         mapfile=game.config.mapfile,
@@ -92,6 +93,7 @@ def game(request, game_id, **kwargs):
     )
 
     player_states, actionstack = play_stack(game)
+    actionstack = prune_actionstack(actionstack)
 
     num_players_submitted = player_accounts.filter(time_submitted__isnull=False).count()
     print(f"Game state {game.state}, player submitted {num_players_submitted}")
@@ -109,6 +111,7 @@ def game(request, game_id, **kwargs):
             game.cards_played = cards_played
             game.save(update_fields=["cards_played"])
             player_states, actionstack = play_stack(game)
+            actionstack = prune_actionstack(actionstack)
 
             animation_time = (len(actionstack) - len(old_actionstack)) * TIME_PER_ACTION
             print(f"Animation time is {animation_time}, old stacksize {len(old_actionstack)}, new stacksize {len(actionstack)}")
@@ -154,15 +157,11 @@ def game(request, game_id, **kwargs):
             p.time_submitted = None
             p.save()
 
-    # filter out empty actions from actionstack
-    payload["actionstack"] = []
-    for a in actionstack:
-        if len(a) > 0:
-            payload["actionstack"].append(a)
-
+    payload["actionstack"] = actionstack
     [print(i, a) for i, a in enumerate(payload["actionstack"])]
 
     payload["Ngameround"] = game.round
+    payload["state"] = game.state
     payload["players"] = {}
     for p in player_states.values():
         payload["players"][p.id] = dict(
@@ -179,6 +178,15 @@ def game(request, game_id, **kwargs):
         )
 
     return JsonResponse(payload)
+
+
+def prune_actionstack(actionstack):
+    """remove empty actions"""
+    slim_stack = []
+    for a in actionstack:
+        if len(a) > 0:
+            slim_stack.append(a)
+    return slim_stack
 
 
 @api_view(["GET"])

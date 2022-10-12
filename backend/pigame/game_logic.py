@@ -187,6 +187,11 @@ def play_stack(game):
     return players, actionstack
 
 
+def kill_player(p):
+    p.health = 0
+    p.xpos = p.ypos = -99
+
+
 def board_moves(game, gmap, players):
     # TODO: disable collisions for board_moves
     actions = []
@@ -202,7 +207,7 @@ def board_moves(game, gmap, players):
     # we have to do this nplayer times to resolve blocking situation on the currents
     for n in range(len(players)):
         for pid, p in players.items():
-            if not player_moved[pid] and p.health > 0:
+            if (not player_moved[pid]) and (p.health > 0):
                 tile_prop = get_tile_properties(gmap, p.xpos, p.ypos)
                 if tile_prop["current_x"] != 0:
                     old_xpos = p.xpos
@@ -210,7 +215,7 @@ def board_moves(game, gmap, players):
                     if p.xpos != old_xpos:
                         player_moved[pid] = True
                 if tile_prop["current_y"] != 0:
-                    old_ypos =p.ypos
+                    old_ypos = p.ypos
                     actions.extend(move_player_y(game, gmap, players, p, tile_prop["current_y"], push_players=False))
                     if p.ypos != old_ypos:
                         player_moved[pid] = True
@@ -239,6 +244,7 @@ def shoot_cannon(game, gmap, players, player):
                 )
                 if other_player.health <= 0:
                     actions.append(dict(key="death", target=other_player.id, type="cannon"))
+                    kill_player(other_player)
 
                 return actions
         # hit a colliding map tile?
@@ -283,18 +289,21 @@ def move_player_x(game, gmap, players, player, inc, push_players=True):
         actions.append(dict(key="collision_x", target=player.id, val=inc, damage=damage))
         if player.health <= 0:
             actions.append(dict(key="death", target=player.id, type="collision"))
+            kill_player(player)
         return actions
 
     if tile_prop["void"]:
         player.health = 0
         actions.append(dict(key="move_x", target=player.id, val=inc))
         actions.append(dict(key="death", target=player.id, type="void"))
+        kill_player(player)
         return actions
 
     if (player.xpos + inc < 0) or (player.xpos + inc >= gmap["width"]):
         player.health = 0
         actions.append(dict(key="move_x", target=player.id, val=inc))
         actions.append(dict(key="death", target=player.id, type="void"))
+        kill_player(player)
         return actions
 
     for pid, p2 in players.items():
@@ -321,18 +330,21 @@ def move_player_y(game, gmap, players, player, inc, push_players=True):
         actions.append(dict(key="collision_y", target=player.id, val=inc, damage=damage))
         if player.health <= 0:
             actions.append(dict(key="death", target=player.id, type="collision"))
+            kill_player(player)
         return actions
 
     if tile_prop["void"]:
         player.health = 0
         actions.append(dict(key="move_y", target=player.id, val=inc))
         actions.append(dict(key="death", target=player.id, type="void"))
+        kill_player(player)
         return actions
 
     if (player.ypos + inc < 0) or (player.ypos + inc >= gmap["height"]):
         player.health = 0
         actions.append(dict(key="move_y", target=player.id, val=inc))
         actions.append(dict(key="death", target=player.id, type="void"))
+        kill_player(player)
         return actions
 
     for pid, p2 in players.items():
@@ -388,6 +400,14 @@ def verify_map(mapobj):
     tilesets = mapobj["tilesets"]
     if len(tilesets) != 1:
         err_msg.append(f"{len(tilesets)} tilesets found. Only supporting 1 tileset.")
+
+    req_props = set(["collision", "current_x", "current_y", "damage", "void", "vortex"])
+    for ts in tilesets:
+        for tile in ts["tiles"]:
+            props = set([prop["name"] for prop in tile["properties"]])
+            if props != req_props:
+                err_msg.append(f"Found tile {tile['id']} without required properties, have {props}, required {req_props}")
+
     if "checkpoints" in layer_names:
         clayer = list(filter(lambda l: l["name"] == "checkpoints", mapobj["layers"]))[0]
         if len(clayer["objects"]) < 1:

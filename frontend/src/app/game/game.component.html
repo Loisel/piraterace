@@ -5,14 +5,11 @@
         <div id="piraterace-game" #game_div></div>
       </ion-col>
       <ion-col size-xs="3" size-sm="2" id="card-column">
-        <ion-card>
+        <ion-card #cards_menu>
           <ion-card-header>
             <ion-card-subtitle>
-              Round {{ Ngameround | async }}
-              <button
-                class="ion-float-right ion-float-bottom"
-                (click)="leaveGame()"
-              >
+              <ion-label>Round {{ Ngameround | async }}</ion-label>
+              <button (click)="leaveGame()">
                 <ion-icon name="exit-outline" color="danger"></ion-icon>
               </button>
             </ion-card-subtitle>
@@ -24,6 +21,9 @@
               disabled="false"
             >
               <ion-reorder *ngFor="let card of cardsinfo; let i = index">
+                <ion-item-divider
+                  *ngIf="i === gameinfo.cardslots"
+                ></ion-item-divider>
                 <ion-item class="gamecard-item" [disabled]="healthCheck(i)">
                   <ion-img
                     class="gamecard-img"
@@ -40,11 +40,7 @@
               color="danger"
             ></ion-progress-bar>
 
-            <ion-button
-              id="submit_cards_button"
-              (click)="submitCards()"
-              color="success"
-            >
+            <ion-button id="submit_cards_button" (click)="submitCards()">
               <ion-icon name="send-outline"></ion-icon>
               <ion-label id="submit_cards_label">Submit Cards</ion-label>
             </ion-button>

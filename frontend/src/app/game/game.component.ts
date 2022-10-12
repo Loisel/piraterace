@@ -36,6 +36,7 @@ export class GameComponent {
   countDownTimer: any;
 
   @ViewChild('game_div', { read: ElementRef }) game_div: ElementRef;
+  @ViewChild('cards_menu', { read: ElementRef }) cards_menu: ElementRef;
 
   constructor(
     private httpService: HttpService,
@@ -79,6 +80,9 @@ export class GameComponent {
 
         this.config.scene = new GameScene(this);
         this.phaserGame = new Phaser.Game(this.config);
+
+        this.cards_menu.nativeElement.style.borderColor =
+          gameinfo['players'][gameinfo['me']]['color'];
       },
       (err) => console.error(err),
       () => console.log('observable complete')
@@ -134,6 +138,9 @@ export class GameComponent {
   }
 
   healthCheck(i: number) {
+    if (this.gameinfo['state'] === 'animate') {
+      return true;
+    }
     return i >= this.gameinfo.players[this.gameinfo.me]['health'];
   }
 

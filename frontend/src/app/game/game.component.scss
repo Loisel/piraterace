@@ -16,16 +16,27 @@ canvas {
 }
 
 ion-card-header {
+  text-align: end;
   padding-bottom: 0px;
   padding-top: 5px;
+  button {
+    background-color: transparent;
+    font-size: 1.5em;
+  }
 }
 ion-card-content {
   padding: 0px;
+  ion-item-divider {
+    min-height: 0;
+    height: 0.1em;
+  }
 }
 
 #card-column {
   padding-top: 0px !important;
   ion-card {
+    border-style: solid;
+    border-width: 0.5em;
     margin: 0px !important;
   }
 }
@@ -48,6 +59,7 @@ ion-card-content {
 }
 
 .gamecard-item {
+  //opacity: .95;
   --min-height: 16px; // reduce default ion-item default height otherwise images are cropped
   height: 8vh;
   .gamecard-img::part(image) {
