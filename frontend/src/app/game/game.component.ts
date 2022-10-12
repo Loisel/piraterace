@@ -273,7 +273,7 @@ class GameScene extends Phaser.Scene {
     if (frame_delay >= this.anim_cutoff) {
       console.log('Shooting:', boat_id, 'at x/y', target_x, target_y);
 
-      let cannonball = this.add.circle(boat.x, boat.y, 10, 0);
+      let cannonball = this.add.circle(boat.x, boat.y, 7, 0);
       let iternum = 0;
       this.animationTimer = this.time.addEvent({
         callback: () => {

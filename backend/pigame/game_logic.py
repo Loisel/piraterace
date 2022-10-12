@@ -198,10 +198,22 @@ def board_moves(game, gmap, players):
             actions.append(dict(key="rotate", target=pid, val=tile_prop["vortex"]))
             p.direction = (p.direction + tile_prop["vortex"]) % 4
 
-        if tile_prop["current_x"] != 0:
-            actions.extend(move_player_x(game, gmap, players, p, tile_prop["current_x"], push_players=False))
-        if tile_prop["current_y"] != 0:
-            actions.extend(move_player_y(game, gmap, players, p, -tile_prop["current_y"], push_players=False))
+    player_moved = {pid: False for pid in players.keys()}
+    # we have to do this nplayer times to resolve blocking situation on the currents
+    for n in range(len(players)):
+        for pid, p in players.items():
+            if not player_moved[pid] and p.health > 0:
+                tile_prop = get_tile_properties(gmap, p.xpos, p.ypos)
+                if tile_prop["current_x"] != 0:
+                    old_xpos = p.xpos
+                    actions.extend(move_player_x(game, gmap, players, p, tile_prop["current_x"], push_players=False))
+                    if p.xpos != old_xpos:
+                        player_moved[pid] = True
+                if tile_prop["current_y"] != 0:
+                    old_ypos =p.ypos
+                    actions.extend(move_player_y(game, gmap, players, p, tile_prop["current_y"], push_players=False))
+                    if p.ypos != old_ypos:
+                        player_moved[pid] = True
     return actions
 
 
