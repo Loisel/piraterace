@@ -11,11 +11,11 @@
  "layers":[
         {
          "data":[107, 138, 222, 410, 224, 183,
-            389, 441, 413, 88, 224, 183,
-            389, 25, 26, 29, 29, 394,
-            389, 409, 413, 413, 413, 88,
-            389, 409, 461, 461, 474, 474,
-            389, 409, 458, 462, 183, 183],
+            210, 441, 413, 88, 224, 183,
+            216, 25, 26, 29, 29, 394,
+            216, 308, 413, 413, 453, 88,
+            216, 401, 461, 461, 354, 474,
+            216, 457, 458, 462, 183, 183],
          "height":6,
          "id":1,
          "name":"background",
@@ -9985,12 +9985,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"current_y",
@@ -10010,7 +10010,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -10019,12 +10019,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"current_y",
@@ -10044,7 +10044,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -10053,12 +10053,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"current_y",
@@ -10078,7 +10078,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -10087,12 +10087,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"current_y",
@@ -10112,7 +10112,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -10121,12 +10121,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"current_y",
@@ -10146,7 +10146,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -10155,12 +10155,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"current_y",
@@ -10180,7 +10180,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 },
             
@@ -10531,12 +10531,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"current_y",
@@ -10556,7 +10556,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -10565,12 +10565,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"current_y",
@@ -10590,7 +10590,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 },
             
@@ -10600,12 +10600,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"current_y",
@@ -10625,7 +10625,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -10634,12 +10634,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"current_y",
@@ -10659,7 +10659,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -10668,12 +10668,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"current_y",
@@ -10693,7 +10693,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -10702,12 +10702,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"current_y",
@@ -10727,7 +10727,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -11078,12 +11078,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"current_y",
@@ -11103,7 +11103,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -11112,12 +11112,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"current_y",
@@ -11137,7 +11137,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -11146,12 +11146,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"current_y",
@@ -11171,7 +11171,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -11180,12 +11180,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"current_y",
@@ -11205,7 +11205,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 },
             
@@ -11215,12 +11215,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"current_y",
@@ -11240,7 +11240,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -11249,12 +11249,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"current_y",
@@ -11274,7 +11274,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -11625,12 +11625,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"current_y",
@@ -11650,7 +11650,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -11659,12 +11659,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"current_y",
@@ -11684,7 +11684,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -11693,12 +11693,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"current_y",
@@ -11718,7 +11718,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -11727,12 +11727,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"current_y",
@@ -11752,7 +11752,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -11761,12 +11761,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"current_y",
@@ -11786,7 +11786,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -11795,12 +11795,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"current_y",
@@ -11820,7 +11820,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 },
             
@@ -12171,12 +12171,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"current_y",
@@ -12196,7 +12196,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -12205,12 +12205,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"current_y",
@@ -12230,7 +12230,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 },
             
@@ -12240,12 +12240,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"current_y",
@@ -12265,7 +12265,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -12274,12 +12274,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"current_y",
@@ -12299,7 +12299,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -12308,12 +12308,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"current_y",
@@ -12333,7 +12333,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -12342,12 +12342,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"current_y",
@@ -12367,7 +12367,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -12718,12 +12718,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"current_y",
@@ -12743,7 +12743,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -12752,12 +12752,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"current_y",
@@ -12777,7 +12777,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -12786,12 +12786,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"current_y",
@@ -12811,7 +12811,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -12820,12 +12820,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"current_y",
@@ -12845,7 +12845,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 },
             
@@ -12855,12 +12855,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"current_y",
@@ -12880,7 +12880,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -12889,12 +12889,12 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"current_y",
@@ -12914,7 +12914,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -13265,7 +13265,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -13275,12 +13275,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -13290,7 +13290,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -13299,7 +13299,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -13309,12 +13309,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -13324,7 +13324,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -13333,7 +13333,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -13343,12 +13343,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -13358,7 +13358,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -13367,7 +13367,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -13377,12 +13377,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -13392,7 +13392,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -13401,7 +13401,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -13411,12 +13411,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -13426,7 +13426,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -13435,7 +13435,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -13445,12 +13445,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -13460,7 +13460,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 },
             
@@ -13811,7 +13811,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -13821,12 +13821,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -13836,7 +13836,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -13845,7 +13845,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -13855,12 +13855,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -13870,7 +13870,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 },
             
@@ -13880,7 +13880,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -13890,12 +13890,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -13905,7 +13905,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -13914,7 +13914,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -13924,12 +13924,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -13939,7 +13939,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -13948,7 +13948,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -13958,12 +13958,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -13973,7 +13973,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -13982,7 +13982,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -13992,12 +13992,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -14007,7 +14007,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -14358,7 +14358,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -14368,12 +14368,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -14383,7 +14383,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -14392,7 +14392,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -14402,12 +14402,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -14417,7 +14417,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -14426,7 +14426,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -14436,12 +14436,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -14451,7 +14451,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -14460,7 +14460,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -14470,12 +14470,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -14485,7 +14485,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 },
             
@@ -14495,7 +14495,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -14505,12 +14505,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -14520,7 +14520,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -14529,7 +14529,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -14539,12 +14539,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -14554,7 +14554,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -14905,7 +14905,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -14915,12 +14915,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -14930,7 +14930,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -14939,7 +14939,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -14949,12 +14949,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -14964,7 +14964,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -14973,7 +14973,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -14983,12 +14983,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -14998,7 +14998,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -15007,7 +15007,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -15017,12 +15017,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -15032,7 +15032,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -15041,7 +15041,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -15051,12 +15051,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -15066,7 +15066,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -15075,7 +15075,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -15085,12 +15085,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -15100,7 +15100,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 },
             
@@ -15451,7 +15451,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -15461,12 +15461,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -15476,7 +15476,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -15485,7 +15485,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -15495,12 +15495,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -15510,7 +15510,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 },
             
@@ -15520,7 +15520,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -15530,12 +15530,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -15545,7 +15545,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -15554,7 +15554,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -15564,12 +15564,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -15579,7 +15579,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -15588,7 +15588,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -15598,12 +15598,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -15613,7 +15613,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -15622,7 +15622,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -15632,12 +15632,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -15647,7 +15647,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -15998,7 +15998,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -16008,12 +16008,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -16023,7 +16023,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -16032,7 +16032,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -16042,12 +16042,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -16057,7 +16057,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -16066,7 +16066,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -16076,12 +16076,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -16091,7 +16091,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }]
                 }, 
                 {
@@ -16100,7 +16100,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -16110,12 +16110,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -16125,7 +16125,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 },
             
@@ -16135,7 +16135,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -16145,12 +16145,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -16160,7 +16160,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {
@@ -16169,7 +16169,7 @@
                         {
                          "name":"collision",
                          "type":"bool",
-                         "value":true
+                         "value":false
                         }, 
                         {
                          "name":"current_x",
@@ -16179,12 +16179,12 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }, 
                         {
                          "name":"damage",
                          "type":"int",
-                         "value":2
+                         "value":0
                         }, 
                         {
                          "name":"void",
@@ -16194,7 +16194,7 @@
                         {
                          "name":"vortex",
                          "type":"int",
-                         "value":0
+                         "value":1
                         }]
                 }, 
                 {

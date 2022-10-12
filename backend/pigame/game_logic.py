@@ -199,9 +199,9 @@ def board_moves(game, gmap, players):
             p.direction = (p.direction + tile_prop["vortex"]) % 4
 
         if tile_prop["current_x"] != 0:
-            actions.extend(move_player_x(game, gmap, players, p, tile_prop["current_x"]))
+            actions.extend(move_player_x(game, gmap, players, p, tile_prop["current_x"], push_players=False))
         if tile_prop["current_y"] != 0:
-            actions.extend(move_player_y(game, gmap, players, p, -tile_prop["current_y"]))
+            actions.extend(move_player_y(game, gmap, players, p, -tile_prop["current_y"], push_players=False))
     return actions
 
 
@@ -262,7 +262,7 @@ def get_actions_for_card(game, gmap, players, player, card):
     return actions
 
 
-def move_player_x(game, gmap, players, player, inc):
+def move_player_x(game, gmap, players, player, inc, push_players=True):
     actions = []
     tile_prop = get_tile_properties(gmap, player.xpos + inc, player.ypos)
     if tile_prop["collision"]:
@@ -287,16 +287,19 @@ def move_player_x(game, gmap, players, player, inc):
 
     for pid, p2 in players.items():
         if (p2.xpos == player.xpos + inc) and (p2.ypos == player.ypos):
-            actions.extend(move_player_x(game, gmap, players, p2, inc))
-            if (p2.xpos == player.xpos + inc) and (p2.ypos == player.ypos):
+            if push_players:
+                actions.extend(move_player_x(game, gmap, players, p2, inc))
+                if (p2.xpos == player.xpos + inc) and (p2.ypos == player.ypos):
+                    return actions
+                break
+            else:
                 return actions
-            break
     player.xpos += inc
     actions.append(dict(key="move_x", target=player.id, val=inc))
     return actions
 
 
-def move_player_y(game, gmap, players, player, inc):
+def move_player_y(game, gmap, players, player, inc, push_players=True):
     actions = []
     tile_prop = get_tile_properties(gmap, player.xpos, player.ypos + inc)
     print("tp", tile_prop)
@@ -322,10 +325,13 @@ def move_player_y(game, gmap, players, player, inc):
 
     for pid, p2 in players.items():
         if (p2.xpos == player.xpos) and (p2.ypos == player.ypos + inc):
-            actions.extend(move_player_y(game, gmap, players, p2, inc))
-            if (p2.xpos == player.xpos) and (p2.ypos == player.ypos + inc):
+            if push_players:
+                actions.extend(move_player_y(game, gmap, players, p2, inc))
+                if (p2.xpos == player.xpos) and (p2.ypos == player.ypos + inc):
+                    return actions
+                break
+            else:
                 return actions
-            break
     player.ypos += inc
     actions.append(dict(key="move_y", target=player.id, val=inc))
     return actions
