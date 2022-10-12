@@ -7,6 +7,12 @@ ion-grid {
 }
 canvas {
   margin-top: 0px !important;
+  max-height: calc(100vh - 65px) !important;
+}
+
+#piraterace-game {
+  max-height: calc(100vh - 65px);
+  max-width: 100%;
 }
 
 ion-card-header {
@@ -28,9 +34,14 @@ ion-card-content {
   height: 1em;
 }
 
-#submit_cards_button ion-icon {
-  padding-right: 0.2em;
-  font-size: 1em;
+#submit_cards_button {
+  padding-left: 0.2em;
+  height: 1.5em;
+  width: 95%;
+  ion-icon {
+    padding-right: 0.2em;
+    font-size: 1em;
+  }
 }
 #submit_cards_label {
   font-size: 0.8em;
