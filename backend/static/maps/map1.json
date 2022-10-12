@@ -11,7 +11,7 @@
  "layers":[
         {
          "data":[107, 138, 222, 410, 224, 183,
-            210, 441, 413, 88, 224, 183,
+            210, 57, 413, 88, 224, 183,
             216, 25, 26, 29, 29, 394,
             216, 308, 413, 413, 453, 88,
             216, 401, 461, 461, 354, 474,
@@ -54,6 +54,30 @@
                  "width":0,
                  "x":120.974076983504,
                  "y":202.67085624509
+                }, 
+                {
+                 "class":"",
+                 "height":0,
+                 "id":15,
+                 "name":"",
+                 "point":true,
+                 "rotation":0,
+                 "visible":true,
+                 "width":0,
+                 "x":79.3650793650794,
+                 "y":159.863945578231
+                }, 
+                {
+                 "class":"",
+                 "height":0,
+                 "id":16,
+                 "name":"",
+                 "point":true,
+                 "rotation":0,
+                 "visible":true,
+                 "width":0,
+                 "x":119.047619047619,
+                 "y":159.863945578231
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -97,7 +121,7 @@
          "y":0
         }],
  "nextlayerid":4,
- "nextobjectid":15,
+ "nextobjectid":17,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.9.0",
