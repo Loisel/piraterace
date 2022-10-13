@@ -68,7 +68,7 @@ export class GameComponent {
             max: {
               height: this.game_div.nativeElement.offsetHeight,
             },
-            mode: Phaser.Scale.FIT,
+            mode: Phaser.Scale.NONE,
             autoCenter: Phaser.Scale.CENTER_BOTH,
           },
           physics: { default: 'None' },
@@ -685,6 +685,20 @@ class GameScene extends Phaser.Scene {
       callbackScope: this,
       delay: 1000, // 1000 = 1 second
       loop: true,
+    });
+
+    // camera draggable, start on player boat
+    var cam = this.cameras.main;
+    var myBoat = this.boats[GI.me].getChildren()[0];
+    // would be nice to have camera respect bounds, but tests with responsive mode not successful
+    //cam.setBounds(0, 0, GI.map.tilewidth * GI.map.width, GI.map.tileheight * GI.map.height);
+    cam.centerOn(myBoat.x, myBoat.y);
+
+    this.input.on('pointermove', function (p) {
+      if (!p.isDown) return;
+
+      cam.scrollX -= (p.x - p.prevPosition.x) / cam.zoom;
+      cam.scrollY -= (p.y - p.prevPosition.y) / cam.zoom;
     });
   }
 
