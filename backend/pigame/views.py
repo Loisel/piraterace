@@ -403,6 +403,9 @@ def create_new_gameconfig(request, **kwargs):
 
 
 def list_gameconfigs(request):
+    if not request.user.is_anonymous:
+        clean_up_configs(request.user.account)
+
     games = GameConfig.objects.filter(game=None)
     ret = dict(
         gameconfigs=list(games.values()),

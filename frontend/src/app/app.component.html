@@ -56,6 +56,9 @@
         <ion-menu-toggle auto-hide="true">
           <ion-item [button]="true" routerLink="lobby">Lobby</ion-item>
         </ion-menu-toggle>
+        <ion-menu-toggle *ngIf="showLeaveGame | async" auto-hide="true">
+          <ion-item [button]="true" (click)="leaveGame()">Leave Game</ion-item>
+        </ion-menu-toggle>
       </ion-list>
     </ion-content>
   </ion-menu>

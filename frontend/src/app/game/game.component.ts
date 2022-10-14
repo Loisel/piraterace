@@ -16,6 +16,7 @@ import { map, takeUntil, takeWhile, finalize } from 'rxjs/operators';
 import Phaser from 'phaser';
 
 import { HttpService } from '../services/http.service';
+import { NavService } from '../services/nav.service';
 import { environment } from '../../environments/environment';
 
 @Component({
@@ -42,7 +43,8 @@ export class GameComponent {
     private httpService: HttpService,
     private route: ActivatedRoute,
     private router: Router,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private navService: NavService
   ) {}
 
   ionViewWillEnter() {
@@ -83,6 +85,8 @@ export class GameComponent {
 
         this.cards_menu.nativeElement.style.borderColor =
           gameinfo['players'][gameinfo['me']]['color'];
+
+        this.navService.setShowLeaveGame(true);
       },
       (err) => console.error(err),
       () => console.log('observable complete')
@@ -124,6 +128,7 @@ export class GameComponent {
   ionViewWillLeave() {
     this.phaserGame.destroy(true, false);
     // this.defaultScene.updateTimer.paused = true;
+    this.navService.setShowLeaveGame(false);
   }
 
   load_gameinfo() {
