@@ -22,7 +22,7 @@
             >
               <ion-reorder *ngFor="let card of cardsinfo; let i = index">
                 <ion-item-divider
-                  *ngIf="i === gameinfo.cardslots"
+                  *ngIf="i === gameinfo?.cardslots"
                 ></ion-item-divider>
                 <ion-item class="gamecard-item" [disabled]="healthCheck(i)">
                   <ion-img

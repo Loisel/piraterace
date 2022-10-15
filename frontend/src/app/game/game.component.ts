@@ -143,10 +143,14 @@ export class GameComponent {
   }
 
   healthCheck(i: number) {
-    if (this.gameinfo['state'] === 'animate') {
-      return true;
+    if (this.gameinfo) {
+      if (this.gameinfo['state'] === 'animate') {
+        return true;
+      }
+      return i >= this.gameinfo.players[this.gameinfo.me]['health'];
+    } else {
+      return false;
     }
-    return i >= this.gameinfo.players[this.gameinfo.me]['health'];
   }
 
   onCardsReorder(event) {
@@ -259,6 +263,39 @@ class GameScene extends Phaser.Scene {
         repeat: this.move_frames - 1,
       });
     }
+  }
+
+  check_player_state() {
+    let valid = true;
+    let GI = this.component.gameinfo;
+    Object.entries(GI.players).forEach(([playerid, player]) => {
+      console.log('check_player_state', player);
+      let boatgrp = this.boats[playerid];
+      let boat = boatgrp.getChildren()[0];
+      let boat_x = Math.floor(boat.x / GI.map.tilewidth);
+      let boat_y = Math.floor(boat.y / GI.map.tileheight);
+      if (boat_x !== player['pos_x']) {
+        console.log(
+          'Error: Inconsistent boat position in x ! Should be ',
+          player,
+          player['pos_x'],
+          ' in game: ',
+          boat_x
+        );
+        valid = false;
+      }
+      if (boat_y !== player['pos_y']) {
+        console.log(
+          'Error: Inconsistent boat position in y ! Should be ',
+          player,
+          player['pos_y'],
+          ' in game: ',
+          boat_y
+        );
+        valid = false;
+      }
+    });
+    console.log('check_player_state: ', valid);
   }
 
   shoot_cannon(
@@ -442,8 +479,8 @@ class GameScene extends Phaser.Scene {
     let frame_delay = time / this.move_frames;
     let boat = this.boats[boat_id];
     boat.setXY(
-      (GIplayer['pos_x'] + 0.5) * GI.map.tilewidth,
-      (GIplayer['pos_y'] + 0.5) * GI.map.tileheight
+      (GIplayer['start_pos_x'] + 0.5) * GI.map.tilewidth,
+      (GIplayer['start_pos_y'] + 0.5) * GI.map.tileheight
     );
     if (frame_delay < this.anim_cutoff) {
     } else {
@@ -615,6 +652,7 @@ class GameScene extends Phaser.Scene {
       this.animationTimer = this.time.addEvent({
         callback: () => {
           this.drawCheckpoints();
+          this.check_player_state();
         },
         callbackScope: this,
         delay:
@@ -682,16 +720,6 @@ class GameScene extends Phaser.Scene {
       this.boats[playerid] = group;
     });
 
-    //return;
-    this.play_actionstack(10); // play the first action stack really quickly in case user does a reload
-
-    this.updateTimer = this.time.addEvent({
-      callback: this.updateEvent,
-      callbackScope: this,
-      delay: 1000, // 1000 = 1 second
-      loop: true,
-    });
-
     // camera draggable, start on player boat
     var cam = this.cameras.main;
     var myBoat = this.boats[GI.me].getChildren()[0];
@@ -704,6 +732,15 @@ class GameScene extends Phaser.Scene {
 
       cam.scrollX -= (p.x - p.prevPosition.x) / cam.zoom;
       cam.scrollY -= (p.y - p.prevPosition.y) / cam.zoom;
+    });
+
+    this.play_actionstack(10); // play the first action stack really quickly in case user does a reload
+
+    this.updateTimer = this.time.addEvent({
+      callback: this.updateEvent,
+      callbackScope: this,
+      delay: 1000, // 1000 = 1 second
+      loop: true,
     });
   }
 
@@ -774,8 +811,6 @@ class GameScene extends Phaser.Scene {
       }
     });
   }
-
-  update() {}
 }
 
 class HealthBar extends Phaser.GameObjects.Container {
