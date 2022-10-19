@@ -16,26 +16,31 @@ def flatten_list_of_tuples(lot):
     return [i for j in lot for i in j]
 
 
-def get_cards_on_hand(player, ncards):
+def get_cards_on_hand(gamecfg, playeridx, ncards):
     """
     get next ncards that a player can draw from his deck
         return list of tuples of (playerid, card)
     """
-    if player.next_card + ncards - 1 > len(player.deck):
-        remaining_cards = player.deck[player.next_card :]
-        old_cards = player.deck[: player.next_card]
+    next_card = gamecfg.player_next_card[playeridx]
+    deck = gamecfg.player_decks[playeridx]
+
+    if next_card + ncards - 1 > len(deck):
+        remaining_cards = deck[next_card:]
+        old_cards = deck[:next_card]
         random.shuffle(old_cards)
-        player.deck = remaining_cards + old_cards
-        player.next_card = 0
-        player.save(update_fields=["next_card", "deck"])
+        gamecfg.player_decks[playeridx] = remaining_cards + old_cards
+        gamecfg.player_next_card[playeridx] = 0
+        gamecfg.save(update_fields=["player_next_card", "player_decks"])
+        next_card = gamecfg.player_next_card[playeridx]
+        deck = gamecfg.player_decks[playeridx]
 
     res = []
     for i in range(0, ncards):
-        res.append((player.pk, player.deck[(player.next_card + i)]))
+        res.append((gamecfg.player_ids[playeridx], deck[next_card + i]))
     return res
 
 
-def determine_next_cards_played(players_in_game, player_ids, ncardslots):
+def determine_next_cards_played(gamecfg):
     """
     returns the cards in order that they will be played in a game by participating players.
     ncardslots will be returned for each player
@@ -43,17 +48,13 @@ def determine_next_cards_played(players_in_game, player_ids, ncardslots):
     """
 
     # print(f"player_ids {player_ids}, player_in_game {players_in_game}")
-    cards_per_player = []
-    for i in player_ids:
-        if i in players_in_game:
-            cards_per_player.append(get_cards_on_hand(Account.objects.get(pk=i), ncardslots))
-        else:  # play random cards from default deck for zombie players
-            random_cards = [(i, random.choice(DEFAULT_DECK)) for _ in range(ncardslots)]
-            cards_per_player.append(random_cards)
+    cards_per_player = [get_cards_on_hand(gamecfg, i, gamecfg.ncardslots) for i in range(len(gamecfg.player_ids))]
+    # for i in enumerate(gamecfg.player_ids):
+    #    cards_per_player.append(get_cards_on_hand(gamecfg, i, gamecfg.ncardslots))
 
     # sort by ranking...
     ret = []
-    for i in range(ncardslots):
+    for i in range(gamecfg.ncardslots):
         nth_cards = [pcards[i] for pcards in cards_per_player]  # i.e. for each player one card
         rankings = [card_id_rank(c)[1] for pid, c in nth_cards]
         # print(f"{i} :: cards this segment {nth_cards} rankings {rankings}")
@@ -277,6 +278,11 @@ def get_actions_for_card(game, gmap, players, player, card):
             actions.append(move_player_x(game, gmap, players, player, xinc))
         if yinc != 0:
             actions.append(move_player_y(game, gmap, players, player, yinc))
+
+    if CARDS[cardid]["repair"] != 0:
+        player.health += CARDS[cardid]["repair"]
+        actions.append([dict(key="repair", target=player.id, val=CARDS[cardid]["repair"])])
+
     return actions
 
 

@@ -4,15 +4,13 @@ from django.contrib.postgres.fields import ArrayField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from pigame.models import BaseGame, GameConfig
+from pigame.models import BaseGame, GameConfig, gen_default_deck
 
 
 class Account(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     game = models.ForeignKey(BaseGame, on_delete=models.SET_NULL, null=True, blank=True)
-    deck = ArrayField(models.IntegerField(null=True, blank=True), null=True, blank=True)
-
-    next_card = models.PositiveSmallIntegerField(default=0)
+    deck = ArrayField(models.IntegerField(), default=gen_default_deck)
 
     # avatar =
     time_submitted = models.DateTimeField(blank=True, null=True)

@@ -265,6 +265,33 @@ class GameScene extends Phaser.Scene {
     }
   }
 
+  repair_animation(boat_id: number, time: number) {
+    let boat = this.boats[boat_id].getChildren()[0];
+    let target_x = boat.x;
+    let target_y = boat.y;
+    console.log('repair animation @ ', target_x, target_y);
+    time *= this.anim_frac;
+    let frame_delay = time / this.move_frames;
+    if (frame_delay >= this.anim_cutoff) {
+      let stars = this.add.group();
+      stars.add(this.add.star(target_x - 2, target_y + 6, 5, 6, 11, 0x00ff00));
+      stars.add(this.add.star(target_x - 5, target_y - 11, 5, 8, 13, 0x00ff00));
+      let iternum = 0;
+      this.animationTimer = this.time.addEvent({
+        callback: () => {
+          stars.incY(-4);
+          iternum += 1;
+          if (iternum == this.move_frames) {
+            stars.destroy(true);
+          }
+        },
+        callbackScope: this,
+        delay: frame_delay, // 1000 = 1 second
+        repeat: this.move_frames - 1,
+      });
+    }
+  }
+
   check_player_state() {
     let valid = true;
     let GI = this.component.gameinfo;
@@ -636,6 +663,13 @@ class GameScene extends Phaser.Scene {
                   0,
                   animation_time_ms,
                   GI.players[action.target]['health']
+                );
+              } else if (action.key === 'repair') {
+                this.repair_animation(action.target, animation_time_ms);
+                this.update_healthbar(
+                  action.target,
+                  -action.val,
+                  animation_time_ms
                 );
               } else {
                 console.log('Error, key not found.');

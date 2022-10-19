@@ -19,6 +19,7 @@ CARDS = {
         descr="forward move",
         move=1,
         rot=0,
+        repair=0,
         img="move_forward_1.jpg",
         url=f"{CARDSURL}/move_forward_1.jpg",
     ),
@@ -26,6 +27,7 @@ CARDS = {
         descr="forward move 2",
         move=2,
         rot=0,
+        repair=0,
         img="move_forward_2.jpg",
         url=f"{CARDSURL}/move_forward_2.jpg",
     ),
@@ -33,6 +35,7 @@ CARDS = {
         descr="back move 1",
         move=-1,
         rot=0,
+        repair=0,
         img="move_back_1.jpg",
         url=f"{CARDSURL}/move_back_1.jpg",
     ),
@@ -40,6 +43,7 @@ CARDS = {
         descr="rotate left",
         move=0,
         rot=-1,
+        repair=0,
         img="rot_left.jpg",
         url=f"{CARDSURL}/rot_left.jpg",
     ),
@@ -47,6 +51,7 @@ CARDS = {
         descr="rotate right",
         move=0,
         rot=1,
+        repair=0,
         img="rot_right.jpg",
         url=f"{CARDSURL}/rot_right.jpg",
     ),
@@ -54,8 +59,17 @@ CARDS = {
         descr="rotate uturn",
         move=0,
         rot=2,
+        repair=0,
         img="rot_u.jpg",
         url=f"{CARDSURL}/rot_u.jpg",
+    ),
+    100: dict(
+        descr="repair",
+        move=0,
+        rot=0,
+        repair=1,
+        img="health.jpg",
+        url=f"{CARDSURL}/health.jpg",
     ),
 }
 
@@ -73,6 +87,15 @@ def gen_default_deck():
         c.append(2 * NRANKINGS + rank)
 
     return c
+
+
+def add_repair_cards(deck, percentage):
+    print(f"old deck: {deck}")
+    Nrepaircards = (percentage * 1e-2) * len(deck)
+    for i in range(int(Nrepaircards + 0.5)):
+        deck.append(100 * NRANKINGS)
+    print(f"new deck: {deck}")
+    return deck
 
 
 def card_id_rank(cardval):
@@ -108,6 +131,8 @@ class GameConfig(models.Model):
     player_start_x = ArrayField(models.PositiveSmallIntegerField(), default=list)
     player_start_y = ArrayField(models.PositiveSmallIntegerField(), default=list)
     player_start_directions = ArrayField(models.PositiveSmallIntegerField(), default=list)
+    player_decks = ArrayField(ArrayField(models.IntegerField(null=True, blank=True), null=True, blank=True))
+    player_next_card = ArrayField(models.IntegerField(), default=list)
     nmaxplayers = models.PositiveSmallIntegerField(default=1)
     mode = models.CharField(max_length=1, choices=GAME_MODES, default="c")
     # nplayers = models.PositiveSmallIntegerField(null=True, blank=True)
@@ -123,6 +148,7 @@ class GameConfig(models.Model):
     creator_userid = models.PositiveIntegerField()
     countdown_mode = models.CharField(max_length=1, choices=CHOICE_MODES, default="d")
     countdown = models.PositiveIntegerField(default=30)
+    percentage_repaircards = models.PositiveSmallIntegerField(default=5)
 
     game = models.OneToOneField("BaseGame", related_name="config", null=True, blank=True, on_delete=models.CASCADE)
 

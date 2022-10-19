@@ -13,7 +13,17 @@ import glob
 import random
 from piraterace.settings import MAPSDIR
 
-from pigame.models import BaseGame, ClassicGame, DEFAULT_DECK, FREE_HEALTH_OFFSET, GameConfig, CARDS, COLORS, card_id_rank
+from pigame.models import (
+    BaseGame,
+    ClassicGame,
+    DEFAULT_DECK,
+    FREE_HEALTH_OFFSET,
+    GameConfig,
+    CARDS,
+    COLORS,
+    card_id_rank,
+    add_repair_cards,
+)
 from piplayer.models import Account
 import datetime
 import pytz
@@ -34,11 +44,15 @@ COUNTDOWN_GRACE_TIME = 2
 
 @api_view(["GET", "POST"])
 @permission_classes((IsAuthenticated,))
+@transaction.atomic
 def player_cards(request, **kwargs):
     player = request.user.account
 
     if player.time_submitted:
         return JsonResponse(f"You already submitted your cards at {player.time_submitted}", status=404, safe=False)
+
+    gamecfg = player.game.config
+    pidx = gamecfg.player_ids.index(player.pk)
 
     if request.method == "POST":
         player_states, actionstack = play_stack(player.game)
@@ -47,19 +61,16 @@ def player_cards(request, **kwargs):
         if any([_ >= player_state.health for _ in [src, target]]):
             return JsonResponse(f"You are not allowed to switch cards because your boat is damaged.", status=404, safe=False)
 
-        # switch cards
-        # tmp = player.deck[player.next_card + src]
-        # player.deck[player.next_card + src] = player.deck[player.next_card + target]
-        # player.deck[player.next_card + target] = tmp
+        # move card into place
+        deck = gamecfg.player_decks[pidx]
+        next_card = gamecfg.player_next_card[pidx]
+        tmp = deck.pop(next_card + src)
+        deck.insert(next_card + target, tmp)
 
-        # or move card into place
-        tmp = player.deck.pop(player.next_card + src)
-        player.deck.insert(player.next_card + target, tmp)
-
-        player.save(update_fields=["deck"])
+        gamecfg.save(update_fields=["player_decks"])
 
     cards = []
-    for playerid, card in get_cards_on_hand(player, player.game.config.ncardsavail):
+    for playerid, card in get_cards_on_hand(gamecfg, pidx, gamecfg.ncardsavail):
         cardid, cardrank = card_id_rank(card)
         cards.append([cardid, cardrank, CARDS[cardid]])
 
@@ -104,9 +115,7 @@ def game(request, game_id, **kwargs):
 
             old_actionstack = actionstack
             cards_played = game.cards_played
-            cards_played_next = determine_next_cards_played(
-                list(player_accounts.values_list("pk", flat=True)), game.config.player_ids, game.config.ncardslots
-            )
+            cards_played_next = determine_next_cards_played(game.config)
             cards_played.extend(flatten_list_of_tuples(cards_played_next))
             game.cards_played = cards_played
             game.save(update_fields=["cards_played"])
@@ -152,16 +161,20 @@ def game(request, game_id, **kwargs):
         game.round += 1
         game.save(update_fields=["state", "timestamp", "round"])
 
+        for i in range(len(game.config.player_next_card)):
+            game.config.player_next_card[i] += game.config.ncardsavail
+            game.config.save(update_fields=["player_next_card"])
+
         for p in player_accounts:  # increment next card pointer
-            p.next_card += game.config.ncardsavail
             p.time_submitted = None
-            p.save()
+            p.save(update_fields=["time_submitted"])
 
     payload["actionstack"] = actionstack
     [print(i, a) for i, a in enumerate(payload["actionstack"])]
 
     payload["Ngameround"] = game.round
     payload["state"] = game.state
+    payload["player_decks"] = game.config.player_decks
     payload["players"] = {}
     for p in player_states.values():
         payload["players"][p.id] = dict(
@@ -236,6 +249,14 @@ def create_game(request, gameconfig_id, **kwargs):
     config.player_start_x = xpos[: len(players)]
     config.player_start_y = ypos[: len(players)]
     config.player_start_directions = dirs[: len(players)]
+
+    for i, pid in enumerate(config.player_ids):
+        deck = players.get(pk=pid).deck
+        deck = add_repair_cards(deck, config.percentage_repaircards)
+        random.shuffle(deck)
+        config.player_decks.append(deck)
+        config.player_next_card.append(0)
+
     game = ClassicGame()
     game.save()
 
@@ -244,9 +265,6 @@ def create_game(request, gameconfig_id, **kwargs):
 
     for n, p in enumerate(players):
         p.game = game
-        p.deck = DEFAULT_DECK
-        random.shuffle(p.deck)
-        p.next_card = 0
         p.time_submitted = None
         p.save()
 
@@ -366,6 +384,7 @@ def create_gameconfig(request, **kwargs):
         creator_userid=player.pk,
         mapfile=mapfile,
         player_ids=[],
+        player_decks=[],
         nmaxplayers=data["Nmaxplayers"],
     )
     gameconfig.add_player(player)
