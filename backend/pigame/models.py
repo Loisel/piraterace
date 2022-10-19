@@ -50,6 +50,13 @@ CARDS = {
         img="rot_right.jpg",
         url=f"{CARDSURL}/rot_right.jpg",
     ),
+    40: dict(
+        descr="rotate uturn",
+        move=0,
+        rot=2,
+        img="rot_u.jpg",
+        url=f"{CARDSURL}/rot_u.jpg",
+    ),
 }
 
 
@@ -60,6 +67,7 @@ def gen_default_deck():
         c.append(10 * NRANKINGS + rank)
         c.append(20 * NRANKINGS + rank)
         c.append(30 * NRANKINGS + rank)
+        c.append(40 * NRANKINGS + rank)
 
     for rank in range(10, NRANKINGS // 2, 10):
         c.append(2 * NRANKINGS + rank)
