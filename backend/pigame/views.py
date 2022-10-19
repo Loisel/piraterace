@@ -36,6 +36,8 @@ from pigame.game_logic import (
     load_inital_map,
     play_stack,
     verify_map,
+    BACKEND_USERID,
+    ROUNDEND_CARDID,
 )
 
 TIME_PER_ACTION = 1
@@ -117,6 +119,7 @@ def game(request, game_id, **kwargs):
             cards_played = game.cards_played
             cards_played_next = determine_next_cards_played(game.config)
             cards_played.extend(flatten_list_of_tuples(cards_played_next))
+            cards_played.extend((BACKEND_USERID, ROUNDEND_CARDID))
             game.cards_played = cards_played
             game.save(update_fields=["cards_played"])
             player_states, actionstack = play_stack(game)

@@ -7,6 +7,9 @@ from piraterace.settings import MAPSDIR
 from piplayer.models import Account
 from pigame.models import card_id_rank, CARDS, DEFAULT_DECK, DIRID2MOVE, DIRID2NAME, FREE_HEALTH_OFFSET
 
+BACKEND_USERID = -1
+ROUNDEND_CARDID = -1
+
 
 def argsort(seq):
     return sorted(range(len(seq)), key=seq.__getitem__)
@@ -132,23 +135,42 @@ def play_stack(game):
     # print(f"full cardstack {cardstack}")
 
     actionstack = []
-    # determine the rounds dynamically to avoid a race condition with respect to the
-    # round counter
-    Nrounds = int(len(cardstack) / (len(players) * game.config.ncardslots))
-    # we do not generate the actions for the *current* round `Nround`!
-    for rnd in range(Nrounds):
 
-        stack_start = rnd * game.config.ncardslots * len(players)
-        stack_end = (rnd + 1) * game.config.ncardslots * len(players)
-        this_round_cards = cardstack[stack_start:stack_end]
-        # print(f"this_round_cards: {this_round_cards}")
+    Nplayercardsplayedthisround = 0
+    for playerid, card in cardstack:
 
-        for icard in range(game.config.ncardslots):
-            for iplayer in range(len(players)):
-                playerid, card = this_round_cards[icard * len(players) + iplayer]
-                if players[playerid].health > 0:
-                    actions = get_actions_for_card(game, initial_map, players, players[playerid], card)
-                    actionstack.extend(actions)
+        if card == ROUNDEND_CARDID:
+            for player in players.values():
+                if (
+                    (player.xpos == checkpoints[player.next_checkpoint][0])
+                    and (player.ypos == checkpoints[player.next_checkpoint][1])
+                    and (player.health > 0)
+                ):
+                    if player.next_checkpoint == len(checkpoints):
+                        game.state = "end"
+                        game.save(update_fields=["state"])
+                        print("You win")
+                    player.next_checkpoint += 1
+
+            # respawns
+            respawn_actions = []
+            for p in players.values():
+                if p.health <= 0:
+                    p.health = game.config.ncardsavail
+                    p.xpos = p.start_loc_x
+                    p.ypos = p.start_loc_y
+                    respawn_actions.append(dict(key="respawn", target=p.id))
+            actionstack.append(respawn_actions)
+
+        # else if # powerdown
+
+        else:  # obviously a player card
+            Nplayercardsplayedthisround += 1
+            actions = get_actions_for_card(game, initial_map, players, players[playerid], card)
+            actionstack.extend(actions)
+
+        if Nplayercardsplayedthisround == len(players):  # all players played a card
+            Nplayercardsplayedthisround = 0
 
             # board moves
             board_moves_actions = board_moves(game, initial_map, players)
@@ -161,29 +183,7 @@ def play_stack(game):
                     cannon_actions.extend(shoot_cannon(game, initial_map, players, p))
             actionstack.append(cannon_actions)
 
-        for player in players.values():
-            if (
-                (player.xpos == checkpoints[player.next_checkpoint][0])
-                and (player.ypos == checkpoints[player.next_checkpoint][1])
-                and (player.health > 0)
-            ):
-                if player.next_checkpoint == len(checkpoints):
-                    game.state = "end"
-                    game.save(update_fields=["state"])
-                    print("You win")
-                player.next_checkpoint += 1
-
-        # respawns
-        respawn_actions = []
-        for p in players.values():
-            if p.health <= 0:
-                p.health = game.config.ncardsavail
-                p.xpos = p.start_loc_x
-                p.ypos = p.start_loc_y
-                respawn_actions.append(dict(key="respawn", target=p.id))
-        actionstack.append(respawn_actions)
-
-        # [print(i, a) for i, a in enumerate(actionstack)]
+    # [print(i, a) for i, a in enumerate(actionstack)]
 
     return players, actionstack
 
