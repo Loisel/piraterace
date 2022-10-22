@@ -1,20 +1,44 @@
 <ion-content class="background">
   <ion-grid>
     <ion-row>
-      <ion-col size-xs="9" size-sm="10" id="game_col">
-        <div id="piraterace-game" #game_div></div>
+      <ion-col size-xs="2" id="tool-column">
+        <ion-card #tools_menu>
+          <ion-card-content>
+            <ion-label>Round {{ Ngameround | async }}</ion-label>
+            <ion-button
+              id="power_down_button"
+              (click)="powerDown()"
+              [disabled]="poweredDown"
+            >
+              <ion-label id="power_down_label">Power Down</ion-label>
+            </ion-button>
+            <ion-progress-bar
+              id="time-progress-bar"
+              [value]="countDownTimer | async"
+              color="danger"
+            ></ion-progress-bar>
+
+            <ion-button
+              id="submit_cards_button"
+              (click)="submitCards()"
+              [disabled]="submittedCards"
+            >
+              <ion-icon name="send-outline"></ion-icon>
+              <ion-label id="submit_cards_label">Submit Cards</ion-label>
+            </ion-button>
+          </ion-card-content>
+        </ion-card>
+      </ion-col>
+      <ion-col size-xs="7" size-sm="8" id="game_col">
+        <div
+          id="piraterace-game"
+          #game_div
+          [style.width.px]="gameWidth"
+          [style.height.px]="gameHeight"
+        ></div>
       </ion-col>
       <ion-col size-xs="3" size-sm="2" id="card-column">
         <ion-card #cards_menu>
-          <ion-card-header>
-            <ion-card-subtitle>
-              <ion-label>Round {{ Ngameround | async }}</ion-label>
-              <button (click)="leaveGame()">
-                <ion-icon name="exit-outline" color="danger"></ion-icon>
-              </button>
-            </ion-card-subtitle>
-          </ion-card-header>
-
           <ion-card-content>
             <ion-reorder-group
               (ionItemReorder)="onCardsReorder($event)"
@@ -24,7 +48,7 @@
                 <ion-item-divider
                   *ngIf="i === gameinfo?.cardslots"
                 ></ion-item-divider>
-                <ion-item class="gamecard-item" [disabled]="healthCheck(i)">
+                <ion-item class="gamecard-item" [disabled]="cardCheck(i)">
                   <ion-img
                     class="gamecard-img"
                     [src]="CARDS_URL + card[2].url"
@@ -33,17 +57,6 @@
                 </ion-item>
               </ion-reorder>
             </ion-reorder-group>
-
-            <ion-progress-bar
-              id="time-progress-bar"
-              [value]="countDownTimer | async"
-              color="danger"
-            ></ion-progress-bar>
-
-            <ion-button id="submit_cards_button" (click)="submitCards()">
-              <ion-icon name="send-outline"></ion-icon>
-              <ion-label id="submit_cards_label">Submit Cards</ion-label>
-            </ion-button>
           </ion-card-content>
         </ion-card>
       </ion-col>

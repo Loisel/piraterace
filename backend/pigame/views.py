@@ -38,6 +38,7 @@ from pigame.game_logic import (
     verify_map,
     BACKEND_USERID,
     ROUNDEND_CARDID,
+    POWER_DOWN_CARDID,
 )
 
 TIME_PER_ACTION = 1
@@ -59,6 +60,9 @@ def player_cards(request, **kwargs):
     if request.method == "POST":
         player_states, actionstack = play_stack(player.game)
         player_state = player_states[player.pk]
+        if player_state.powered_down:
+            return JsonResponse(f"You are not allowed to switch cards because are in a power down.", status=404, safe=False)
+
         src, target = request.data
         if any([_ >= player_state.health for _ in [src, target]]):
             return JsonResponse(f"You are not allowed to switch cards because your boat is damaged.", status=404, safe=False)
@@ -111,7 +115,8 @@ def game(request, game_id, **kwargs):
     num_players_submitted = player_accounts.filter(time_submitted__isnull=False).count()
     print(f"Game state {game.state}, player submitted {num_players_submitted}")
     if game.state in ["countdown", "select"]:
-        if num_players_submitted == player_accounts.count():
+        num_players_powerdown = len([p for p in player_states.values() if p.powered_down])
+        if num_players_submitted >= player_accounts.count() - num_players_powerdown:
             game.state = "animate"
             game.save(update_fields=["state"])
 
@@ -191,6 +196,7 @@ def game(request, game_id, **kwargs):
             color=p.color,
             team=p.team,
             health=p.health,
+            powered_down=p.powered_down,
         )
 
     return JsonResponse(payload)
@@ -234,6 +240,30 @@ def submit_cards(request, **kwargs):
     account.save(update_fields=["time_submitted"])
 
     return JsonResponse(f"You submitted your cards at {now}", safe=False)
+
+
+@api_view(["GET"])
+@permission_classes((IsAuthenticated,))
+def power_down(request, **kwargs):
+    account = request.user.account
+    if not account.game:
+        return JsonResponse(f"You are currently not in a game", status=404, safe=False)
+
+    if account.time_submitted:
+        return JsonResponse(f"You already submitted your cards at {account.time_submitted}", status=404, safe=False)
+    if not account.game:
+        return JsonResponse(f"You are currently not in a game", status=404, safe=False)
+
+    for pid, card in zip(account.game.cards_played[-2::-2], account.game.cards_played[-1::-2]):
+        if card == ROUNDEND_CARDID:
+            break
+        elif (card == POWER_DOWN_CARDID) and (pid == account.pk):
+            return JsonResponse(f"You already requested a power down.", status=404, safe=False)
+
+    account.game.cards_played.extend((account.pk, POWER_DOWN_CARDID))
+    account.game.save(update_fields=["cards_played"])
+
+    return JsonResponse(f"Power down requested", safe=False)
 
 
 @api_view(["GET"])

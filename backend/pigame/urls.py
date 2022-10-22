@@ -17,4 +17,5 @@ urlpatterns = [
     path("view_gameconfig/<int:gameconfig_id>", views.view_gameconfig, name="view_gameconfig"),
     path("list_gameconfigs", views.list_gameconfigs),
     path("submit_cards", views.submit_cards),
+    path("power_down", views.power_down),
 ]

@@ -3,17 +3,11 @@ import { Injectable } from '@angular/core';
 
 @Injectable()
 export class NavService {
-  private showLeaveGame: BehaviorSubject<boolean>;
+  public showLeaveGame: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
+    false
+  );
 
-  constructor() {
-    this.showLeaveGame = new BehaviorSubject(false);
-  }
-
-  getShowLeaveGame() {
-    return this.showLeaveGame;
-  }
-
-  setShowLeaveGame(bool) {
-    this.showLeaveGame.next(bool);
+  setShowLeaveGame(state: boolean) {
+    this.showLeaveGame.next(state);
   }
 }

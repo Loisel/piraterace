@@ -9,6 +9,7 @@ from pigame.models import card_id_rank, CARDS, DEFAULT_DECK, DIRID2MOVE, DIRID2N
 
 BACKEND_USERID = -1
 ROUNDEND_CARDID = -1
+POWER_DOWN_CARDID = -2
 
 
 def argsort(seq):
@@ -127,6 +128,7 @@ def play_stack(game):
         p.color = color
         p.team = team
         p.health = game.config.ncardsavail + FREE_HEALTH_OFFSET
+        p.powered_down = False
         players[pid] = p
 
     cardstack = list(zip(stack[::2], stack[1::2]))
@@ -137,6 +139,7 @@ def play_stack(game):
     actionstack = []
 
     Nplayercardsplayedthisround = 0
+    powerdowncards = []
     for playerid, card in cardstack:
 
         if card == ROUNDEND_CARDID:
@@ -162,7 +165,15 @@ def play_stack(game):
                     respawn_actions.append(dict(key="respawn", target=p.id))
             actionstack.append(respawn_actions)
 
-        # else if # powerdown
+            for player in players.values():
+                player.powered_down = False
+            for pid in powerdowncards:
+                players[pid].health = game.config.ncardsavail + FREE_HEALTH_OFFSET
+                players[pid].powered_down = True
+            powerdowncards = []
+
+        elif card == POWER_DOWN_CARDID:
+            powerdowncards.append(playerid)
 
         else:  # obviously a player card
             Nplayercardsplayedthisround += 1
@@ -179,7 +190,7 @@ def play_stack(game):
             # cannons
             cannon_actions = []
             for p in players.values():
-                if p.health > 0:
+                if p.health > 0 and not p.powered_down:
                     cannon_actions.extend(shoot_cannon(game, initial_map, players, p))
             actionstack.append(cannon_actions)
 
@@ -260,6 +271,8 @@ def shoot_cannon(game, gmap, players, player):
 def get_actions_for_card(game, gmap, players, player, card):
 
     actions = []
+    if player.powered_down:
+        return actions
     cardid, cardrank = card_id_rank(card)
     rot = CARDS[cardid]["rot"]
     if rot != 0:
@@ -280,8 +293,10 @@ def get_actions_for_card(game, gmap, players, player, card):
             actions.append(move_player_y(game, gmap, players, player, yinc))
 
     if CARDS[cardid]["repair"] != 0:
-        player.health += CARDS[cardid]["repair"]
-        actions.append([dict(key="repair", target=player.id, val=CARDS[cardid]["repair"])])
+        maxhealth = game.config.ncardsavail + FREE_HEALTH_OFFSET
+        if player.health + CARDS[cardid]["repair"] <= maxhealth:
+            player.health += CARDS[cardid]["repair"]
+            actions.append([dict(key="repair", target=player.id, val=CARDS[cardid]["repair"])])
 
     return actions
 

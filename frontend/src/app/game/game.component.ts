@@ -1,5 +1,6 @@
 import { IonicModule } from '@ionic/angular';
 import { ToastController } from '@ionic/angular';
+import { Platform } from '@ionic/angular';
 import {
   Component,
   OnInit,
@@ -36,8 +37,14 @@ export class GameComponent {
   countDownValue: number = -1;
   countDownTimer: any;
 
+  gameWidth: number;
+  gameHeight: number;
+  submittedCards: boolean = false;
+  poweredDown: boolean = false;
+
   @ViewChild('game_div', { read: ElementRef }) game_div: ElementRef;
   @ViewChild('cards_menu', { read: ElementRef }) cards_menu: ElementRef;
+  @ViewChild('tools_menu', { read: ElementRef }) tools_menu: ElementRef;
 
   constructor(
     private httpService: HttpService,
@@ -64,12 +71,12 @@ export class GameComponent {
           width: this.gameinfo.map.width * this.gameinfo.map.tilewidth,
           height: this.gameinfo.map.height * this.gameinfo.map.tileheight,
           scale: {
-            min: {
-              height: this.game_div.nativeElement.offsetHeight,
-            },
-            max: {
-              height: this.game_div.nativeElement.offsetHeight,
-            },
+            // min: {
+            //   height: this.game_div.nativeElement.offsetHeight,
+            // },
+            // max: {
+            //   height: this.game_div.nativeElement.offsetHeight,
+            // },
             mode: Phaser.Scale.NONE,
             autoCenter: Phaser.Scale.CENTER_BOTH,
           },
@@ -85,6 +92,8 @@ export class GameComponent {
 
         this.cards_menu.nativeElement.style.borderColor =
           gameinfo['players'][gameinfo['me']]['color'];
+        this.tools_menu.nativeElement.style.borderColor =
+          gameinfo['players'][gameinfo['me']]['color'];
 
         this.navService.setShowLeaveGame(true);
       },
@@ -99,6 +108,11 @@ export class GameComponent {
       )
       .subscribe((val) => {
         this.countDownStop.next();
+        this.submittedCards = false;
+        if (this.gameinfo.players[this.gameinfo.me]['powered_down']) {
+          this.submittedCards = true;
+        }
+        this.poweredDown = false;
         this.getPlayerCards();
       });
   }
@@ -142,8 +156,11 @@ export class GameComponent {
     });
   }
 
-  healthCheck(i: number) {
+  cardCheck(i: number) {
     if (this.gameinfo) {
+      if (this.gameinfo.players[this.gameinfo.me]['powered_down']) {
+        return true;
+      }
       if (this.gameinfo['state'] === 'animate') {
         return true;
       }
@@ -174,13 +191,24 @@ export class GameComponent {
   submitCards() {
     this.httpService.submitCards().subscribe(
       (ret) => {
-        console.log('submitCards: ', ret);
         this.presentToast(ret, 'success');
-        // set cards inactive
+        this.submittedCards = true;
       },
       (error) => {
-        console.log('failed leave game: ', error);
         this.presentToast(error.error, 'danger');
+      }
+    );
+  }
+
+  powerDown() {
+    this.httpService.powerDown().subscribe(
+      (ret) => {
+        this.poweredDown = true;
+        this.presentToast(ret, 'success');
+      },
+      (error) => {
+        this.presentToast(error.error, 'danger');
+        this.poweredDown = true;
       }
     );
   }
@@ -758,8 +786,8 @@ class GameScene extends Phaser.Scene {
     var cam = this.cameras.main;
     var myBoat = this.boats[GI.me].getChildren()[0];
     // would be nice to have camera respect bounds, but tests with responsive mode not successful
-    //cam.setBounds(0, 0, GI.map.tilewidth * GI.map.width, GI.map.tileheight * GI.map.height);
     cam.centerOn(myBoat.x, myBoat.y);
+    //cam.setBounds(0, 0, GI.map.tilewidth * GI.map.width, GI.map.tileheight * GI.map.height);
 
     this.input.on('pointermove', function (p) {
       if (!p.isDown) return;

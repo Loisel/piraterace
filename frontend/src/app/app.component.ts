@@ -14,19 +14,14 @@ import { Router } from '@angular/router';
   styleUrls: ['app.component.scss'],
 })
 export class AppComponent {
-  showLeaveGame: BehaviorSubject<boolean>;
   constructor(
     private menu: MenuController,
     public authService: AuthService,
-    private navService: NavService,
+    public navService: NavService,
     private httpService: HttpService,
     private router: Router,
     private toastController: ToastController
   ) {}
-
-  ngOnInit() {
-    this.showLeaveGame = this.navService.getShowLeaveGame();
-  }
 
   leaveGame() {
     this.httpService.get_leaveGame().subscribe(
