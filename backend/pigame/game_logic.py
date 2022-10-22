@@ -271,8 +271,9 @@ def shoot_cannon(game, gmap, players, player):
 def get_actions_for_card(game, gmap, players, player, card):
 
     actions = []
-    if player.powered_down:
+    if player.powered_down or player.health <= 0:
         return actions
+
     cardid, cardrank = card_id_rank(card)
     rot = CARDS[cardid]["rot"]
     if rot != 0:
