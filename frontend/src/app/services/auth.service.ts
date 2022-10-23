@@ -10,6 +10,7 @@ import { tap, filter, take, shareReplay } from 'rxjs/operators';
 
 import { environment } from '../../environments/environment';
 import { StorageService } from './storage.service';
+import { UserDetail } from '../model/userdetail';
 
 @Injectable({
   providedIn: 'root',
@@ -18,7 +19,11 @@ export class AuthService {
   registerUserURL = `${environment.API_URL}/auth/users/`;
   loginUserURL = `${environment.API_URL}/auth/jwt/create`;
   refreshUserURL = `${environment.API_URL}/auth/jwt/refresh`;
-  userDetailURL = `${environment.API_URL}/auth/users/me`;
+  userDetailAuthURL = `${environment.API_URL}/auth/users/me`;
+  userDetailURL = `${environment.API_URL}/piplayer/userDetail`;
+
+  public userDetail: BehaviorSubject<UserDetail> =
+    new BehaviorSubject<UserDetail>(null);
 
   public isAuthenticated: BehaviorSubject<boolean> =
     new BehaviorSubject<boolean>(null);
@@ -34,6 +39,19 @@ export class AuthService {
     private storageService: StorageService
   ) {
     this.load_token();
+    setInterval(() => this.updateUserDetail(), 5 * 1000);
+  }
+
+  updateUserDetail() {
+    this.getUserDetail().subscribe(
+      (result) => {
+        console.log('updateUserDetail', result);
+        this.userDetail.next(result);
+      },
+      (error) => {
+        console.log('updateUserDetail failed', error);
+      }
+    );
   }
 
   registerUser(username, password, email) {
@@ -112,7 +130,9 @@ export class AuthService {
   }
 
   getUserDetail() {
-    return this.httpClient.get(this.userDetailURL).pipe(shareReplay());
+    return this.httpClient
+      .get<UserDetail>(this.userDetailURL)
+      .pipe(shareReplay());
   }
 
   getToken() {

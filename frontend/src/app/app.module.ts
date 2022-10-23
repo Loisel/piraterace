@@ -14,7 +14,6 @@ import { TokenInterceptor } from './services/token.interceptor';
 import { AuthService } from './services/auth.service';
 import { StorageService } from './services/storage.service';
 import { HttpService } from './services/http.service';
-import { NavService } from './services/nav.service';
 
 export const httpInterceptorProviders = [
   { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true },
@@ -35,7 +34,6 @@ export const httpInterceptorProviders = [
     StorageService,
     AuthService,
     HttpService,
-    NavService,
     httpInterceptorProviders,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
   ],

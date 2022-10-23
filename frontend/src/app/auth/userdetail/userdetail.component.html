@@ -1,7 +1,7 @@
 <ion-content class="content">
   <h1>Your User details</h1>
   <pre>
-  {{ userdetail | json }}
+  {{ authService.userDetail | async | json }}
 </pre
   >
 

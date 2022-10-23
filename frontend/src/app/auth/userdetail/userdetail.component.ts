@@ -7,8 +7,6 @@ import { AuthService } from '../../services/auth.service';
   styleUrls: ['./userdetail.component.scss'],
 })
 export class UserdetailComponent implements OnInit {
-  userdetail: any = null;
-
   constructor(public authService: AuthService) {
     this.load_userdetails();
   }
@@ -16,8 +14,6 @@ export class UserdetailComponent implements OnInit {
   ngOnInit() {}
 
   load_userdetails() {
-    this.authService.getUserDetail().subscribe((ret) => {
-      this.userdetail = ret;
-    });
+    this.authService.updateUserDetail();
   }
 }
