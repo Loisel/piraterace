@@ -10,7 +10,8 @@
               (click)="powerDown()"
               [disabled]="poweredDown"
             >
-              <ion-label id="power_down_label">Power Down</ion-label>
+              <ion-icon name="construct-outline"></ion-icon>
+              <ion-label id="power_down_label">Re-Rig</ion-label>
             </ion-button>
             <ion-progress-bar
               id="time-progress-bar"
@@ -24,8 +25,35 @@
               [disabled]="submittedCards"
             >
               <ion-icon name="send-outline"></ion-icon>
-              <ion-label id="submit_cards_label">Submit Cards</ion-label>
+              <ion-label id="submit_cards_label">Set Sails</ion-label>
             </ion-button>
+            <ion-item-divider></ion-item-divider>
+
+            <ion-buttons id="leave_game_button">
+              <ion-button color="primary">
+                <ion-icon name="log-out-outline"></ion-icon>
+                <ion-label id="leave_game_label">Leave Game</ion-label>
+              </ion-button>
+              <ion-popover trigger="leave_game_button" [dismissOnSelect]="true">
+                <ng-template>
+                  <ion-content>
+                    Are you sure you want to abandon your crew? You will not be
+                    able re-enter and the souls aboard will be condemned to sail
+                    on this forsaken boat for all eternity!
+                    <ion-list>
+                      <ion-button color="primary">
+                        <ion-icon name="send-outline"></ion-icon>
+                        Aye Aye! One more turn!
+                      </ion-button>
+                      <ion-button color="danger" (click)="leaveGame()">
+                        <ion-icon name="log-out-outline"></ion-icon>
+                        Yes, leave them!
+                      </ion-button>
+                    </ion-list>
+                  </ion-content>
+                </ng-template>
+              </ion-popover>
+            </ion-buttons>
           </ion-card-content>
         </ion-card>
       </ion-col>
