@@ -187,11 +187,14 @@ def play_stack(game):
             board_moves_actions = board_moves(game, initial_map, players)
             actionstack.append(board_moves_actions)
 
+            board_turret_actions = board_turrets(game, initial_map, players)
+            actionstack.append(board_turret_actions)
+
             # cannons
             cannon_actions = []
             for p in players.values():
                 if p.health > 0 and not p.powered_down:
-                    cannon_actions.extend(shoot_cannon(game, initial_map, players, p))
+                    cannon_actions.extend(shoot_player_cannon(game, initial_map, players, p))
             actionstack.append(cannon_actions)
 
     # [print(i, a) for i, a in enumerate(actionstack)]
@@ -202,6 +205,46 @@ def play_stack(game):
 def kill_player(p):
     p.health = 0
     p.xpos = p.ypos = -99
+
+
+def board_turrets(game, gmap, players):
+    actions = []
+
+    for x in range(gmap["width"]):
+        for y in range(gmap["height"]):
+            tile_prop = get_tile_properties(gmap, x, y)
+            if tile_prop["turret_x"] != 0:
+                #print(f"turret_x at ({x},{y}) {tile_prop['turret_x']}")
+                actions.extend(
+                    shoot_cannon_ball(
+                        gmap,
+                        xstart=x,
+                        ystart=y,
+                        xinc=tile_prop["turret_x"],
+                        yinc=0,
+                        players=players,
+                        cannon_damage=1,
+                        collide_terrain=True,
+                        collide_players=True,
+                    )
+                )
+            if tile_prop["turret_y"] != 0:
+                #print(f"turret_y at ({x},{y}) {tile_prop['turret_y']}")
+                actions.extend(
+                    shoot_cannon_ball(
+                        gmap,
+                        xstart=x,
+                        ystart=y,
+                        xinc=0,
+                        yinc=tile_prop["turret_y"],
+                        players=players,
+                        cannon_damage=1,
+                        collide_terrain=True,
+                        collide_players=True,
+                    )
+                )
+
+    return actions
 
 
 def board_moves(game, gmap, players):
@@ -234,37 +277,54 @@ def board_moves(game, gmap, players):
     return actions
 
 
-def shoot_cannon(game, gmap, players, player):
+def shoot_player_cannon(game, gmap, players, player):
+    return shoot_cannon_ball(
+        gmap,
+        xstart=player.xpos,
+        ystart=player.ypos,
+        xinc=DIRID2MOVE[player.direction][0],
+        yinc=DIRID2MOVE[player.direction][1],
+        players=players,
+        cannon_damage=1,
+        collide_terrain=True,
+        collide_players=True,
+    )
+
+
+def shoot_cannon_ball(gmap, xstart, ystart, xinc, yinc, players, cannon_damage=1, collide_terrain=True, collide_players=True):
     actions = []
-    CB_DAMAGE = 1
+    x, y = xstart, ystart
+    while (x >= 0 and x < gmap["width"]) and (y >= 0 and y < gmap["height"]):
+        x += xinc
+        y += yinc
 
-    xinc = DIRID2MOVE[player.direction][0]
-    yinc = DIRID2MOVE[player.direction][1]
-
-    cb_x = player.xpos
-    cb_y = player.ypos
-
-    while (cb_x >= 0 and cb_x < gmap["width"]) and (cb_y >= 0 and cb_y < gmap["height"]):
-        cb_x += xinc
-        cb_y += yinc
         # hit a player ?
         for other_player in players.values():
-            if (cb_x == other_player.xpos) and (cb_y == other_player.ypos):
-                other_player.health -= CB_DAMAGE
+            if (x == other_player.xpos) and (y == other_player.ypos):
+                other_player.health -= cannon_damage
                 actions.append(
-                    dict(key="shot", target=player.id, other_player=other_player.id, damage=CB_DAMAGE, collided_at=(cb_x, cb_y))
+                    dict(
+                        key="shot",
+                        src_x=xstart,
+                        src_y=ystart,
+                        other_player=other_player.id,
+                        damage=cannon_damage,
+                        collided_at=(x, y),
+                    )
                 )
                 if other_player.health <= 0:
                     actions.append(dict(key="death", target=other_player.id, type="cannon"))
                     kill_player(other_player)
 
-                return actions
+                if collide_players:
+                    return actions
         # hit a colliding map tile?
-        if get_tile_properties(gmap, cb_x, cb_y)["collision"]:
-            actions.append(dict(key="shot", target=player.id, collided_at=(cb_x, cb_y)))
-            return actions
+        if get_tile_properties(gmap, x, y)["collision"]:
+            actions.append(dict(key="shot", src_x=xstart, src_y=ystart, collided_at=(x, y)))
+            if collide_terrain:
+                return actions
 
-    actions.append(dict(key="shot", target=player.id, collided_at=(cb_x, cb_y)))
+    actions.append(dict(key="shot", src_x=xstart, src_y=ystart, collided_at=(x, y)))
     return actions
 
 
