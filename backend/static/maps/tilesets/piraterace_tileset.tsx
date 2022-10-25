@@ -137,10 +137,10 @@
   <properties>
    <property name="collision" type="bool" value="true"/>
    <property name="current_x" type="int" value="0"/>
-   <property name="current_y" type="int" value="-1"/>
+   <property name="current_y" type="int" value="0"/>
    <property name="damage" type="int" value="1"/>
    <property name="turret_x" type="int" value="0"/>
-   <property name="turret_y" type="int" value="0"/>
+   <property name="turret_y" type="int" value="-1"/>
    <property name="void" type="bool" value="false"/>
    <property name="vortex" type="int" value="0"/>
   </properties>
@@ -149,10 +149,10 @@
   <properties>
    <property name="collision" type="bool" value="true"/>
    <property name="current_x" type="int" value="0"/>
-   <property name="current_y" type="int" value="-1"/>
+   <property name="current_y" type="int" value="0"/>
    <property name="damage" type="int" value="1"/>
    <property name="turret_x" type="int" value="0"/>
-   <property name="turret_y" type="int" value="0"/>
+   <property name="turret_y" type="int" value="-1"/>
    <property name="void" type="bool" value="false"/>
    <property name="vortex" type="int" value="0"/>
   </properties>
@@ -161,10 +161,10 @@
   <properties>
    <property name="collision" type="bool" value="true"/>
    <property name="current_x" type="int" value="0"/>
-   <property name="current_y" type="int" value="-1"/>
+   <property name="current_y" type="int" value="0"/>
    <property name="damage" type="int" value="1"/>
    <property name="turret_x" type="int" value="0"/>
-   <property name="turret_y" type="int" value="0"/>
+   <property name="turret_y" type="int" value="-1"/>
    <property name="void" type="bool" value="false"/>
    <property name="vortex" type="int" value="0"/>
   </properties>
@@ -173,10 +173,10 @@
   <properties>
    <property name="collision" type="bool" value="true"/>
    <property name="current_x" type="int" value="0"/>
-   <property name="current_y" type="int" value="-1"/>
+   <property name="current_y" type="int" value="0"/>
    <property name="damage" type="int" value="1"/>
    <property name="turret_x" type="int" value="0"/>
-   <property name="turret_y" type="int" value="0"/>
+   <property name="turret_y" type="int" value="-1"/>
    <property name="void" type="bool" value="false"/>
    <property name="vortex" type="int" value="0"/>
   </properties>
@@ -185,10 +185,10 @@
   <properties>
    <property name="collision" type="bool" value="true"/>
    <property name="current_x" type="int" value="0"/>
-   <property name="current_y" type="int" value="-1"/>
+   <property name="current_y" type="int" value="0"/>
    <property name="damage" type="int" value="1"/>
    <property name="turret_x" type="int" value="0"/>
-   <property name="turret_y" type="int" value="0"/>
+   <property name="turret_y" type="int" value="-1"/>
    <property name="void" type="bool" value="false"/>
    <property name="vortex" type="int" value="0"/>
   </properties>
@@ -197,10 +197,10 @@
   <properties>
    <property name="collision" type="bool" value="true"/>
    <property name="current_x" type="int" value="0"/>
-   <property name="current_y" type="int" value="-1"/>
+   <property name="current_y" type="int" value="0"/>
    <property name="damage" type="int" value="1"/>
    <property name="turret_x" type="int" value="0"/>
-   <property name="turret_y" type="int" value="0"/>
+   <property name="turret_y" type="int" value="-1"/>
    <property name="void" type="bool" value="false"/>
    <property name="vortex" type="int" value="0"/>
   </properties>
@@ -209,10 +209,10 @@
   <properties>
    <property name="collision" type="bool" value="true"/>
    <property name="current_x" type="int" value="0"/>
-   <property name="current_y" type="int" value="-1"/>
+   <property name="current_y" type="int" value="0"/>
    <property name="damage" type="int" value="1"/>
    <property name="turret_x" type="int" value="0"/>
-   <property name="turret_y" type="int" value="0"/>
+   <property name="turret_y" type="int" value="-1"/>
    <property name="void" type="bool" value="false"/>
    <property name="vortex" type="int" value="0"/>
   </properties>
@@ -221,10 +221,10 @@
   <properties>
    <property name="collision" type="bool" value="true"/>
    <property name="current_x" type="int" value="0"/>
-   <property name="current_y" type="int" value="-1"/>
+   <property name="current_y" type="int" value="0"/>
    <property name="damage" type="int" value="1"/>
    <property name="turret_x" type="int" value="0"/>
-   <property name="turret_y" type="int" value="0"/>
+   <property name="turret_y" type="int" value="-1"/>
    <property name="void" type="bool" value="false"/>
    <property name="vortex" type="int" value="0"/>
   </properties>
@@ -1049,10 +1049,10 @@
   <properties>
    <property name="collision" type="bool" value="true"/>
    <property name="current_x" type="int" value="0"/>
-   <property name="current_y" type="int" value="-1"/>
+   <property name="current_y" type="int" value="0"/>
    <property name="damage" type="int" value="0"/>
    <property name="turret_x" type="int" value="0"/>
-   <property name="turret_y" type="int" value="0"/>
+   <property name="turret_y" type="int" value="-1"/>
    <property name="void" type="bool" value="false"/>
    <property name="vortex" type="int" value="0"/>
   </properties>
@@ -1061,10 +1061,10 @@
   <properties>
    <property name="collision" type="bool" value="true"/>
    <property name="current_x" type="int" value="0"/>
-   <property name="current_y" type="int" value="-1"/>
+   <property name="current_y" type="int" value="0"/>
    <property name="damage" type="int" value="0"/>
    <property name="turret_x" type="int" value="0"/>
-   <property name="turret_y" type="int" value="0"/>
+   <property name="turret_y" type="int" value="-1"/>
    <property name="void" type="bool" value="false"/>
    <property name="vortex" type="int" value="0"/>
   </properties>
@@ -1073,10 +1073,10 @@
   <properties>
    <property name="collision" type="bool" value="true"/>
    <property name="current_x" type="int" value="0"/>
-   <property name="current_y" type="int" value="-1"/>
+   <property name="current_y" type="int" value="0"/>
    <property name="damage" type="int" value="0"/>
    <property name="turret_x" type="int" value="0"/>
-   <property name="turret_y" type="int" value="0"/>
+   <property name="turret_y" type="int" value="-1"/>
    <property name="void" type="bool" value="false"/>
    <property name="vortex" type="int" value="0"/>
   </properties>
@@ -1085,10 +1085,10 @@
   <properties>
    <property name="collision" type="bool" value="true"/>
    <property name="current_x" type="int" value="0"/>
-   <property name="current_y" type="int" value="-1"/>
+   <property name="current_y" type="int" value="0"/>
    <property name="damage" type="int" value="0"/>
    <property name="turret_x" type="int" value="0"/>
-   <property name="turret_y" type="int" value="0"/>
+   <property name="turret_y" type="int" value="-1"/>
    <property name="void" type="bool" value="false"/>
    <property name="vortex" type="int" value="0"/>
   </properties>
@@ -1097,10 +1097,10 @@
   <properties>
    <property name="collision" type="bool" value="true"/>
    <property name="current_x" type="int" value="0"/>
-   <property name="current_y" type="int" value="-1"/>
+   <property name="current_y" type="int" value="0"/>
    <property name="damage" type="int" value="0"/>
    <property name="turret_x" type="int" value="0"/>
-   <property name="turret_y" type="int" value="0"/>
+   <property name="turret_y" type="int" value="-1"/>
    <property name="void" type="bool" value="false"/>
    <property name="vortex" type="int" value="0"/>
   </properties>
@@ -1109,10 +1109,10 @@
   <properties>
    <property name="collision" type="bool" value="true"/>
    <property name="current_x" type="int" value="0"/>
-   <property name="current_y" type="int" value="-1"/>
+   <property name="current_y" type="int" value="0"/>
    <property name="damage" type="int" value="0"/>
    <property name="turret_x" type="int" value="0"/>
-   <property name="turret_y" type="int" value="0"/>
+   <property name="turret_y" type="int" value="-1"/>
    <property name="void" type="bool" value="false"/>
    <property name="vortex" type="int" value="0"/>
   </properties>
@@ -1121,10 +1121,10 @@
   <properties>
    <property name="collision" type="bool" value="true"/>
    <property name="current_x" type="int" value="0"/>
-   <property name="current_y" type="int" value="-1"/>
+   <property name="current_y" type="int" value="0"/>
    <property name="damage" type="int" value="0"/>
    <property name="turret_x" type="int" value="0"/>
-   <property name="turret_y" type="int" value="0"/>
+   <property name="turret_y" type="int" value="-1"/>
    <property name="void" type="bool" value="false"/>
    <property name="vortex" type="int" value="0"/>
   </properties>
@@ -1133,10 +1133,10 @@
   <properties>
    <property name="collision" type="bool" value="true"/>
    <property name="current_x" type="int" value="0"/>
-   <property name="current_y" type="int" value="-1"/>
+   <property name="current_y" type="int" value="0"/>
    <property name="damage" type="int" value="0"/>
    <property name="turret_x" type="int" value="0"/>
-   <property name="turret_y" type="int" value="0"/>
+   <property name="turret_y" type="int" value="-1"/>
    <property name="void" type="bool" value="false"/>
    <property name="vortex" type="int" value="0"/>
   </properties>

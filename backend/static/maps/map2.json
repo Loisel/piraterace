@@ -682,7 +682,7 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":-1
+                         "value":0
                         }, 
                         {
                          "name":"damage",
@@ -697,7 +697,7 @@
                         {
                          "name":"turret_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"void",
@@ -726,7 +726,7 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":-1
+                         "value":0
                         }, 
                         {
                          "name":"damage",
@@ -741,7 +741,7 @@
                         {
                          "name":"turret_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"void",
@@ -770,7 +770,7 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":-1
+                         "value":0
                         }, 
                         {
                          "name":"damage",
@@ -785,7 +785,7 @@
                         {
                          "name":"turret_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"void",
@@ -814,7 +814,7 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":-1
+                         "value":0
                         }, 
                         {
                          "name":"damage",
@@ -829,7 +829,7 @@
                         {
                          "name":"turret_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"void",
@@ -858,7 +858,7 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":-1
+                         "value":0
                         }, 
                         {
                          "name":"damage",
@@ -873,7 +873,7 @@
                         {
                          "name":"turret_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"void",
@@ -902,7 +902,7 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":-1
+                         "value":0
                         }, 
                         {
                          "name":"damage",
@@ -917,7 +917,7 @@
                         {
                          "name":"turret_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"void",
@@ -946,7 +946,7 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":-1
+                         "value":0
                         }, 
                         {
                          "name":"damage",
@@ -961,7 +961,7 @@
                         {
                          "name":"turret_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"void",
@@ -990,7 +990,7 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":-1
+                         "value":0
                         }, 
                         {
                          "name":"damage",
@@ -1005,7 +1005,7 @@
                         {
                          "name":"turret_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"void",
@@ -4029,7 +4029,7 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":-1
+                         "value":0
                         }, 
                         {
                          "name":"damage",
@@ -4044,7 +4044,7 @@
                         {
                          "name":"turret_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"void",
@@ -4073,7 +4073,7 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":-1
+                         "value":0
                         }, 
                         {
                          "name":"damage",
@@ -4088,7 +4088,7 @@
                         {
                          "name":"turret_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"void",
@@ -4117,7 +4117,7 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":-1
+                         "value":0
                         }, 
                         {
                          "name":"damage",
@@ -4132,7 +4132,7 @@
                         {
                          "name":"turret_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"void",
@@ -4161,7 +4161,7 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":-1
+                         "value":0
                         }, 
                         {
                          "name":"damage",
@@ -4176,7 +4176,7 @@
                         {
                          "name":"turret_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"void",
@@ -4205,7 +4205,7 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":-1
+                         "value":0
                         }, 
                         {
                          "name":"damage",
@@ -4220,7 +4220,7 @@
                         {
                          "name":"turret_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"void",
@@ -4249,7 +4249,7 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":-1
+                         "value":0
                         }, 
                         {
                          "name":"damage",
@@ -4264,7 +4264,7 @@
                         {
                          "name":"turret_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"void",
@@ -4293,7 +4293,7 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":-1
+                         "value":0
                         }, 
                         {
                          "name":"damage",
@@ -4308,7 +4308,7 @@
                         {
                          "name":"turret_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"void",
@@ -4337,7 +4337,7 @@
                         {
                          "name":"current_y",
                          "type":"int",
-                         "value":-1
+                         "value":0
                         }, 
                         {
                          "name":"damage",
@@ -4352,7 +4352,7 @@
                         {
                          "name":"turret_y",
                          "type":"int",
-                         "value":0
+                         "value":-1
                         }, 
                         {
                          "name":"void",
