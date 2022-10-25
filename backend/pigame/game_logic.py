@@ -214,7 +214,7 @@ def board_turrets(game, gmap, players):
         for y in range(gmap["height"]):
             tile_prop = get_tile_properties(gmap, x, y)
             if tile_prop["turret_x"] != 0:
-                #print(f"turret_x at ({x},{y}) {tile_prop['turret_x']}")
+                # print(f"turret_x at ({x},{y}) {tile_prop['turret_x']}")
                 actions.extend(
                     shoot_cannon_ball(
                         gmap,
@@ -229,7 +229,7 @@ def board_turrets(game, gmap, players):
                     )
                 )
             if tile_prop["turret_y"] != 0:
-                #print(f"turret_y at ({x},{y}) {tile_prop['turret_y']}")
+                # print(f"turret_y at ({x},{y}) {tile_prop['turret_y']}")
                 actions.extend(
                     shoot_cannon_ball(
                         gmap,

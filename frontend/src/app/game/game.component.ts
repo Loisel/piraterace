@@ -763,7 +763,7 @@ class GameScene extends Phaser.Scene {
         'boat'
       );
       //set the width of the sprite
-      boat.displayHeight = GI.map.tileheight * 1.5;
+      boat.displayHeight = GI.map.tileheight * 1.1;
       //scale evenly
       boat.scaleX = boat.scaleY;
       boat.angle = player['start_direction'] * 90;
