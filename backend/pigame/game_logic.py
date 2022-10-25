@@ -423,7 +423,7 @@ def verify_map(mapobj):
     if len(tilesets) != 1:
         err_msg.append(f"{len(tilesets)} tilesets found. Only supporting 1 tileset.")
 
-    req_props = set(["collision", "current_x", "current_y", "damage", "void", "vortex"])
+    req_props = set(["collision", "current_x", "current_y", "damage", "void", "vortex", "turret_x", "turret_y"])
     for ts in tilesets:
         for tile in ts["tiles"]:
             props = set([prop["name"] for prop in tile["properties"]])
