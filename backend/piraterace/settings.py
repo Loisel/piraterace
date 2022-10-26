@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ["localhost", "dev.piraterace.com"]
 CSRF_TRUSTED_ORIGINS = ["http://localhost", "http://dev.piraterace.com", "https://dev.piraterace.com"]
 
 CORS_ALLOWED_ORIGINS = [
+    "http://localhost",
     "http://localhost:8100",
     "http://localhost:8200",
     "https://dev.piraterace.com:443",
