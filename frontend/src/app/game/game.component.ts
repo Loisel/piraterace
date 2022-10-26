@@ -44,6 +44,7 @@ export class GameComponent {
   @ViewChild('game_div', { read: ElementRef }) game_div: ElementRef;
   @ViewChild('cards_menu', { read: ElementRef }) cards_menu: ElementRef;
   @ViewChild('tools_menu', { read: ElementRef }) tools_menu: ElementRef;
+  @ViewChild('game_canvas', { read: ElementRef }) game_canvas: ElementRef;
 
   constructor(
     private httpService: HttpService,
@@ -63,18 +64,15 @@ export class GameComponent {
         );
         this.gameinfo = gameinfo;
         this.Ngameround.next(gameinfo['Ngameround']);
+
         this.config = {
           parent: 'piraterace-game',
-          type: Phaser.AUTO,
+          type: Phaser.CANVAS,
+          transparent: true,
+          canvas: this.game_canvas.nativeElement,
           width: this.gameinfo.map.width * this.gameinfo.map.tilewidth,
           height: this.gameinfo.map.height * this.gameinfo.map.tileheight,
           scale: {
-            // min: {
-            //   height: this.game_div.nativeElement.offsetHeight,
-            // },
-            // max: {
-            //   height: this.game_div.nativeElement.offsetHeight,
-            // },
             mode: Phaser.Scale.NONE,
             autoCenter: Phaser.Scale.CENTER_BOTH,
           },
@@ -91,6 +89,8 @@ export class GameComponent {
         this.cards_menu.nativeElement.style.borderColor =
           gameinfo['players'][gameinfo['me']]['color'];
         this.tools_menu.nativeElement.style.borderColor =
+          gameinfo['players'][gameinfo['me']]['color'];
+        this.game_canvas.nativeElement.style.borderColor =
           gameinfo['players'][gameinfo['me']]['color'];
       },
       (err) => console.error(err),

@@ -58,12 +58,9 @@
         </ion-card>
       </ion-col>
       <ion-col size-xs="7" size-sm="8" id="game_col">
-        <div
-          id="piraterace-game"
-          #game_div
-          [style.width.px]="gameWidth"
-          [style.height.px]="gameHeight"
-        ></div>
+        <div id="piraterace-game" #game_div>
+          <canvas id="game-canvas" #game_canvas></canvas>
+        </div>
       </ion-col>
       <ion-col size-xs="3" size-sm="2" id="card-column">
         <ion-card #cards_menu>

@@ -10,9 +10,9 @@ canvas {
   max-height: calc(100vh - 65px) !important;
 }
 
-#piraterace-game {
-  max-height: calc(100vh - 65px);
-  max-width: 100%;
+#game-canvas {
+  border-style: solid;
+  border-width: 0.5em;
 }
 
 ion-card-header {
