@@ -87,7 +87,11 @@ def player_cards(request, **kwargs):
 @permission_classes((IsAuthenticated,))
 @transaction.atomic
 def game(request, game_id, **kwargs):
-    game = get_object_or_404(BaseGame, pk=game_id)
+    try:
+        game = BaseGame.objects.filter(pk=game_id).select_for_update()[0]
+    except IndexError:
+        raise Http404("No MyModel matches the given query.")
+
     player = request.user.account
 
     player_accounts = game.account_set.all()
