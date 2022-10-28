@@ -8,7 +8,7 @@
             <ion-button
               id="power_down_button"
               (click)="powerDown()"
-              [disabled]="poweredDown"
+              [disabled]="poweredDown || submittedCards"
             >
               <ion-icon name="construct-outline"></ion-icon>
               <ion-label id="power_down_label">Re-Rig</ion-label>
