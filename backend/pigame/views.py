@@ -7,6 +7,7 @@ from django.core import serializers
 from django.db import transaction
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+from django.core.cache import cache
 
 import os
 import glob
@@ -44,6 +45,19 @@ from pigame.game_logic import (
 TIME_PER_ACTION = 1
 COUNTDOWN_GRACE_TIME = 2
 
+def get_play_stack(game, invalidate_cache=False):
+    if invalidate_cache:
+        #print(f"Invalidate cached stack for {game.pk}")
+        cache.set(f'play_stack{game.pk}', None)
+
+    ret = cache.get(f'play_stack{game.pk}')
+    if ret is None:
+        ret = play_stack(game)
+        cache.set(f'play_stack{game.pk}', ret, 30)
+        #print(f"Update cache with stack for {game.pk}")
+    else:
+        #print(f"Returning cached stack for {game.pk}")
+    return ret
 
 @api_view(["GET", "POST"])
 @permission_classes((IsAuthenticated,))
@@ -58,7 +72,7 @@ def player_cards(request, **kwargs):
     pidx = gamecfg.player_ids.index(player.pk)
 
     if request.method == "POST":
-        player_states, actionstack = play_stack(player.game)
+        player_states, actionstack = get_play_stack(player.game)
         player_state = player_states[player.pk]
         if player_state.powered_down:
             return JsonResponse(f"You are not allowed to switch cards because are in a power down.", status=404, safe=False)
@@ -113,7 +127,7 @@ def game(request, game_id, **kwargs):
         initial_health=game.config.ncardsavail + FREE_HEALTH_OFFSET,
     )
 
-    player_states, actionstack = play_stack(game)
+    player_states, actionstack = get_play_stack(game)
     actionstack = prune_actionstack(actionstack)
 
     num_players_submitted = player_accounts.filter(time_submitted__isnull=False).count()
@@ -131,7 +145,7 @@ def game(request, game_id, **kwargs):
             cards_played.extend((BACKEND_USERID, ROUNDEND_CARDID))
             game.cards_played = cards_played
             game.save(update_fields=["cards_played"])
-            player_states, actionstack = play_stack(game)
+            player_states, actionstack = get_play_stack(game, invalidate_cache=True)
             actionstack = prune_actionstack(actionstack)
 
             animation_time = (len(actionstack) - len(old_actionstack)) * TIME_PER_ACTION

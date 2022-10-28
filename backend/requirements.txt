@@ -7,6 +7,9 @@ djangorestframework
 djangorestframework
 djangorestframework_simplejwt
 djoser
-psycopg2-binary
-Werkzeug
 matplotlib
+psycopg2-binary
+uwsgi
+Werkzeug
+redis
+hiredis

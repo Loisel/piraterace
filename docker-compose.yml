@@ -38,6 +38,14 @@ services:
     depends_on:
       - backend
     volumes:
+      - ./nginx/uwsgi_params:/etc/nginx/uwsgi_params
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
       - ./volumes/static_volume:/static_volume
       - ./volumes/media_volume:/media_volume
+
+  redis:
+    image: 'bitnami/redis:latest'
+    expose:
+      - "6379"
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
