@@ -671,7 +671,7 @@ class GameScene extends Phaser.Scene {
       cam.scrollY -= (p.y - p.prevPosition.y) / cam.zoom;
     });
 
-    this.play_actionstack(100); // play the first action stack really quickly in case user does a reload
+    this.play_actionstack(20); // play the first action stack really quickly in case user does a reload
 
     this.updateTimer = this.time.addEvent({
       callback: this.updateEvent,
