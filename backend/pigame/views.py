@@ -117,7 +117,7 @@ def game(request, game_id, **kwargs):
     actionstack = prune_actionstack(actionstack)
 
     num_players_submitted = player_accounts.filter(time_submitted__isnull=False).count()
-    print(f"Game state {game.state}, player submitted {num_players_submitted}")
+    #print(f"Game state {game.state}, player submitted {num_players_submitted}")
     if game.state in ["countdown", "select"]:
         num_players_powerdown = len([p for p in player_states.values() if p.powered_down])
         if num_players_submitted >= player_accounts.count() - num_players_powerdown:
@@ -135,7 +135,7 @@ def game(request, game_id, **kwargs):
             actionstack = prune_actionstack(actionstack)
 
             animation_time = (len(actionstack) - len(old_actionstack)) * TIME_PER_ACTION
-            print(f"Animation time is {animation_time}, old stacksize {len(old_actionstack)}, new stacksize {len(actionstack)}")
+            #print(f"Animation time is {animation_time}, old stacksize {len(old_actionstack)}, new stacksize {len(actionstack)}")
             game.timestamp = datetime.datetime.now(pytz.utc) + datetime.timedelta(seconds=animation_time)
             game.save(update_fields=["timestamp"])
 
@@ -182,7 +182,7 @@ def game(request, game_id, **kwargs):
             p.save(update_fields=["time_submitted"])
 
     payload["actionstack"] = actionstack
-    [print(i, a) for i, a in enumerate(payload["actionstack"])]
+    #[print(i, a) for i, a in enumerate(payload["actionstack"])]
 
     payload["Ngameround"] = game.round
     payload["state"] = game.state

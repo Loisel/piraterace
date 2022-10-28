@@ -409,7 +409,7 @@ def move_player_x(game, gmap, players, player, inc, push_players=True):
 def move_player_y(game, gmap, players, player, inc, push_players=True):
     actions = []
     tile_prop = get_tile_properties(gmap, player.xpos, player.ypos + inc)
-    print("tp", tile_prop)
+    #print("tp", tile_prop)
     if tile_prop["collision"]:
         damage = tile_prop["damage"]
         player.health -= damage
