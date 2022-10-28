@@ -162,7 +162,7 @@ def play_stack(game):
                     p.health = game.config.ncardsavail
                     p.xpos = p.start_loc_x
                     p.ypos = p.start_loc_y
-                    respawn_actions.append(dict(key="respawn", target=p.id))
+                    respawn_actions.append(dict(key="respawn", target=p.id, health=p.health))
             actionstack.append(respawn_actions)
 
             for player in players.values():
@@ -255,7 +255,7 @@ def board_moves(game, gmap, players):
             break
         tile_prop = get_tile_properties(gmap, p.xpos, p.ypos)
         if tile_prop["vortex"] != 0:
-            actions.append(dict(key="rotate", target=pid, val=tile_prop["vortex"]))
+            actions.append({"key": "rotate", "target": pid, "from": p.direction, "to": (p.direction + tile_prop["vortex"]) % 4})
             p.direction = (p.direction + tile_prop["vortex"]) % 4
 
     player_moved = {pid: False for pid in players.keys()}
@@ -337,7 +337,7 @@ def get_actions_for_card(game, gmap, players, player, card):
     cardid, cardrank = card_id_rank(card)
     rot = CARDS[cardid]["rot"]
     if rot != 0:
-        actions.append([dict(key="rotate", target=player.id, val=rot)])
+        actions.append([{"key": "rotate", "target": player.id, "from": player.direction, "to": (player.direction + rot) % 4}])
         player.direction = (player.direction + rot) % 4
 
     for mov in range(abs(CARDS[cardid]["move"])):
@@ -357,7 +357,7 @@ def get_actions_for_card(game, gmap, players, player, card):
         maxhealth = game.config.ncardsavail + FREE_HEALTH_OFFSET
         if player.health + CARDS[cardid]["repair"] <= maxhealth:
             player.health += CARDS[cardid]["repair"]
-            actions.append([dict(key="repair", target=player.id, val=CARDS[cardid]["repair"])])
+            actions.append([dict(key="repair", target=player.id, val=CARDS[cardid]["repair"], posx=player.xpos, posy=player.ypos)])
 
     return actions
 
@@ -376,14 +376,14 @@ def move_player_x(game, gmap, players, player, inc, push_players=True):
 
     if tile_prop["void"]:
         player.health = 0
-        actions.append(dict(key="move_x", target=player.id, val=inc))
+        actions.append({"key": "move_x", "target": player.id, "from": player.xpos, "to": player.xpos + inc})
         actions.append(dict(key="death", target=player.id, type="void"))
         kill_player(player)
         return actions
 
     if (player.xpos + inc < 0) or (player.xpos + inc >= gmap["width"]):
         player.health = 0
-        actions.append(dict(key="move_x", target=player.id, val=inc))
+        actions.append({"key": "move_x", "target": player.id, "from": player.xpos, "to": player.xpos + inc})
         actions.append(dict(key="death", target=player.id, type="void"))
         kill_player(player)
         return actions
@@ -397,8 +397,8 @@ def move_player_x(game, gmap, players, player, inc, push_players=True):
                 break
             else:
                 return actions
+    actions.append({"key": "move_x", "target": player.id, "from": player.xpos, "to": player.xpos + inc})
     player.xpos += inc
-    actions.append(dict(key="move_x", target=player.id, val=inc))
     return actions
 
 
@@ -417,14 +417,14 @@ def move_player_y(game, gmap, players, player, inc, push_players=True):
 
     if tile_prop["void"]:
         player.health = 0
-        actions.append(dict(key="move_y", target=player.id, val=inc))
+        actions.append({"key": "move_y", "target": player.id, "from": player.ypos, "to": player.ypos + inc})
         actions.append(dict(key="death", target=player.id, type="void"))
         kill_player(player)
         return actions
 
     if (player.ypos + inc < 0) or (player.ypos + inc >= gmap["height"]):
         player.health = 0
-        actions.append(dict(key="move_y", target=player.id, val=inc))
+        actions.append({"key": "move_y", "target": player.id, "from": player.ypos, "to": player.ypos + inc})
         actions.append(dict(key="death", target=player.id, type="void"))
         kill_player(player)
         return actions
@@ -438,8 +438,8 @@ def move_player_y(game, gmap, players, player, inc, push_players=True):
                 break
             else:
                 return actions
+    actions.append({"key": "move_y", "target": player.id, "from": player.ypos, "to": player.ypos + inc})
     player.ypos += inc
-    actions.append(dict(key="move_y", target=player.id, val=inc))
     return actions
 
 
