@@ -140,9 +140,11 @@ def play_stack(game):
 
     Nplayercardsplayedthisround = 0
     powerdowncards = []
+    activeCardSlot = 0  # denotes current card slot that is to be played by each player, i.e. 0 if players are to play first card, 1 if players are playing second card
     for playerid, card in cardstack:
 
         if card == ROUNDEND_CARDID:
+            activeCardSlot = 0
             for player in players.values():
                 if (
                     (player.xpos == checkpoints[player.next_checkpoint][0])
@@ -176,11 +178,13 @@ def play_stack(game):
             powerdowncards.append(playerid)
 
         else:  # obviously a player card
+            actionstack.append([dict(key="card_is_played", target=p.id, cardslot=activeCardSlot)])
             Nplayercardsplayedthisround += 1
             actions = get_actions_for_card(game, initial_map, players, players[playerid], card)
             actionstack.extend(actions)
 
         if Nplayercardsplayedthisround == len(players):  # all players played a card
+            activeCardSlot += 1
             Nplayercardsplayedthisround = 0
 
             # board moves

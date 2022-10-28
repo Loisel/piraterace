@@ -73,7 +73,11 @@
                 <ion-item-divider
                   *ngIf="i === gameinfo?.cardslots"
                 ></ion-item-divider>
-                <ion-item class="gamecard-item" [disabled]="cardCheck(i)">
+                <ion-item
+                  class="gamecard-item"
+                  [class.active-card]="highlightCard(i)"
+                  [disabled]="cardCheck(i)"
+                >
                   <ion-img
                     class="gamecard-img"
                     [src]="CARDS_URL + card[2].url"

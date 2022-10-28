@@ -36,6 +36,8 @@ export class GameComponent {
   countDownValue: number = -1;
   countDownTimer: any;
 
+  highlightedCardSlot: number = -1;
+
   gameWidth: number;
   gameHeight: number;
   submittedCards: boolean = false;
@@ -165,6 +167,10 @@ export class GameComponent {
     }
   }
 
+  highlightCard(i: number) {
+    return i === this.highlightedCardSlot;
+  }
+
   onCardsReorder(event) {
     console.log(event.detail);
     this.httpService
@@ -264,7 +270,6 @@ class GameScene extends Phaser.Scene {
     );
   }
 
-
   check_player_state() {
     let valid = true;
     let GI = this.component.gameinfo;
@@ -319,7 +324,6 @@ class GameScene extends Phaser.Scene {
     });
   }
 
-
   flush_down_boat(boat_id: number, time: number) {
     let GI = this.component.gameinfo;
     let GIplayer = this.component.gameinfo.players[boat_id];
@@ -341,7 +345,6 @@ class GameScene extends Phaser.Scene {
       });
     }
   }
-
 
   getTileX(tileidx: number) {
     return this.component.gameinfo.map.tilewidth * (tileidx + 0.5);
@@ -371,6 +374,7 @@ class GameScene extends Phaser.Scene {
       onComplete: function () {
         this.drawCheckpoints();
         this.check_player_state();
+        this.component.highlightedCardSlot = -1;
       },
       callbackScope: this,
     });
@@ -552,6 +556,19 @@ class GameScene extends Phaser.Scene {
             },
             callbackScope: this,
           });
+        } else if (action.key === 'card_is_played') {
+          if (action.target === this.component.gameinfo.me) {
+            console.log('my card is playing', action.target, action.cardslot);
+            let boatGroup = this.boats[action.target].getChildren();
+            timeline.add({
+              targets: boatGroup,
+              offset: offset,
+              onComplete: function () {
+                this.component.highlightedCardSlot = action.cardslot;
+              },
+              callbackScope: this,
+            });
+          }
         } else {
           console.log('Error, key not found.');
         }
