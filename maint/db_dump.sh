@@ -6,6 +6,7 @@ PROJECT_ROOT="$(readlink -f $SCRIPTDIR/../)"
 cd $PROJECT_ROOT
 
 DB_VOLUME=$PROJECT_ROOT/volumes/db_backup/
+mkdir -p $DB_VOLUME
 
 FILE=$(date -u +"%Y-%m-%dT%H.%M.%SZ").db
 
