@@ -9,8 +9,10 @@ FILE=${1:-latest.db}
 
 echo "Restoring from $FILE"
 
+docker-compose up -d db
 docker-compose exec db bash -l -c " \
 echo Restoring $FILE; \
 ls -al /backup/$FILE; \
-psql -U postgres < /backup/$FILE
+while [ ! pg_isready ]; do echo 'waiting for database'; done
+psql -U postgres < /backup/$FILE \
 "
