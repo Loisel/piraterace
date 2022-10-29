@@ -46,18 +46,13 @@ TIME_PER_ACTION = 1
 COUNTDOWN_GRACE_TIME = 2
 
 def get_play_stack(game, invalidate_cache=False):
-    if invalidate_cache:
-        #print(f"Invalidate cached stack for {game.pk}")
-        cache.set(f'play_stack{game.pk}', None)
+    if not invalidate_cache:
+        ret = cache.get(f'play_stack{game.pk}')
+        if ret is not None:
+            return ret
 
-    ret = cache.get(f'play_stack{game.pk}')
-    if ret is None:
-        ret = play_stack(game)
-        cache.set(f'play_stack{game.pk}', ret, 30)
-        #print(f"Update cache with stack for {game.pk}")
-    else:
-        pass
-        #print(f"Returning cached stack for {game.pk}")
+    ret = play_stack(game)
+    cache.set(f'play_stack{game.pk}', ret, 30)
 
     return ret
 
