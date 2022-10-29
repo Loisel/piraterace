@@ -42,19 +42,21 @@ from pigame.game_logic import (
     POWER_DOWN_CARDID,
 )
 
-TIME_PER_ACTION = 1
+TIME_PER_ACTION = 0.6
 COUNTDOWN_GRACE_TIME = 2
+
 
 def get_play_stack(game, invalidate_cache=False):
     if not invalidate_cache:
-        ret = cache.get(f'play_stack{game.pk}')
+        ret = cache.get(f"play_stack{game.pk}")
         if ret is not None:
             return ret
 
     ret = play_stack(game)
-    cache.set(f'play_stack{game.pk}', ret, 30)
+    cache.set(f"play_stack{game.pk}", ret, 30)
 
     return ret
+
 
 @api_view(["GET", "POST"])
 @permission_classes((IsAuthenticated,))
@@ -140,7 +142,7 @@ def game(request, game_id, **kwargs):
     actionstack = prune_actionstack(actionstack)
 
     num_players_submitted = player_accounts.filter(time_submitted__isnull=False).count()
-    #print(f"Game state {game.state}, player submitted {num_players_submitted}")
+    # print(f"Game state {game.state}, player submitted {num_players_submitted}")
     if game.state in ["countdown", "select"]:
         num_players_powerdown = len([p for p in player_states.values() if p.powered_down])
         if num_players_submitted >= player_accounts.count() - num_players_powerdown:
@@ -158,7 +160,7 @@ def game(request, game_id, **kwargs):
             actionstack = prune_actionstack(actionstack)
 
             animation_time = (len(actionstack) - len(old_actionstack)) * TIME_PER_ACTION
-            #print(f"Animation time is {animation_time}, old stacksize {len(old_actionstack)}, new stacksize {len(actionstack)}")
+            # print(f"Animation time is {animation_time}, old stacksize {len(old_actionstack)}, new stacksize {len(actionstack)}")
             game.timestamp = datetime.datetime.now(pytz.utc) + datetime.timedelta(seconds=animation_time)
             game.save(update_fields=["timestamp"])
 

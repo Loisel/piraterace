@@ -743,7 +743,7 @@ class GameScene extends Phaser.Scene {
       this.component.gameinfo = gameinfo;
       this.component.Ngameround.next(gameinfo['Ngameround']);
 
-      this.play_actionstack(gameinfo['time_per_action'] * 1000);
+      this.play_actionstack(gameinfo['time_per_action'] * 900);
 
       if (gameinfo.countdown) {
         if (this.component.countDownValue < 0) {
