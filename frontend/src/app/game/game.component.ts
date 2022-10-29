@@ -172,19 +172,18 @@ export class GameComponent {
   }
 
   onCardsReorder(event) {
-    console.log(event.detail);
+    event.detail.complete(true);
     this.httpService
       .switchPlayerCards(event.detail.from, event.detail.to)
       .subscribe(
         (result) => {
           console.log('switch cards:', result);
           this.cardsinfo = result;
-          event.detail.complete(true);
         },
         (error) => {
           console.log('failed reorder cards: ', error);
-          this.presentToast(error.error, 'danger');
-          event.detail.complete(false);
+          this.presentToast(error.error.message, 'danger');
+          this.cardsinfo = error.error.cards;
         }
       );
   }

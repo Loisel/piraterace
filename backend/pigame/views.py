@@ -71,12 +71,24 @@ def player_cards(request, **kwargs):
     if request.method == "POST":
         player_states, actionstack = get_play_stack(player.game)
         player_state = player_states[player.pk]
+        cards = []
+        for playerid, card in get_cards_on_hand(gamecfg, pidx, gamecfg.ncardsavail):
+            cardid, cardrank = card_id_rank(card)
+            cards.append([cardid, cardrank, CARDS[cardid]])
         if player_state.powered_down:
-            return JsonResponse(f"You are not allowed to switch cards because are in a power down.", status=404, safe=False)
+            return JsonResponse(
+                {"message": f"You are not allowed to switch cards because are in a power down.", "cards": cards},
+                status=404,
+                safe=False,
+            )
 
         src, target = request.data
         if any([_ >= player_state.health for _ in [src, target]]):
-            return JsonResponse(f"You are not allowed to switch cards because your boat is damaged.", status=404, safe=False)
+            return JsonResponse(
+                {"message": f"You are not allowed to switch cards because your boat is damaged.", "cards": cards},
+                status=404,
+                safe=False,
+            )
 
         # move card into place
         deck = gamecfg.player_decks[pidx]
@@ -193,7 +205,7 @@ def game(request, game_id, **kwargs):
             p.save(update_fields=["time_submitted"])
 
     payload["actionstack"] = actionstack
-    #[print(i, a) for i, a in enumerate(payload["actionstack"])]
+    # [print(i, a) for i, a in enumerate(payload["actionstack"])]
 
     payload["Ngameround"] = game.round
     payload["state"] = game.state
