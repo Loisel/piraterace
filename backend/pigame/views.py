@@ -56,7 +56,9 @@ def get_play_stack(game, invalidate_cache=False):
         cache.set(f'play_stack{game.pk}', ret, 30)
         #print(f"Update cache with stack for {game.pk}")
     else:
+        pass
         #print(f"Returning cached stack for {game.pk}")
+
     return ret
 
 @api_view(["GET", "POST"])
