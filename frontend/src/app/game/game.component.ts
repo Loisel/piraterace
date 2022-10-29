@@ -77,12 +77,14 @@ export class GameComponent {
           scale: {
             mode: Phaser.Scale.NONE,
             autoCenter: Phaser.Scale.CENTER_BOTH,
+            autoRound: true,
           },
           physics: { default: 'None' },
           fps: {
-            target: 24,
+            target: 12,
             forceSetTimeOut: true,
           },
+          disableContextMenu: true,
         };
 
         this.config.scene = new GameScene(this);
