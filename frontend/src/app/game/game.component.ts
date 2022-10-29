@@ -670,7 +670,14 @@ class GameScene extends Phaser.Scene {
       cam.scrollY -= (p.y - p.prevPosition.y) / cam.zoom;
     });
 
-    this.play_actionstack(20); // play the first action stack really quickly in case user does a reload
+    // this.play_actionstack(20); // play the first action stack really quickly in case user does a reload
+    Object.entries(GI.players).forEach(([playerid, player]) => {
+      this.boats[playerid].setX(this.getTileX(player['pos_x']));
+      this.boats[playerid].setY(this.getTileY(player['pos_y']));
+      this.boats[playerid].rotate((player['direction'] * Math.PI) / 2);
+      this.update_healthbar(+playerid, 0, 0, player['health']);
+      this.last_played_action = this.component.gameinfo.actionstack.length;
+    });
 
     this.updateTimer = this.time.addEvent({
       callback: this.updateEvent,
