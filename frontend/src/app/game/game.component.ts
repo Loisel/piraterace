@@ -347,11 +347,11 @@ class GameScene extends Phaser.Scene {
     }
   }
 
-  getTileX(tileidx: number) {
-    return this.component.gameinfo.map.tilewidth * (tileidx + 0.5);
+  getTileX(tileidx: number): number {
+    return +this.component.gameinfo.map.tilewidth * (tileidx + 0.5);
   }
-  getTileY(tileidx: number) {
-    return this.component.gameinfo.map.tileheight * (tileidx + 0.5);
+  getTileY(tileidx: number): number {
+    return +this.component.gameinfo.map.tileheight * (tileidx + 0.5);
   }
 
   play_actionstack(animation_time_ms: number) {
@@ -499,20 +499,20 @@ class GameScene extends Phaser.Scene {
           if (action.type === 'void') {
             timeline.add({
               targets: boatGroup,
-              scale: -1,
+              scale: '-=1',
               angle: '+=360',
               offset: offset,
             });
           } else if (action.type === 'collision') {
             timeline.add({
               targets: boatGroup,
-              scale: -1,
+              scale: '-=1',
               offset: offset,
             });
           } else if (action.type === 'cannon') {
             timeline.add({
               targets: boatGroup,
-              scale: -1,
+              scale: '-=1',
               offset: offset,
             });
           } else {
@@ -522,17 +522,20 @@ class GameScene extends Phaser.Scene {
           let boatGroup = this.boats[action.target].getChildren();
           timeline.add({
             targets: boatGroup,
-            scale: 1,
+            scale: '+=1',
             offset: offset,
-            onStart: function (tween, target) {
-              let GIplayer = this.component.gameinfo.players[action.target];
-              this.boats[action.target].setXY(
-                (GIplayer['start_pos_x'] + 0.5) * GI.map.tilewidth,
-                (GIplayer['start_pos_y'] + 0.5) * GI.map.tileheight
+            onStart: function () {
+              let boatGroup = this.boats[action.target];
+              boatGroup.setX(
+                this.component.gameinfo.map.tilewidth * (action.posx + 0.5)
               );
+              boatGroup.setY(
+                this.component.gameinfo.map.tileheight * (action.posy + 0.5)
+              );
+              let pboat = boatGroup.getChildren()[0];
+              pboat.setAngle(90 * action['direction']);
             },
-            onComplete: function (tween, target) {
-              let GI = this.component.gameinfo;
+            onComplete: function () {
               this.update_healthbar(action.target, 0, 0, action.health);
             },
             callbackScope: this,
@@ -623,8 +626,8 @@ class GameScene extends Phaser.Scene {
     Object.entries(GI.players).forEach(([playerid, player]) => {
       let color = Phaser.Display.Color.HexStringToColor(player['color']);
       let backdrop = this.add.rectangle(
-        (player['start_pos_x'] + 0.5) * GI.map.tilewidth,
-        (player['start_pos_y'] + 0.5) * GI.map.tileheight,
+        (player['pos_x'] + 0.5) * GI.map.tilewidth,
+        (player['pos_y'] + 0.5) * GI.map.tileheight,
         GI.map.tilewidth,
         GI.map.tileheight,
         color.color,
@@ -632,23 +635,23 @@ class GameScene extends Phaser.Scene {
       );
 
       var boat = this.add.sprite(
-        (player['start_pos_x'] + 0.5) * GI.map.tilewidth,
-        (player['start_pos_y'] + 0.5) * GI.map.tileheight,
+        (player['pos_x'] + 0.5) * GI.map.tilewidth,
+        (player['pos_y'] + 0.5) * GI.map.tileheight,
         'boat'
       );
       //set the width of the sprite
       boat.displayHeight = GI.map.tileheight * 1.1;
       //scale evenly
       boat.scaleX = boat.scaleY;
-      boat.angle = player['start_direction'] * 90;
+      boat.angle = player['direction'] * 90;
 
       let hp = new HealthBar(
         this,
-        (player['start_pos_x'] + 0.5) * GI.map.tilewidth,
-        (player['start_pos_y'] + 0.5) * GI.map.tileheight,
+        (player['pos_x'] + 0.5) * GI.map.tilewidth,
+        (player['pos_y'] + 0.5) * GI.map.tileheight,
         GI.map.tilewidth * 0.8,
         GI.map.tileheight * 0.12,
-        GI.initial_health
+        player['health']
       );
 
       let group = this.add.group();
@@ -673,13 +676,13 @@ class GameScene extends Phaser.Scene {
     });
 
     // this.play_actionstack(20); // play the first action stack really quickly in case user does a reload
-    Object.entries(GI.players).forEach(([playerid, player]) => {
-      this.boats[playerid].setX(this.getTileX(player['pos_x']));
-      this.boats[playerid].setY(this.getTileY(player['pos_y']));
-      this.boats[playerid].rotate((player['direction'] * Math.PI) / 2);
-      this.update_healthbar(+playerid, 0, 0, player['health']);
-      this.last_played_action = this.component.gameinfo.actionstack.length;
-    });
+    // Object.entries(GI.players).forEach(([playerid, player]) => {
+    //   this.boats[playerid].setX(this.getTileX(player['pos_x']));
+    //   this.boats[playerid].setY(this.getTileY(player['pos_y']));
+    //   this.boats[playerid].rotate((player['direction'] * Math.PI) / 2);
+    //   this.update_healthbar(+playerid, 0, 0, player['health']);
+    // });
+    this.last_played_action = this.component.gameinfo.actionstack.length;
 
     this.updateTimer = this.time.addEvent({
       callback: this.updateEvent,

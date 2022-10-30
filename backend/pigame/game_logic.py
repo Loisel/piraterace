@@ -118,9 +118,8 @@ def play_stack(game):
     ):
         p = types.SimpleNamespace()
         p.id = pid
-        p.start_loc_x = x
-        p.start_loc_y = y
-        p.start_direction = direction
+        p.last_cp_x = x
+        p.last_cp_y = y
         p.xpos = x
         p.ypos = y
         p.direction = direction
@@ -156,15 +155,19 @@ def play_stack(game):
                         game.save(update_fields=["state"])
                         print("You win")
                     player.next_checkpoint += 1
+                    player.last_cp_x = player.xpos
+                    player.last_cp_y = player.ypos
 
             # respawns
             respawn_actions = []
             for p in players.values():
                 if p.health <= 0:
                     p.health = game.config.ncardsavail
-                    p.xpos = p.start_loc_x
-                    p.ypos = p.start_loc_y
-                    respawn_actions.append(dict(key="respawn", target=p.id, health=p.health))
+                    p.xpos = p.last_cp_x
+                    p.ypos = p.last_cp_y
+                    respawn_actions.append(
+                        dict(key="respawn", target=p.id, health=p.health, posx=p.xpos, posy=p.ypos, direction=p.direction)
+                    )
             actionstack.append(respawn_actions)
 
             for player in players.values():

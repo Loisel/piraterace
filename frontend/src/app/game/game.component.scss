@@ -6,13 +6,12 @@ ion-grid {
   padding: 0px;
 }
 canvas {
-  margin-top: 0px !important;
-  max-height: calc(100vh - 65px) !important;
+  margin-top: -5px !important;
 }
 
 #game-canvas {
   border-style: solid;
-  border-width: 0.5em;
+  border-width: 0.3em;
 }
 
 ion-card-header {
@@ -33,6 +32,7 @@ ion-card-content {
 }
 
 #tool-column {
+  margin-top: -10px !important;
   z-index: 9;
   ion-card {
     border-style: solid;
@@ -42,7 +42,7 @@ ion-card-content {
 }
 
 #card-column {
-  padding-top: 0px !important;
+  margin-top: -10px !important;
   ion-card {
     border-style: solid;
     border-width: 0.5em;

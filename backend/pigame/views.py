@@ -215,9 +215,6 @@ def game(request, game_id, **kwargs):
     payload["players"] = {}
     for p in player_states.values():
         payload["players"][p.id] = dict(
-            start_pos_x=p.start_loc_x,
-            start_pos_y=p.start_loc_y,
-            start_direction=p.start_direction,
             pos_x=p.xpos,
             pos_y=p.ypos,
             direction=p.direction,
