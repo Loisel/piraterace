@@ -427,30 +427,33 @@ class GameScene extends Phaser.Scene {
           });
         } else if (action.key === 'collision_x') {
           let wiggle_delta_x = GI.map.tilewidth * 0.1;
-
+          let nWiggles = 4;
           let boatGroup = this.boats[action.target].getChildren();
           timeline.add({
             targets: boatGroup,
-            x: boatGroup[0].x + action.val * wiggle_delta_x,
+            x: function (target, key, value) {
+              return value + action.val * wiggle_delta_x;
+            },
             offset: offset,
-            duration: animation_time_ms / 4,
+            duration: animation_time_ms / (nWiggles * 2),
             yoyo: true,
-            repeat: 2,
+            repeat: nWiggles,
             callbackScope: this,
             onComplete: function () {
-              console.log('complete wiggle');
               this.update_healthbar(action.target, action.damage, 0);
             },
           });
         } else if (action.key === 'collision_y') {
           let boatGroup = this.boats[action.target].getChildren();
           let wiggle_delta_y = GI.map.tileheight * 0.1;
-
+          let nWiggles = 4;
           timeline.add({
             targets: boatGroup,
-            y: boatGroup[0].y + action.val * wiggle_delta_y,
-            duration: animation_time_ms / 4,
-            repeat: 2,
+            y: function (target, key, value) {
+              return value + action.val * wiggle_delta_y;
+            },
+            duration: animation_time_ms / (nWiggles * 2),
+            repeat: nWiggles,
             offset: offset,
             yoyo: true,
             onComplete: function () {
@@ -526,11 +529,9 @@ class GameScene extends Phaser.Scene {
             offset: offset,
             onStart: function () {
               let boatGroup = this.boats[action.target];
-              boatGroup.setX(
-                this.component.gameinfo.map.tilewidth * (action.posx + 0.5)
-              );
-              boatGroup.setY(
-                this.component.gameinfo.map.tileheight * (action.posy + 0.5)
+              boatGroup.setXY(
+                this.getTileX(action.posx),
+                this.getTileY(action.posy)
               );
               let pboat = boatGroup.getChildren()[0];
               pboat.setAngle(90 * action['direction']);
@@ -573,6 +574,17 @@ class GameScene extends Phaser.Scene {
               callbackScope: this,
             });
           }
+        } else if (action.key === 'powerdownrepair') {
+          let boatGroup = this.boats[action.target].getChildren();
+          timeline.add({
+            targets: boatGroup,
+            offset: offset,
+            duration: 0,
+            onComplete: function () {
+              this.update_healthbar(action.target, 0, 0, action.health);
+            },
+            callbackScope: this,
+          });
         } else {
           console.log('Error, key not found.');
         }

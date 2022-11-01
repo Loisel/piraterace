@@ -172,9 +172,12 @@ def play_stack(game):
 
             for player in players.values():
                 player.powered_down = False
+            powerdownrepair_actions = []
             for pid in powerdowncards:
                 players[pid].health = game.config.ncardsavail + FREE_HEALTH_OFFSET
                 players[pid].powered_down = True
+                powerdownrepair_actions.append(dict(key="powerdownrepair", target=pid, health=players[pid].health))
+            actionstack.append(powerdownrepair_actions)
             powerdowncards = []
 
         elif card == POWER_DOWN_CARDID:
