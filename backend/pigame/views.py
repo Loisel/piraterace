@@ -64,6 +64,9 @@ def get_play_stack(game, invalidate_cache=False):
 def player_cards(request, **kwargs):
     player = request.user.account
 
+    if player.game.state in ["end"]:  # if game ended we dont need to serve cards anymore
+        return JsonResponse([], safe=False)
+
     if player.time_submitted:
         return JsonResponse(f"You already submitted your cards at {player.time_submitted}", status=404, safe=False)
 
@@ -223,6 +226,17 @@ def game(request, game_id, **kwargs):
             team=p.team,
             health=p.health,
             powered_down=p.powered_down,
+        )
+
+    if game.state in ["end"]:
+        for a in payload["actionstack"][::-1]:
+            if len(a) > 0:
+                if a[0]["key"] == "win":
+                    winner_id = a[0]["target"]
+        winner = Account.objects.get(pk=winner_id)
+        payload["summary"] = dict(
+            winner_id=winner_id,
+            winner=winner.user.username,
         )
 
     return JsonResponse(payload)

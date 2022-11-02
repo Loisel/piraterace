@@ -1,5 +1,6 @@
 import { IonicModule } from '@ionic/angular';
 import { ToastController } from '@ionic/angular';
+import { AlertController } from '@ionic/angular';
 import { Platform } from '@ionic/angular';
 import {
   Component,
@@ -52,7 +53,8 @@ export class GameComponent {
     private httpService: HttpService,
     private route: ActivatedRoute,
     private router: Router,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private alertController: AlertController
   ) {}
 
   ionViewWillEnter() {
@@ -237,6 +239,24 @@ export class GameComponent {
     });
     toast.present();
   }
+
+  async presentSummary() {
+    let winner = this.gameinfo.summary.winner;
+    const alert = await this.alertController.create({
+      header: 'Race finished',
+      //subHeader: ''
+      message: `Yo Ho Ho, turns out the mighty ${winner} is quite a Seadog and finished first!`,
+      buttons: [
+        {
+          text: 'Okay, leave',
+          handler: () => {
+            this.leaveGame();
+          },
+        },
+      ],
+    });
+    await alert.present();
+  }
 }
 
 class GameScene extends Phaser.Scene {
@@ -358,15 +378,15 @@ class GameScene extends Phaser.Scene {
     let GI = this.component.gameinfo;
     let actionstack = this.component.gameinfo.actionstack;
 
-    if (this.component.gameinfo.actionstack.length <= this.last_played_action) {
-      return;
-    }
-
     console.log(
       'this.last_played_action',
       this.last_played_action,
       actionstack.length
     );
+
+    if (this.component.gameinfo.actionstack.length <= this.last_played_action) {
+      return;
+    }
 
     // let tm = new Phaser.Tweens.TweenManager(this);
     console.log('Animation time:', animation_time_ms);
@@ -563,7 +583,6 @@ class GameScene extends Phaser.Scene {
           });
         } else if (action.key === 'card_is_played') {
           if (action.target === this.component.gameinfo.me) {
-            console.log('my card is playing', action.target, action.cardslot);
             let boatGroup = this.boats[action.target].getChildren();
             timeline.add({
               targets: boatGroup,
@@ -582,6 +601,18 @@ class GameScene extends Phaser.Scene {
             duration: 0,
             onComplete: function () {
               this.update_healthbar(action.target, 0, 0, action.health);
+            },
+            callbackScope: this,
+          });
+        } else if (action.key === 'win') {
+          let boatGroup = this.boats[action.target].getChildren();
+          timeline.add({
+            targets: boatGroup,
+            offset: offset,
+            duration: 0,
+            onComplete: function () {
+              this.updateTimer.paused = true;
+              this.component.presentSummary();
             },
             callbackScope: this,
           });
@@ -687,7 +718,7 @@ class GameScene extends Phaser.Scene {
       cam.scrollY -= (p.y - p.prevPosition.y) / cam.zoom;
     });
 
-    // this.play_actionstack(20); // play the first action stack really quickly in case user does a reload
+    //this.play_actionstack(20); // play the first action stack really quickly in case user does a reload
     // Object.entries(GI.players).forEach(([playerid, player]) => {
     //   this.boats[playerid].setX(this.getTileX(player['pos_x']));
     //   this.boats[playerid].setY(this.getTileY(player['pos_y']));
@@ -695,6 +726,7 @@ class GameScene extends Phaser.Scene {
     //   this.update_healthbar(+playerid, 0, 0, player['health']);
     // });
     this.last_played_action = this.component.gameinfo.actionstack.length;
+    // TODO: now because we dont play all acions after reload, the win condition may never be played... need to talk to Al about this...
 
     this.updateTimer = this.time.addEvent({
       callback: this.updateEvent,

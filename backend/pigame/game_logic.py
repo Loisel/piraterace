@@ -150,10 +150,10 @@ def play_stack(game):
                     and (player.ypos == checkpoints[player.next_checkpoint][1])
                     and (player.health > 0)
                 ):
-                    if player.next_checkpoint == len(checkpoints):
+                    if player.next_checkpoint == len(checkpoints) - 1:
                         game.state = "end"
                         game.save(update_fields=["state"])
-                        print("You win")
+                        actionstack.append([dict(key="win", target=player.id)])
                     player.next_checkpoint += 1
                     player.last_cp_x = player.xpos
                     player.last_cp_y = player.ypos
