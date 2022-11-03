@@ -122,7 +122,10 @@ def play_stack(game):
         p.last_cp_y = y
         p.xpos = x
         p.ypos = y
+        p.start_pos_x = x
+        p.start_pos_y = y
         p.direction = direction
+        p.start_direction = direction
         p.next_checkpoint = 1
         p.color = color
         p.team = team

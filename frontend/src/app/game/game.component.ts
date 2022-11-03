@@ -285,6 +285,13 @@ class GameScene extends Phaser.Scene {
     console.log('check_player_state: ', valid);
   }
 
+  reset_health_bar() {
+    let GI = this.component.gameinfo;
+    Object.entries(GI.players).forEach(([playerid, player]) => {
+      this.update_healthbar(+playerid, 0, player['health']);
+    });
+  }
+
   update_healthbar(boat_id: number, damage: number, value: number = undefined) {
     let bar = this.boats[boat_id].getChildren()[2];
     if (value) {
@@ -318,6 +325,7 @@ class GameScene extends Phaser.Scene {
       onComplete: function () {
         this.drawCheckpoints();
         this.check_player_state();
+        this.reset_health_bar();
         this.component.highlightedCardSlot = -1;
       },
       callbackScope: this,
@@ -358,56 +366,71 @@ class GameScene extends Phaser.Scene {
       if (action.from == 3 && action.to == 0) {
         targetAngle = 360;
       }
-      timeline.add({
-        targets: boatGroup,
-        duration: animation_time_ms,
-        angle: {
-          from: action.from * 90,
-          to: targetAngle,
-        },
-        offset: offset,
-      });
+      if (animation_time_ms < 100) {
+        boatGroup[0].setAngle(targetAngle);
+      } else {
+        timeline.add({
+          targets: boatGroup,
+          duration: animation_time_ms,
+          angle: {
+            from: action.from * 90,
+            to: targetAngle,
+          },
+          offset: offset,
+        });
+      }
     }
   }
 
   timeline_add_move_x(timeline, action, animation_time_ms, offset) {
     if (action.key === 'move_x') {
       let GI = this.component.gameinfo;
-      let boatGroup = this.boats[action.target].getChildren();
-      timeline.add({
-        targets: boatGroup,
-        duration: animation_time_ms,
-        x: {
-          from: (action.from + 0.5) * GI.map.tilewidth,
-          to: (action.to + 0.5) * GI.map.tilewidth,
-        },
-        offset: offset,
-      });
+      let boatGroup = this.boats[action.target];
+      let targetX = this.getTileX(action.to);
+      if (animation_time_ms < 100) {
+        boatGroup.setX(targetX);
+      } else {
+        timeline.add({
+          targets: boatGroup.getChildren(),
+          duration: animation_time_ms,
+          x: {
+            from: (action.from + 0.5) * GI.map.tilewidth,
+            to: targetX,
+          },
+          offset: offset,
+        });
+      }
     }
   }
 
   timeline_add_move_y(timeline, action, animation_time_ms, offset) {
     if (action.key === 'move_y') {
       let GI = this.component.gameinfo;
-      let boatGroup = this.boats[action.target].getChildren();
-      timeline.add({
-        targets: boatGroup,
-        duration: animation_time_ms,
-        y: {
-          from: (action.from + 0.5) * GI.map.tileheight,
-          to: (action.to + 0.5) * GI.map.tileheight,
-        },
-        offset: offset,
-      });
+      let boatGroup = this.boats[action.target];
+      let targetY = this.getTileY(action.to);
+      if (animation_time_ms < 100) {
+        boatGroup.setY(targetY);
+      } else {
+        timeline.add({
+          targets: boatGroup.getChildren(),
+          duration: animation_time_ms,
+          y: {
+            from: (action.from + 0.5) * GI.map.tileheight,
+            to: targetY,
+          },
+          offset: offset,
+        });
+      }
     }
   }
 
   timeline_add_collision_x(timeline, action, animation_time_ms, offset) {
-    if (action.key === 'collision_x') {
+    if (action.key === 'collision_x' && animation_time_ms >= 100) {
       let GI = this.component.gameinfo;
       let wiggle_delta_x = GI.map.tilewidth * 0.1;
       let nWiggles = 4;
       let boatGroup = this.boats[action.target].getChildren();
+
       timeline.add({
         targets: boatGroup,
         x: function (target, key, value) {
@@ -426,7 +449,7 @@ class GameScene extends Phaser.Scene {
   }
 
   timeline_add_collision_y(timeline, action, animation_time_ms, offset) {
-    if (action.key === 'collision_y') {
+    if (action.key === 'collision_y' && animation_time_ms >= 100) {
       let GI = this.component.gameinfo;
       let boatGroup = this.boats[action.target].getChildren();
       let wiggle_delta_y = GI.map.tileheight * 0.1;
@@ -449,7 +472,7 @@ class GameScene extends Phaser.Scene {
   }
 
   timeline_add_shot(timeline, action, animation_time_ms, offset) {
-    if (action.key === 'shot') {
+    if (action.key === 'shot' && animation_time_ms >= 100) {
       let GI = this.component.gameinfo;
       let cannonball = this.add.circle((action.src_x + 0.5) * GI.map.tilewidth, (action.src_y + 0.5) * GI.map.tilewidth, 7, 0);
       cannonball.setVisible(false);
@@ -485,7 +508,7 @@ class GameScene extends Phaser.Scene {
   }
 
   timeline_add_death(timeline, action, animation_time_ms, offset) {
-    if (action.key === 'death') {
+    if (action.key === 'death' && animation_time_ms >= 100) {
       let boatGroup = this.boats[action.target].getChildren();
       if (action.type === 'void') {
         timeline.add({
@@ -517,28 +540,34 @@ class GameScene extends Phaser.Scene {
 
   timeline_add_respawn(timeline, action, animation_time_ms, offset) {
     if (action.key === 'respawn') {
-      let boatGroup = this.boats[action.target].getChildren();
-      timeline.add({
-        targets: boatGroup,
-        scale: '+=1',
-        offset: offset,
-        duration: animation_time_ms,
-        onStart: function () {
-          let boatGroup = this.boats[action.target];
-          boatGroup.setXY(this.getTileX(action.posx), this.getTileY(action.posy));
-          let pboat = boatGroup.getChildren()[0];
-          pboat.setAngle(90 * action['direction']);
-        },
-        onComplete: function () {
-          this.update_healthbar(action.target, 0, action.health);
-        },
-        callbackScope: this,
-      });
+      let boatGroup = this.boats[action.target];
+      if (animation_time_ms < 100) {
+        boatGroup.setXY(this.getTileX(action.posx), this.getTileY(action.posy));
+        let pboat = boatGroup.getChildren()[0];
+        pboat.setAngle(90 * action['direction']);
+      } else {
+        timeline.add({
+          targets: boatGroup.getChildren(),
+          scale: '+=1',
+          offset: offset,
+          duration: animation_time_ms,
+          onStart: function () {
+            let boatGroup = this.boats[action.target];
+            boatGroup.setXY(this.getTileX(action.posx), this.getTileY(action.posy));
+            let pboat = boatGroup.getChildren()[0];
+            pboat.setAngle(90 * action['direction']);
+          },
+          onComplete: function () {
+            this.update_healthbar(action.target, 0, action.health);
+          },
+          callbackScope: this,
+        });
+      }
     }
   }
 
   timeline_add_repair(timeline, action, animation_time_ms, offset) {
-    if (action.key === 'repair') {
+    if (action.key === 'repair' && animation_time_ms >= 100) {
       let boatGroup = this.boats[action.target].getChildren();
       timeline.add(this.showStars(this.getTileX(action.posx), this.getTileY(action.posy), 0x00ff00, animation_time_ms, offset));
 
@@ -555,7 +584,7 @@ class GameScene extends Phaser.Scene {
   }
 
   timeline_add_card_is_played(timeline, action, animation_time_ms, offset) {
-    if (action.key === 'card_is_played') {
+    if (action.key === 'card_is_played' && animation_time_ms >= 100) {
       if (action.target === this.component.gameinfo.me) {
         let boatGroup = this.boats[action.target].getChildren();
         timeline.add({
@@ -572,7 +601,7 @@ class GameScene extends Phaser.Scene {
   }
 
   timeline_add_powerdownrepair(timeline, action, animation_time_ms, offset) {
-    if (action.key === 'powerdownrepair') {
+    if (action.key === 'powerdownrepair' && animation_time_ms >= 100) {
       let boatGroup = this.boats[action.target].getChildren();
       timeline.add({
         targets: boatGroup,
@@ -671,25 +700,25 @@ class GameScene extends Phaser.Scene {
     let GI = this.component.gameinfo;
     let color = Phaser.Display.Color.HexStringToColor(player['color']);
     let backdrop = this.add.rectangle(
-      (player['pos_x'] + 0.5) * GI.map.tilewidth,
-      (player['pos_y'] + 0.5) * GI.map.tileheight,
+      this.getTileX(player['start_pos_x']),
+      this.getTileY(player['start_pos_y']),
       GI.map.tilewidth,
       GI.map.tileheight,
       color.color,
       0.75
     );
 
-    var boat = this.add.sprite((player['pos_x'] + 0.5) * GI.map.tilewidth, (player['pos_y'] + 0.5) * GI.map.tileheight, 'boat');
+    var boat = this.add.sprite(this.getTileX(player['start_pos_x']), this.getTileY(player['start_pos_y']), 'boat');
     //set the width of the sprite
     boat.displayHeight = GI.map.tileheight * 1.1;
     //scale evenly
     boat.scaleX = boat.scaleY;
-    boat.angle = player['direction'] * 90;
+    boat.angle = player['start_direction'] * 90;
 
     let hp = new HealthBar(
       this,
-      (player['pos_x'] + 0.5) * GI.map.tilewidth,
-      (player['pos_y'] + 0.5) * GI.map.tileheight,
+      this.getTileX(player['start_pos_x']),
+      this.getTileY(player['start_pos_y']),
       GI.map.tilewidth * 0.8,
       GI.map.tileheight * 0.12,
       player['health']
@@ -755,15 +784,7 @@ class GameScene extends Phaser.Scene {
       cam.scrollY -= (p.y - p.prevPosition.y) / cam.zoom;
     });
 
-    // this.play_actionstack(200); // play the first action stack really quickly in case user does a reload
-    // Object.entries(GI.players).forEach(([playerid, player]) => {
-    //   this.boats[playerid].setX(this.getTileX(player['pos_x']));
-    //   this.boats[playerid].setY(this.getTileY(player['pos_y']));
-    //   this.boats[playerid].rotate((player['direction'] * Math.PI) / 2);
-    //   this.update_healthbar(+playerid, 0, 0, player['health']);
-    // });
-    this.last_played_action = this.component.gameinfo.actionstack.length;
-    // TODO: now because we dont play all acions after reload, the win condition may never be played... need to talk to Al about this...
+    this.play_actionstack(0); // play the first action stack really quickly in case user does a reload
 
     this.updateTimer = this.time.addEvent({
       callback: this.updateEvent,

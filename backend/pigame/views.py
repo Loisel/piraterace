@@ -220,7 +220,10 @@ def game(request, game_id, **kwargs):
         payload["players"][p.id] = dict(
             pos_x=p.xpos,
             pos_y=p.ypos,
+            start_pos_x=p.start_pos_x,
+            start_pos_y=p.start_pos_y,
             direction=p.direction,
+            start_direction=p.start_direction,
             next_checkpoint=p.next_checkpoint,
             color=p.color,
             team=p.team,
@@ -233,11 +236,12 @@ def game(request, game_id, **kwargs):
             if len(a) > 0:
                 if a[0]["key"] == "win":
                     winner_id = a[0]["target"]
-        winner = Account.objects.get(pk=winner_id)
-        payload["summary"] = dict(
-            winner_id=winner_id,
-            winner=winner.user.username,
-        )
+                    winner = Account.objects.get(pk=winner_id)
+                    payload["summary"] = dict(
+                        winner_id=winner_id,
+                        winner=winner.user.username,
+                    )
+                    break
 
     return JsonResponse(payload)
 
