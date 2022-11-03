@@ -78,10 +78,7 @@ export class GamelistComponent implements OnInit {
   }
 
   reconnectGame() {
-    console.log('Reconnect to game: ', [
-      'game',
-      this.reconnectGameId.getValue(),
-    ]);
+    console.log('Reconnect to game: ', ['game', this.reconnectGameId.getValue()]);
     //this.router.navigate(['game', this.reconnectGameId.getValue()]);
     let id = this.reconnectGameId.getValue();
     this.router.navigate(['game', id]);

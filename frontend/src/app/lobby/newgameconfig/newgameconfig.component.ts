@@ -39,13 +39,11 @@ export class NewGameConfigComponent {
     console.log('selectMapChange', e);
     this.data.selected_map = e.target.value;
 
-    this.httpService
-      .post_create_new_gameConfig(this.data)
-      .subscribe((response) => {
-        console.log('post post_create_new_gameConfig', response);
-        this.data = response;
-        this.draw_phaser_snapshot();
-      });
+    this.httpService.post_create_new_gameConfig(this.data).subscribe((response) => {
+      console.log('post post_create_new_gameConfig', response);
+      this.data = response;
+      this.draw_phaser_snapshot();
+    });
   }
 
   createGameConfig(event) {
@@ -84,19 +82,9 @@ export class NewGameConfigComponent {
 
     function phaser_preload() {
       console.log('phaser_preload', this);
-      this.load.image(
-        'tileset',
-        `${environment.STATIC_URL}/maps/${mapinfo.tilesets[0].image}`
-      );
-      this.load.tilemapTiledJSON(
-        'tilemap',
-        `${environment.STATIC_URL}/maps/${selected_map}`
-      );
-      this.load.spritesheet(
-        'boat',
-        `${environment.STATIC_URL}/sprites/boat.png`,
-        { frameWidth: 24, frameHeight: 72 }
-      );
+      this.load.image('tileset', `${environment.STATIC_URL}/maps/${mapinfo.tilesets[0].image}`);
+      this.load.tilemapTiledJSON('tilemap', `${environment.STATIC_URL}/maps/${selected_map}`);
+      this.load.spritesheet('boat', `${environment.STATIC_URL}/sprites/boat.png`, { frameWidth: 24, frameHeight: 72 });
     }
 
     function phaser_create() {

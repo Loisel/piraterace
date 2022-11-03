@@ -9,11 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { LobbyRoutingModule } from './lobby-routing.module';
 
 @NgModule({
-  declarations: [
-    GamelistComponent,
-    GameConfigComponent,
-    NewGameConfigComponent,
-  ],
+  declarations: [GamelistComponent, GameConfigComponent, NewGameConfigComponent],
   imports: [CommonModule, IonicModule, LobbyRoutingModule, FormsModule],
 })
 export class LobbyModule {}

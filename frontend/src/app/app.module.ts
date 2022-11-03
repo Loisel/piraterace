@@ -15,9 +15,7 @@ import { AuthService } from './services/auth.service';
 import { StorageService } from './services/storage.service';
 import { HttpService } from './services/http.service';
 
-export const httpInterceptorProviders = [
-  { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true },
-];
+export const httpInterceptorProviders = [{ provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true }];
 
 @NgModule({
   declarations: [AppComponent],

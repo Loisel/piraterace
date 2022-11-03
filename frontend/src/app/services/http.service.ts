@@ -30,10 +30,7 @@ export class HttpService {
     return this.httpClient.get<GameConfig>(`${this.view_gameConfigURL}/${id}`);
   }
   createGameConfig(data: NewGameConfig) {
-    return this.httpClient.post<GameConfig>(
-      `${this.create_gameConfigURL}`,
-      data
-    );
+    return this.httpClient.post<GameConfig>(`${this.create_gameConfigURL}`, data);
   }
   createGame(game_id: number) {
     return this.httpClient.get(`${this.create_gameURL}/${game_id}`);
@@ -65,15 +62,10 @@ export class HttpService {
     return this.httpClient.post(`${this.player_infoURL}/${id}`, data);
   }
   get_create_new_gameConfig() {
-    return this.httpClient.get<NewGameConfig>(
-      `${this.create_new_gameConfigURL}`
-    );
+    return this.httpClient.get<NewGameConfig>(`${this.create_new_gameConfigURL}`);
   }
   post_create_new_gameConfig(data: NewGameConfig) {
-    return this.httpClient.post<NewGameConfig>(
-      `${this.create_new_gameConfigURL}`,
-      data
-    );
+    return this.httpClient.post<NewGameConfig>(`${this.create_new_gameConfigURL}`, data);
   }
   get_leaveGame() {
     return this.httpClient.get(`${this.get_leaveGameURL}`);

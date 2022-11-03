@@ -1,12 +1,5 @@
 import { Injectable } from '@angular/core';
-import {
-  HttpInterceptor,
-  HttpRequest,
-  HttpResponse,
-  HttpHandler,
-  HttpEvent,
-  HttpErrorResponse,
-} from '@angular/common/http';
+import { HttpInterceptor, HttpRequest, HttpResponse, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 
 import { BehaviorSubject, Observable, throwError, from } from 'rxjs';
@@ -18,19 +11,11 @@ import { AuthService } from './auth.service';
 @Injectable()
 export class TokenInterceptor implements HttpInterceptor {
   private refreshingInProgress: boolean;
-  private accessTokenSubject: BehaviorSubject<string> =
-    new BehaviorSubject<string>(null);
+  private accessTokenSubject: BehaviorSubject<string> = new BehaviorSubject<string>(null);
 
-  constructor(
-    private alertController: AlertController,
-    private authService: AuthService,
-    private router: Router
-  ) {}
+  constructor(private alertController: AlertController, private authService: AuthService, private router: Router) {}
 
-  intercept(
-    request: HttpRequest<any>,
-    next: HttpHandler
-  ): Observable<HttpEvent<any>> {
+  intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return from(this.authService.getToken()).pipe(
       filter((token) => token !== 'uninitialized'),
       take(1), // filter 'uninitialized' value to actually wait until auth module may have loaded a token from storage
@@ -45,8 +30,7 @@ export class TokenInterceptor implements HttpInterceptor {
         return next.handle(request).pipe(
           catchError((error: HttpErrorResponse) => {
             const status = error.status;
-            const reason =
-              error && error.error.reason ? error.error.reason : '';
+            const reason = error && error.error.reason ? error.error.reason : '';
             console.log('Interceptor Error', error, status, reason);
 
             if (error instanceof HttpErrorResponse && error.status === 401) {
@@ -69,14 +53,8 @@ export class TokenInterceptor implements HttpInterceptor {
     );
   }
 
-  private refreshToken(
-    request: HttpRequest<any>,
-    next: HttpHandler
-  ): Observable<HttpEvent<any>> {
-    console.log(
-      'Interceptor Asking for a token refresh',
-      this.refreshingInProgress
-    );
+  private refreshToken(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    console.log('Interceptor Asking for a token refresh', this.refreshingInProgress);
     if (!this.refreshingInProgress) {
       this.refreshingInProgress = true;
       this.accessTokenSubject.next(null);
@@ -84,10 +62,7 @@ export class TokenInterceptor implements HttpInterceptor {
       return this.authService.refreshToken().pipe(
         switchMap((res) => {
           this.refreshingInProgress = false;
-          console.log(
-            'Interceptor re-setting refreshingInProgress',
-            this.refreshingInProgress
-          );
+          console.log('Interceptor re-setting refreshingInProgress', this.refreshingInProgress);
           let token = this.authService.getToken().getValue();
           console.log('==== REFRESHED TOKEN', res, ' => ', token);
 
@@ -107,20 +82,13 @@ export class TokenInterceptor implements HttpInterceptor {
       );
     } else {
       // wait while getting new token
-      console.log(
-        'Interceptor wait while getting new token',
-        this.refreshingInProgress
-      );
+      console.log('Interceptor wait while getting new token', this.refreshingInProgress);
       return this.accessTokenSubject.pipe(
         filter((token) => token !== 'uninitialized'),
         take(1),
         switchMap((token) => {
           // repeat failed request with new token
-          console.log(
-            'Interceptor wait while getting new token',
-            this.refreshingInProgress,
-            token
-          );
+          console.log('Interceptor wait while getting new token', this.refreshingInProgress, token);
           request = request.clone({
             headers: request.headers.set('Authorization', 'JWT ' + token),
           });

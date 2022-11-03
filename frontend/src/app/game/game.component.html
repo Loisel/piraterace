@@ -5,25 +5,13 @@
         <ion-card #tools_menu>
           <ion-card-content>
             <ion-label>Round {{ Ngameround | async }}</ion-label>
-            <ion-button
-              id="power_down_button"
-              (click)="powerDown()"
-              [disabled]="poweredDown || submittedCards"
-            >
+            <ion-button id="power_down_button" (click)="powerDown()" [disabled]="poweredDown || submittedCards">
               <ion-icon name="construct-outline"></ion-icon>
               <ion-label id="power_down_label">Re-Rig</ion-label>
             </ion-button>
-            <ion-progress-bar
-              id="time-progress-bar"
-              [value]="countDownTimer | async"
-              color="danger"
-            ></ion-progress-bar>
+            <ion-progress-bar id="time-progress-bar" [value]="countDownTimer | async" color="danger"></ion-progress-bar>
 
-            <ion-button
-              id="submit_cards_button"
-              (click)="submitCards()"
-              [disabled]="submittedCards"
-            >
+            <ion-button id="submit_cards_button" (click)="submitCards()" [disabled]="submittedCards">
               <ion-icon name="send-outline"></ion-icon>
               <ion-label id="submit_cards_label">Set Sails</ion-label>
             </ion-button>
@@ -37,9 +25,8 @@
               <ion-popover trigger="leave_game_button" [dismissOnSelect]="true">
                 <ng-template>
                   <ion-content>
-                    Are you sure you want to abandon your crew? You will not be
-                    able re-enter and the souls aboard will be condemned to sail
-                    on this forsaken boat for all eternity!
+                    Are you sure you want to abandon your crew? You will not be able re-enter and the souls aboard will be condemned
+                    to sail on this forsaken boat for all eternity!
                     <ion-list>
                       <ion-button color="primary">
                         <ion-icon name="send-outline"></ion-icon>
@@ -65,23 +52,11 @@
       <ion-col size-xs="3" size-sm="2" id="card-column">
         <ion-card #cards_menu>
           <ion-card-content>
-            <ion-reorder-group
-              (ionItemReorder)="onCardsReorder($event)"
-              disabled="false"
-            >
+            <ion-reorder-group (ionItemReorder)="onCardsReorder($event)" disabled="false">
               <ion-reorder *ngFor="let card of cardsinfo; let i = index">
-                <ion-item-divider
-                  *ngIf="i === gameinfo?.cardslots"
-                ></ion-item-divider>
-                <ion-item
-                  class="gamecard-item"
-                  [class.active-card]="highlightCard(i)"
-                  [disabled]="cardCheck(i)"
-                >
-                  <ion-img
-                    class="gamecard-img"
-                    [src]="CARDS_URL + card[2].url"
-                  ></ion-img>
+                <ion-item-divider *ngIf="i === gameinfo?.cardslots"></ion-item-divider>
+                <ion-item class="gamecard-item" [class.active-card]="highlightCard(i)" [disabled]="cardCheck(i)">
+                  <ion-img class="gamecard-img" [src]="CARDS_URL + card[2].url"></ion-img>
                   <ion-badge>{{ card[1] }}</ion-badge>
                 </ion-item>
               </ion-reorder>

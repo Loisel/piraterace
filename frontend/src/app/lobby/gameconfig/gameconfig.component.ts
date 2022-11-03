@@ -131,19 +131,9 @@ export class GameConfigComponent implements OnInit {
 
     function phaser_preload() {
       console.log('phaser_preload', this);
-      this.load.image(
-        'tileset',
-        `${environment.STATIC_URL}/maps/${mapinfo.tilesets[0].image}`
-      );
-      this.load.tilemapTiledJSON(
-        'tilemap',
-        `${environment.STATIC_URL}/maps/${mapfile}`
-      );
-      this.load.spritesheet(
-        'boat',
-        `${environment.STATIC_URL}/sprites/boat.png`,
-        { frameWidth: 24, frameHeight: 72 }
-      );
+      this.load.image('tileset', `${environment.STATIC_URL}/maps/${mapinfo.tilesets[0].image}`);
+      this.load.tilemapTiledJSON('tilemap', `${environment.STATIC_URL}/maps/${mapfile}`);
+      this.load.spritesheet('boat', `${environment.STATIC_URL}/sprites/boat.png`, { frameWidth: 24, frameHeight: 72 });
     }
 
     function phaser_create() {
@@ -174,10 +164,8 @@ export class GameConfigComponent implements OnInit {
       type: Phaser.AUTO,
       physics: { default: 'None' },
       parent: 'map-preview',
-      width:
-        this.gameConfig.map_info.width * this.gameConfig.map_info.tilewidth,
-      height:
-        this.gameConfig.map_info.height * this.gameConfig.map_info.tileheight,
+      width: this.gameConfig.map_info.width * this.gameConfig.map_info.tilewidth,
+      height: this.gameConfig.map_info.height * this.gameConfig.map_info.tileheight,
       scale: {
         mode: Phaser.Scale.FIT,
       },

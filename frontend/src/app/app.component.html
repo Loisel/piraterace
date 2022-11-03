@@ -5,23 +5,11 @@
         <ion-menu-button menu="leftmenu"></ion-menu-button>
       </ion-buttons>
 
-      <ion-title
-        ><img
-          style="display: inline-block; padding-top: 8px; height: 5ex"
-          src="assets/theme/logo.png"
-      /></ion-title>
+      <ion-title><img style="display: inline-block; padding-top: 8px; height: 5ex" src="assets/theme/logo.png" /></ion-title>
 
       <ion-buttons id="usermenu-button" slot="end">
-        <ion-icon
-          *ngIf="authService.isAuthenticated | async"
-          name="person-circle"
-          size="large"
-        ></ion-icon>
-        <ion-icon
-          *ngIf="!(authService.isAuthenticated | async)"
-          name="log-in-outline"
-          size="large"
-        ></ion-icon>
+        <ion-icon *ngIf="authService.isAuthenticated | async" name="person-circle" size="large"></ion-icon>
+        <ion-icon *ngIf="!(authService.isAuthenticated | async)" name="log-in-outline" size="large"></ion-icon>
 
         <ion-popover trigger="usermenu-button" [dismissOnSelect]="true">
           <ng-template>
@@ -68,18 +56,12 @@
         <ion-menu-toggle auto-hide="true">
           <ion-item [button]="true" routerLink="lobby">Lobby</ion-item>
         </ion-menu-toggle>
-        <ion-menu-toggle
-          auto-hide="true"
-          *ngIf="(authService.userDetail | async)?.game"
-        >
+        <ion-menu-toggle auto-hide="true" *ngIf="(authService.userDetail | async)?.game">
           <ion-item [button]="true" (click)="reconnectCurrentGame()">
             Reconnect Current Game {{ (authService.userDetail | async)?.game }}
           </ion-item>
         </ion-menu-toggle>
-        <ion-menu-toggle
-          *ngIf="(authService.userDetail | async)?.game"
-          auto-hide="true"
-        >
+        <ion-menu-toggle *ngIf="(authService.userDetail | async)?.game" auto-hide="true">
           <ion-item [button]="true" (click)="leaveGame()">Leave Game</ion-item>
         </ion-menu-toggle>
       </ion-list>

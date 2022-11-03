@@ -1,10 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {
-  FormGroup,
-  FormBuilder,
-  FormControl,
-  Validators,
-} from '@angular/forms';
+import { FormGroup, FormBuilder, FormControl, Validators } from '@angular/forms';
 import { ToastController } from '@ionic/angular';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -58,9 +53,7 @@ export class LoginComponent implements OnInit {
       (error) => {
         console.log('login returned with error', error);
         let errmsg = '';
-        Object.entries(error.error).forEach(
-          ([key, value]) => (errmsg += value + ' ')
-        );
+        Object.entries(error.error).forEach(([key, value]) => (errmsg += value + ' '));
         this.presentToast(errmsg, 'danger');
       }
     );

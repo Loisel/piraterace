@@ -1,11 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ToastController } from '@ionic/angular';
-import {
-  FormGroup,
-  FormBuilder,
-  FormControl,
-  Validators,
-} from '@angular/forms';
+import { FormGroup, FormBuilder, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { AuthService } from '../../services/auth.service';
@@ -38,19 +33,10 @@ export class RegisterComponent implements OnInit {
       username: new FormControl('', Validators.compose([Validators.required])),
       email: new FormControl(
         '',
-        Validators.compose([
-          Validators.required,
-          Validators.pattern('^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$'),
-        ])
+        Validators.compose([Validators.required, Validators.pattern('^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$')])
       ),
-      password: new FormControl(
-        '',
-        Validators.compose([Validators.minLength(8), Validators.required])
-      ),
-      confirmpassword: new FormControl(
-        '',
-        Validators.compose([Validators.minLength(8), Validators.required])
-      ),
+      password: new FormControl('', Validators.compose([Validators.minLength(8), Validators.required])),
+      confirmpassword: new FormControl('', Validators.compose([Validators.minLength(8), Validators.required])),
     });
   }
 
@@ -63,24 +49,20 @@ export class RegisterComponent implements OnInit {
   }
 
   async onSubmit(values) {
-    this.authService
-      .registerUser(values['username'], values['password'], values['email'])
-      .subscribe(
-        (ret) => {
-          console.log('register return', ret);
-          this.presentToast('User registered', 'success');
-          this.authService.login(ret['username'], values['password']);
-          this.router.navigateByUrl('/auth/userdetail');
-        },
-        (error) => {
-          console.log('register returned with error', error);
-          let errmsg = 'Error registering user!\n';
-          Object.entries(error.error).forEach(
-            ([key, value]) => (errmsg += '* ' + key + ' : ' + value + '\n')
-          );
-          this.presentToast(errmsg, 'danger');
-        }
-      );
+    this.authService.registerUser(values['username'], values['password'], values['email']).subscribe(
+      (ret) => {
+        console.log('register return', ret);
+        this.presentToast('User registered', 'success');
+        this.authService.login(ret['username'], values['password']);
+        this.router.navigateByUrl('/auth/userdetail');
+      },
+      (error) => {
+        console.log('register returned with error', error);
+        let errmsg = 'Error registering user!\n';
+        Object.entries(error.error).forEach(([key, value]) => (errmsg += '* ' + key + ' : ' + value + '\n'));
+        this.presentToast(errmsg, 'danger');
+      }
+    );
   }
 
   async presentToast(msg, color = 'primary') {

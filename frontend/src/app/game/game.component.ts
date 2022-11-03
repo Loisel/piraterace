@@ -2,14 +2,7 @@ import { IonicModule } from '@ionic/angular';
 import { ToastController } from '@ionic/angular';
 import { AlertController } from '@ionic/angular';
 import { Platform } from '@ionic/angular';
-import {
-  Component,
-  OnInit,
-  AfterViewInit,
-  OnDestroy,
-  ViewChild,
-  ElementRef,
-} from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { interval, BehaviorSubject } from 'rxjs';
 import { filter, pairwise } from 'rxjs/operators';
@@ -61,11 +54,7 @@ export class GameComponent {
     this.load_gameinfo().subscribe(
       (gameinfo) => {
         console.log('Game:', gameinfo);
-        console.log(
-          'Game_div size:',
-          this.game_div.nativeElement.offsetWidth,
-          this.game_div.nativeElement.offsetHeight
-        );
+        console.log('Game_div size:', this.game_div.nativeElement.offsetWidth, this.game_div.nativeElement.offsetHeight);
         this.gameinfo = gameinfo;
         this.Ngameround.next(gameinfo['Ngameround']);
 
@@ -92,12 +81,9 @@ export class GameComponent {
         this.config.scene = new GameScene(this);
         this.phaserGame = new Phaser.Game(this.config);
 
-        this.cards_menu.nativeElement.style.borderColor =
-          gameinfo['players'][gameinfo['me']]['color'];
-        this.tools_menu.nativeElement.style.borderColor =
-          gameinfo['players'][gameinfo['me']]['color'];
-        this.game_canvas.nativeElement.style.borderColor =
-          gameinfo['players'][gameinfo['me']]['color'];
+        this.cards_menu.nativeElement.style.borderColor = gameinfo['players'][gameinfo['me']]['color'];
+        this.tools_menu.nativeElement.style.borderColor = gameinfo['players'][gameinfo['me']]['color'];
+        this.game_canvas.nativeElement.style.borderColor = gameinfo['players'][gameinfo['me']]['color'];
       },
       (err) => console.error(err),
       () => console.log('observable complete')
@@ -134,8 +120,7 @@ export class GameComponent {
       finalize(() => this.finalizeCountDown()),
       map((_) => {
         console.log('time increment', this.countDownValue);
-        this.countDownValue =
-          this.countDownValue + (1 / (end - start)) * (updatefreq / 1000);
+        this.countDownValue = this.countDownValue + (1 / (end - start)) * (updatefreq / 1000);
         return this.countDownValue; // [0,1] for progressbar
       })
     );
@@ -177,19 +162,17 @@ export class GameComponent {
 
   onCardsReorder(event) {
     event.detail.complete(true);
-    this.httpService
-      .switchPlayerCards(event.detail.from, event.detail.to)
-      .subscribe(
-        (result) => {
-          console.log('switch cards:', result);
-          this.cardsinfo = result;
-        },
-        (error) => {
-          console.log('failed reorder cards: ', error);
-          this.presentToast(error.error.message, 'danger');
-          this.cardsinfo = error.error.cards;
-        }
-      );
+    this.httpService.switchPlayerCards(event.detail.from, event.detail.to).subscribe(
+      (result) => {
+        console.log('switch cards:', result);
+        this.cardsinfo = result;
+      },
+      (error) => {
+        console.log('failed reorder cards: ', error);
+        this.presentToast(error.error.message, 'danger');
+        this.cardsinfo = error.error.cards;
+      }
+    );
   }
 
   submitCards() {
@@ -276,19 +259,9 @@ class GameScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image(
-      'tileset',
-      `${environment.STATIC_URL}/maps/${this.component.gameinfo.map.tilesets[0].image}`
-    );
-    this.load.tilemapTiledJSON(
-      'tilemap',
-      `${environment.STATIC_URL}/maps/${this.component.gameinfo.mapfile}`
-    );
-    this.load.spritesheet(
-      'boat',
-      `${environment.STATIC_URL}/sprites/boat.png`,
-      { frameWidth: 24, frameHeight: 72 }
-    );
+    this.load.image('tileset', `${environment.STATIC_URL}/maps/${this.component.gameinfo.map.tilesets[0].image}`);
+    this.load.tilemapTiledJSON('tilemap', `${environment.STATIC_URL}/maps/${this.component.gameinfo.mapfile}`);
+    this.load.spritesheet('boat', `${environment.STATIC_URL}/sprites/boat.png`, { frameWidth: 24, frameHeight: 72 });
   }
 
   check_player_state() {
@@ -301,35 +274,18 @@ class GameScene extends Phaser.Scene {
       let boat_x = Math.floor(boat.x / GI.map.tilewidth);
       let boat_y = Math.floor(boat.y / GI.map.tileheight);
       if (boat_x !== player['pos_x']) {
-        console.log(
-          'Error: Inconsistent boat position in x ! Should be ',
-          player,
-          player['pos_x'],
-          ' in game: ',
-          boat_x
-        );
+        console.log('Error: Inconsistent boat position in x ! Should be ', player, player['pos_x'], ' in game: ', boat_x);
         valid = false;
       }
       if (boat_y !== player['pos_y']) {
-        console.log(
-          'Error: Inconsistent boat position in y ! Should be ',
-          player,
-          player['pos_y'],
-          ' in game: ',
-          boat_y
-        );
+        console.log('Error: Inconsistent boat position in y ! Should be ', player, player['pos_y'], ' in game: ', boat_y);
         valid = false;
       }
     });
     console.log('check_player_state: ', valid);
   }
 
-  update_healthbar(
-    boat_id: number,
-    damage: number,
-    time: number,
-    value: number = undefined
-  ) {
+  update_healthbar(boat_id: number, damage: number, time: number, value: number = undefined) {
     let bar = this.boats[boat_id].getChildren()[2];
     this.animationTimer = this.time.addEvent({
       callback: () => {
@@ -378,11 +334,7 @@ class GameScene extends Phaser.Scene {
     let GI = this.component.gameinfo;
     let actionstack = this.component.gameinfo.actionstack;
 
-    console.log(
-      'this.last_played_action',
-      this.last_played_action,
-      actionstack.length
-    );
+    console.log('this.last_played_action', this.last_played_action, actionstack.length);
 
     if (this.component.gameinfo.actionstack.length <= this.last_played_action) {
       return;
@@ -404,227 +356,279 @@ class GameScene extends Phaser.Scene {
       let action_grp = actionstack[i];
       for (let action of action_grp) {
         console.log('Action:', action);
-        if (action.key === 'rotate') {
-          let boatGroup = this.boats[action.target].getChildren();
-          // boat.angle += 90 * action.val;
-          let targetAngle = action.to * 90;
-          if (action.from == 0 && action.to == 3) {
-            targetAngle = -90;
-          }
-          if (action.from == 3 && action.to == 0) {
-            targetAngle = 360;
-          }
-          timeline.add({
-            targets: boatGroup,
-            duration: animation_time_ms,
-            angle: {
-              from: action.from * 90,
-              to: targetAngle,
-            },
-            offset: offset,
-          });
-        } else if (action.key === 'move_x') {
-          let boatGroup = this.boats[action.target].getChildren();
-          timeline.add({
-            targets: boatGroup,
-            duration: animation_time_ms,
-            x: {
-              from: (action.from + 0.5) * GI.map.tilewidth,
-              to: (action.to + 0.5) * GI.map.tilewidth,
-            },
-            offset: offset,
-          });
-        } else if (action.key === 'move_y') {
-          let boatGroup = this.boats[action.target].getChildren();
-          timeline.add({
-            targets: boatGroup,
-            duration: animation_time_ms,
-            y: {
-              from: (action.from + 0.5) * GI.map.tileheight,
-              to: (action.to + 0.5) * GI.map.tileheight,
-            },
-            offset: offset,
-          });
-        } else if (action.key === 'collision_x') {
-          let wiggle_delta_x = GI.map.tilewidth * 0.1;
-          let nWiggles = 4;
-          let boatGroup = this.boats[action.target].getChildren();
-          timeline.add({
-            targets: boatGroup,
-            x: function (target, key, value) {
-              return value + action.val * wiggle_delta_x;
-            },
-            offset: offset,
-            duration: animation_time_ms / (nWiggles * 2),
-            yoyo: true,
-            repeat: nWiggles,
-            callbackScope: this,
-            onComplete: function () {
-              this.update_healthbar(action.target, action.damage, 0);
-            },
-          });
-        } else if (action.key === 'collision_y') {
-          let boatGroup = this.boats[action.target].getChildren();
-          let wiggle_delta_y = GI.map.tileheight * 0.1;
-          let nWiggles = 4;
-          timeline.add({
-            targets: boatGroup,
-            y: function (target, key, value) {
-              return value + action.val * wiggle_delta_y;
-            },
-            duration: animation_time_ms / (nWiggles * 2),
-            repeat: nWiggles,
-            offset: offset,
-            yoyo: true,
-            onComplete: function () {
-              this.update_healthbar(action.target, action.damage, 0);
-            },
-            callbackScope: this,
-          });
-        } else if (action.key === 'shot') {
-          let cannonball = this.add.circle(
-            (action.src_x + 0.5) * GI.map.tilewidth,
-            (action.src_y + 0.5) * GI.map.tilewidth,
-            7,
-            0
-          );
-          cannonball.setVisible(false);
-          timeline.add({
-            targets: cannonball,
-            x: (action.collided_at[0] + 0.5) * GI.map.tilewidth,
-            y: (action.collided_at[1] + 0.5) * GI.map.tilewidth,
-            callbackScope: this,
-            onStart: function (tween, target) {
-              cannonball.setVisible(true);
-            },
-            onComplete: function (tween, target) {
-              cannonball.destroy();
-              if (action.other_player !== undefined) {
-                this.update_healthbar(action.other_player, action.damage, 0);
-              }
-            },
-            duration: (animation_time_ms * 2) / 3,
-            offset: offset,
-          });
-          if (action.other_player !== undefined) {
-            timeline.add(
-              this.showStars(
-                this.getTileX(action.collided_at[0]),
-                this.getTileY(action.collided_at[1]),
-                0xff0000,
-                animation_time_ms / 3,
-                offset + (animation_time_ms * 2) / 3
-              )
-            );
-          }
-        } else if (action.key === 'death') {
-          let boatGroup = this.boats[action.target].getChildren();
-          if (action.type === 'void') {
-            timeline.add({
-              targets: boatGroup,
-              scale: '-=1',
-              angle: '+=360',
-              offset: offset,
-            });
-          } else if (action.type === 'collision') {
-            timeline.add({
-              targets: boatGroup,
-              scale: '-=1',
-              offset: offset,
-            });
-          } else if (action.type === 'cannon') {
-            timeline.add({
-              targets: boatGroup,
-              scale: '-=1',
-              offset: offset,
-            });
-          } else {
-            console.log('unknown type of death: ', action.type);
-          }
-        } else if (action.key === 'respawn') {
-          let boatGroup = this.boats[action.target].getChildren();
-          timeline.add({
-            targets: boatGroup,
-            scale: '+=1',
-            offset: offset,
-            onStart: function () {
-              let boatGroup = this.boats[action.target];
-              boatGroup.setXY(
-                this.getTileX(action.posx),
-                this.getTileY(action.posy)
-              );
-              let pboat = boatGroup.getChildren()[0];
-              pboat.setAngle(90 * action['direction']);
-            },
-            onComplete: function () {
-              this.update_healthbar(action.target, 0, 0, action.health);
-            },
-            callbackScope: this,
-          });
-        } else if (action.key === 'repair') {
-          let boatGroup = this.boats[action.target].getChildren();
-          timeline.add(
-            this.showStars(
-              this.getTileX(action.posx),
-              this.getTileY(action.posy),
-              0x00ff00,
-              animation_time_ms,
-              offset
-            )
-          );
-
-          timeline.add({
-            targets: boatGroup,
-            offset: offset,
-            onComplete: function () {
-              this.update_healthbar(action.target, -action.val, 0);
-            },
-            callbackScope: this,
-          });
-        } else if (action.key === 'card_is_played') {
-          if (action.target === this.component.gameinfo.me) {
-            let boatGroup = this.boats[action.target].getChildren();
-            timeline.add({
-              targets: boatGroup,
-              offset: offset,
-              onComplete: function () {
-                this.component.highlightedCardSlot = action.cardslot;
-              },
-              callbackScope: this,
-            });
-          }
-        } else if (action.key === 'powerdownrepair') {
-          let boatGroup = this.boats[action.target].getChildren();
-          timeline.add({
-            targets: boatGroup,
-            offset: offset,
-            duration: 0,
-            onComplete: function () {
-              this.update_healthbar(action.target, 0, 0, action.health);
-            },
-            callbackScope: this,
-          });
-        } else if (action.key === 'win') {
-          let boatGroup = this.boats[action.target].getChildren();
-          timeline.add({
-            targets: boatGroup,
-            offset: offset,
-            duration: 0,
-            onComplete: function () {
-              this.updateTimer.paused = true;
-              this.component.presentSummary();
-            },
-            callbackScope: this,
-          });
-        } else {
-          console.log('Error, key not found.');
-        }
+        this.timeline_add_rotate(timeline, action, animation_time_ms, offset);
+        this.timeline_add_move_x(timeline, action, animation_time_ms, offset);
+        this.timeline_add_move_y(timeline, action, animation_time_ms, offset);
+        this.timeline_add_collision_x(timeline, action, animation_time_ms, offset);
+        this.timeline_add_collision_y(timeline, action, animation_time_ms, offset);
+        this.timeline_add_shot(timeline, action, animation_time_ms, offset);
+        this.timeline_add_death(timeline, action, animation_time_ms, offset);
+        this.timeline_add_respawn(timeline, action, animation_time_ms, offset);
+        this.timeline_add_repair(timeline, action, animation_time_ms, offset);
+        this.timeline_add_card_is_played(timeline, action, animation_time_ms, offset);
+        this.timeline_add_powerdownrepair(timeline, action, animation_time_ms, offset);
+        this.timeline_add_win(timeline, action, animation_time_ms, offset);
       }
     }
 
     console.log('Timeline: ', timeline);
     timeline.play();
     this.last_played_action = actionstack.length;
+  }
+
+  timeline_add_rotate(timeline, action, animation_time_ms, offset) {
+    if (action.key === 'rotate') {
+      let boatGroup = this.boats[action.target].getChildren();
+      // boat.angle += 90 * action.val;
+      let targetAngle = action.to * 90;
+      if (action.from == 0 && action.to == 3) {
+        targetAngle = -90;
+      }
+      if (action.from == 3 && action.to == 0) {
+        targetAngle = 360;
+      }
+      timeline.add({
+        targets: boatGroup,
+        duration: animation_time_ms,
+        angle: {
+          from: action.from * 90,
+          to: targetAngle,
+        },
+        offset: offset,
+      });
+    }
+  }
+
+  timeline_add_move_x(timeline, action, animation_time_ms, offset) {
+    if (action.key === 'move_x') {
+      let GI = this.component.gameinfo;
+      let boatGroup = this.boats[action.target].getChildren();
+      timeline.add({
+        targets: boatGroup,
+        duration: animation_time_ms,
+        x: {
+          from: (action.from + 0.5) * GI.map.tilewidth,
+          to: (action.to + 0.5) * GI.map.tilewidth,
+        },
+        offset: offset,
+      });
+    }
+  }
+
+  timeline_add_move_y(timeline, action, animation_time_ms, offset) {
+    if (action.key === 'move_y') {
+      let GI = this.component.gameinfo;
+      let boatGroup = this.boats[action.target].getChildren();
+      timeline.add({
+        targets: boatGroup,
+        duration: animation_time_ms,
+        y: {
+          from: (action.from + 0.5) * GI.map.tileheight,
+          to: (action.to + 0.5) * GI.map.tileheight,
+        },
+        offset: offset,
+      });
+    }
+  }
+
+  timeline_add_collision_x(timeline, action, animation_time_ms, offset) {
+    if (action.key === 'collision_x') {
+      let GI = this.component.gameinfo;
+      let wiggle_delta_x = GI.map.tilewidth * 0.1;
+      let nWiggles = 4;
+      let boatGroup = this.boats[action.target].getChildren();
+      timeline.add({
+        targets: boatGroup,
+        x: function (target, key, value) {
+          return value + action.val * wiggle_delta_x;
+        },
+        offset: offset,
+        duration: animation_time_ms / (nWiggles * 2),
+        yoyo: true,
+        repeat: nWiggles,
+        callbackScope: this,
+        onComplete: function () {
+          this.update_healthbar(action.target, action.damage, 0);
+        },
+      });
+    }
+  }
+
+  timeline_add_collision_y(timeline, action, animation_time_ms, offset) {
+    if (action.key === 'collision_y') {
+      let GI = this.component.gameinfo;
+      let boatGroup = this.boats[action.target].getChildren();
+      let wiggle_delta_y = GI.map.tileheight * 0.1;
+      let nWiggles = 4;
+      timeline.add({
+        targets: boatGroup,
+        y: function (target, key, value) {
+          return value + action.val * wiggle_delta_y;
+        },
+        duration: animation_time_ms / (nWiggles * 2),
+        repeat: nWiggles,
+        offset: offset,
+        yoyo: true,
+        onComplete: function () {
+          this.update_healthbar(action.target, action.damage, 0);
+        },
+        callbackScope: this,
+      });
+    }
+  }
+
+  timeline_add_shot(timeline, action, animation_time_ms, offset) {
+    if (action.key === 'shot') {
+      let GI = this.component.gameinfo;
+      let cannonball = this.add.circle((action.src_x + 0.5) * GI.map.tilewidth, (action.src_y + 0.5) * GI.map.tilewidth, 7, 0);
+      cannonball.setVisible(false);
+      timeline.add({
+        targets: cannonball,
+        x: (action.collided_at[0] + 0.5) * GI.map.tilewidth,
+        y: (action.collided_at[1] + 0.5) * GI.map.tilewidth,
+        callbackScope: this,
+        onStart: function (tween, target) {
+          cannonball.setVisible(true);
+        },
+        onComplete: function (tween, target) {
+          cannonball.destroy();
+          if (action.other_player !== undefined) {
+            this.update_healthbar(action.other_player, action.damage, 0);
+          }
+        },
+        duration: (animation_time_ms * 2) / 3,
+        offset: offset,
+      });
+      if (action.other_player !== undefined) {
+        timeline.add(
+          this.showStars(
+            this.getTileX(action.collided_at[0]),
+            this.getTileY(action.collided_at[1]),
+            0xff0000,
+            animation_time_ms / 3,
+            offset + (animation_time_ms * 2) / 3
+          )
+        );
+      }
+    }
+  }
+
+  timeline_add_death(timeline, action, animation_time_ms, offset) {
+    if (action.key === 'death') {
+      let boatGroup = this.boats[action.target].getChildren();
+      if (action.type === 'void') {
+        timeline.add({
+          targets: boatGroup,
+          scale: '-=1',
+          angle: '+=360',
+          offset: offset,
+          duration: animation_time_ms,
+        });
+      } else if (action.type === 'collision') {
+        timeline.add({
+          targets: boatGroup,
+          scale: '-=1',
+          offset: offset,
+          duration: animation_time_ms,
+        });
+      } else if (action.type === 'cannon') {
+        timeline.add({
+          targets: boatGroup,
+          scale: '-=1',
+          offset: offset,
+          duration: animation_time_ms,
+        });
+      } else {
+        console.log('unknown type of death: ', action.type);
+      }
+    }
+  }
+
+  timeline_add_respawn(timeline, action, animation_time_ms, offset) {
+    if (action.key === 'respawn') {
+      let boatGroup = this.boats[action.target].getChildren();
+      timeline.add({
+        targets: boatGroup,
+        scale: '+=1',
+        offset: offset,
+        duration: animation_time_ms,
+        onStart: function () {
+          let boatGroup = this.boats[action.target];
+          boatGroup.setXY(this.getTileX(action.posx), this.getTileY(action.posy));
+          let pboat = boatGroup.getChildren()[0];
+          pboat.setAngle(90 * action['direction']);
+        },
+        onComplete: function () {
+          this.update_healthbar(action.target, 0, 0, action.health);
+        },
+        callbackScope: this,
+      });
+    }
+  }
+
+  timeline_add_repair(timeline, action, animation_time_ms, offset) {
+    if (action.key === 'repair') {
+      let boatGroup = this.boats[action.target].getChildren();
+      timeline.add(this.showStars(this.getTileX(action.posx), this.getTileY(action.posy), 0x00ff00, animation_time_ms, offset));
+
+      timeline.add({
+        targets: boatGroup,
+        offset: offset,
+        duration: animation_time_ms,
+        onComplete: function () {
+          this.update_healthbar(action.target, -action.val, 0);
+        },
+        callbackScope: this,
+      });
+    }
+  }
+
+  timeline_add_card_is_played(timeline, action, animation_time_ms, offset) {
+    if (action.key === 'card_is_played') {
+      if (action.target === this.component.gameinfo.me) {
+        let boatGroup = this.boats[action.target].getChildren();
+        timeline.add({
+          targets: boatGroup,
+          offset: offset,
+          duration: animation_time_ms,
+          onComplete: function () {
+            this.component.highlightedCardSlot = action.cardslot;
+          },
+          callbackScope: this,
+        });
+      }
+    }
+  }
+
+  timeline_add_powerdownrepair(timeline, action, animation_time_ms, offset) {
+    if (action.key === 'powerdownrepair') {
+      let boatGroup = this.boats[action.target].getChildren();
+      timeline.add({
+        targets: boatGroup,
+        offset: offset,
+        duration: 0,
+        onComplete: function () {
+          this.update_healthbar(action.target, 0, 0, action.health);
+        },
+        callbackScope: this,
+      });
+    }
+  }
+
+  timeline_add_win(timeline, action, animation_time_ms, offset) {
+    if (action.key === 'win') {
+      let boatGroup = this.boats[action.target].getChildren();
+      timeline.add({
+        targets: boatGroup,
+        offset: offset,
+        duration: 0,
+        onComplete: function () {
+          this.updateTimer.paused = true;
+          this.component.presentSummary();
+        },
+        callbackScope: this,
+      });
+    }
   }
 
   showStars(x, y, color, duration, offset) {
@@ -647,95 +651,6 @@ class GameScene extends Phaser.Scene {
     };
   }
 
-  create() {
-    let GI = this.component.gameinfo;
-
-    // create the Tilemap
-    const map = this.make.tilemap({
-      key: 'tilemap',
-      tileWidth: GI.map.tilewidth,
-      tileHeight: GI.map.tileheight,
-    });
-
-    // add the tileset image we are using
-    const tileset = map.addTilesetImage(GI.map.tilesets[0].name, 'tileset');
-
-    // create the layers we want in the right order
-    map.createLayer(GI.map.layers[0].name, tileset, 0, 0);
-
-    this.drawGrid();
-    this.drawCheckpoints();
-
-    Object.entries(GI.players).forEach(([playerid, player]) => {
-      let color = Phaser.Display.Color.HexStringToColor(player['color']);
-      let backdrop = this.add.rectangle(
-        (player['pos_x'] + 0.5) * GI.map.tilewidth,
-        (player['pos_y'] + 0.5) * GI.map.tileheight,
-        GI.map.tilewidth,
-        GI.map.tileheight,
-        color.color,
-        0.75
-      );
-
-      var boat = this.add.sprite(
-        (player['pos_x'] + 0.5) * GI.map.tilewidth,
-        (player['pos_y'] + 0.5) * GI.map.tileheight,
-        'boat'
-      );
-      //set the width of the sprite
-      boat.displayHeight = GI.map.tileheight * 1.1;
-      //scale evenly
-      boat.scaleX = boat.scaleY;
-      boat.angle = player['direction'] * 90;
-
-      let hp = new HealthBar(
-        this,
-        (player['pos_x'] + 0.5) * GI.map.tilewidth,
-        (player['pos_y'] + 0.5) * GI.map.tileheight,
-        GI.map.tilewidth * 0.8,
-        GI.map.tileheight * 0.12,
-        player['health']
-      );
-
-      let group = this.add.group();
-      group.add(boat);
-      group.add(backdrop);
-      group.add(hp);
-      this.boats[playerid] = group;
-    });
-
-    // camera draggable, start on player boat
-    var cam = this.cameras.main;
-    var myBoat = this.boats[GI.me].getChildren()[0];
-    // would be nice to have camera respect bounds, but tests with responsive mode not successful
-    cam.centerOn(myBoat.x, myBoat.y);
-    //cam.setBounds(0, 0, GI.map.tilewidth * GI.map.width, GI.map.tileheight * GI.map.height);
-
-    this.input.on('pointermove', function (p) {
-      if (!p.isDown) return;
-
-      cam.scrollX -= (p.x - p.prevPosition.x) / cam.zoom;
-      cam.scrollY -= (p.y - p.prevPosition.y) / cam.zoom;
-    });
-
-    //this.play_actionstack(20); // play the first action stack really quickly in case user does a reload
-    // Object.entries(GI.players).forEach(([playerid, player]) => {
-    //   this.boats[playerid].setX(this.getTileX(player['pos_x']));
-    //   this.boats[playerid].setY(this.getTileY(player['pos_y']));
-    //   this.boats[playerid].rotate((player['direction'] * Math.PI) / 2);
-    //   this.update_healthbar(+playerid, 0, 0, player['health']);
-    // });
-    this.last_played_action = this.component.gameinfo.actionstack.length;
-    // TODO: now because we dont play all acions after reload, the win condition may never be played... need to talk to Al about this...
-
-    this.updateTimer = this.time.addEvent({
-      callback: this.updateEvent,
-      callbackScope: this,
-      delay: 1000, // 1000 = 1 second
-      loop: true,
-    });
-  }
-
   drawCheckpoints(): void {
     for (let text of this.checkpointLabels) {
       text.destroy();
@@ -750,17 +665,12 @@ class GameScene extends Phaser.Scene {
       } else if (name == next_cp) {
         color = 'red';
       }
-      let num = this.add.text(
-        (pos[0] + 0.5) * GI.map.tilewidth,
-        (pos[1] + 0.5) * GI.map.tileheight,
-        name,
-        {
-          fontSize: '30px',
-          strokeThickness: 5,
-          stroke: color,
-          color: color,
-        }
-      );
+      let num = this.add.text((pos[0] + 0.5) * GI.map.tilewidth, (pos[1] + 0.5) * GI.map.tileheight, name, {
+        fontSize: '30px',
+        strokeThickness: 5,
+        stroke: color,
+        color: color,
+      });
       num.setOrigin(0.5, 0.5);
       this.checkpointLabels.push(num);
     });
@@ -786,6 +696,41 @@ class GameScene extends Phaser.Scene {
     }
   }
 
+  drawBoat(player) {
+    let GI = this.component.gameinfo;
+    let color = Phaser.Display.Color.HexStringToColor(player['color']);
+    let backdrop = this.add.rectangle(
+      (player['pos_x'] + 0.5) * GI.map.tilewidth,
+      (player['pos_y'] + 0.5) * GI.map.tileheight,
+      GI.map.tilewidth,
+      GI.map.tileheight,
+      color.color,
+      0.75
+    );
+
+    var boat = this.add.sprite((player['pos_x'] + 0.5) * GI.map.tilewidth, (player['pos_y'] + 0.5) * GI.map.tileheight, 'boat');
+    //set the width of the sprite
+    boat.displayHeight = GI.map.tileheight * 1.1;
+    //scale evenly
+    boat.scaleX = boat.scaleY;
+    boat.angle = player['direction'] * 90;
+
+    let hp = new HealthBar(
+      this,
+      (player['pos_x'] + 0.5) * GI.map.tilewidth,
+      (player['pos_y'] + 0.5) * GI.map.tileheight,
+      GI.map.tilewidth * 0.8,
+      GI.map.tileheight * 0.12,
+      player['health']
+    );
+
+    let group = this.add.group();
+    group.add(boat);
+    group.add(backdrop);
+    group.add(hp);
+    return group;
+  }
+
   updateEvent(): void {
     this.component.load_gameinfo().subscribe((gameinfo) => {
       console.log('GameInfo ', gameinfo);
@@ -796,12 +741,64 @@ class GameScene extends Phaser.Scene {
 
       if (gameinfo.countdown) {
         if (this.component.countDownValue < 0) {
-          this.component.setupCountDown(
-            gameinfo.countdown_duration - gameinfo.countdown,
-            gameinfo.countdown_duration
-          );
+          this.component.setupCountDown(gameinfo.countdown_duration - gameinfo.countdown, gameinfo.countdown_duration);
         }
       }
+    });
+  }
+
+  create() {
+    let GI = this.component.gameinfo;
+
+    // create the Tilemap
+    const map = this.make.tilemap({
+      key: 'tilemap',
+      tileWidth: GI.map.tilewidth,
+      tileHeight: GI.map.tileheight,
+    });
+
+    // add the tileset image we are using
+    const tileset = map.addTilesetImage(GI.map.tilesets[0].name, 'tileset');
+
+    // create the layers we want in the right order
+    map.createLayer(GI.map.layers[0].name, tileset, 0, 0);
+
+    this.drawGrid();
+    this.drawCheckpoints();
+
+    Object.entries(GI.players).forEach(([playerid, player]) => {
+      this.boats[playerid] = this.drawBoat(player);
+    });
+
+    // camera draggable, start on player boat
+    var cam = this.cameras.main;
+    var myBoat = this.boats[GI.me].getChildren()[0];
+    // would be nice to have camera respect bounds, but tests with responsive mode not successful
+    cam.centerOn(myBoat.x, myBoat.y);
+    //cam.setBounds(0, 0, GI.map.tilewidth * GI.map.width, GI.map.tileheight * GI.map.height);
+
+    this.input.on('pointermove', function (p) {
+      if (!p.isDown) return;
+
+      cam.scrollX -= (p.x - p.prevPosition.x) / cam.zoom;
+      cam.scrollY -= (p.y - p.prevPosition.y) / cam.zoom;
+    });
+
+    // this.play_actionstack(200); // play the first action stack really quickly in case user does a reload
+    // Object.entries(GI.players).forEach(([playerid, player]) => {
+    //   this.boats[playerid].setX(this.getTileX(player['pos_x']));
+    //   this.boats[playerid].setY(this.getTileY(player['pos_y']));
+    //   this.boats[playerid].rotate((player['direction'] * Math.PI) / 2);
+    //   this.update_healthbar(+playerid, 0, 0, player['health']);
+    // });
+    this.last_played_action = this.component.gameinfo.actionstack.length;
+    // TODO: now because we dont play all acions after reload, the win condition may never be played... need to talk to Al about this...
+
+    this.updateTimer = this.time.addEvent({
+      callback: this.updateEvent,
+      callbackScope: this,
+      delay: 1000, // 1000 = 1 second
+      loop: true,
     });
   }
 }
@@ -860,12 +857,7 @@ class HealthBar extends Phaser.GameObjects.Container {
     //  Health
 
     this.bar.fillStyle(0xffffff);
-    this.bar.fillRect(
-      xoffset + 2,
-      yoffset + 2,
-      this.width - 4,
-      this.height - 2
-    );
+    this.bar.fillRect(xoffset + 2, yoffset + 2, this.width - 4, this.height - 2);
 
     console.log('initial health:', this.initial_health, 'value:', this.value);
     if (this.value <= this.initial_health * 0.3) {

@@ -3,16 +3,8 @@
     <ion-row>
       <ion-item>
         <ion-label>Select Map</ion-label>
-        <ion-select
-          placeholder="Select map"
-          interface="popover"
-          cancelText="Cancel"
-          (ionChange)="selectMapChange($event)"
-        >
-          <ion-select-option
-            *ngFor="let map of data?.available_maps"
-            [value]="map"
-          >
+        <ion-select placeholder="Select map" interface="popover" cancelText="Cancel" (ionChange)="selectMapChange($event)">
+          <ion-select-option *ngFor="let map of data?.available_maps" [value]="map">
             {{ map }}
           </ion-select-option>
         </ion-select>
@@ -24,16 +16,12 @@
       </ion-col>
       <ion-col>
         <ion-list>
-          <ion-item *ngIf="data?.map_info"
-            >Number of players: {{ data.Nmaxplayers }}</ion-item
-          >
+          <ion-item *ngIf="data?.map_info">Number of players: {{ data.Nmaxplayers }}</ion-item>
         </ion-list>
       </ion-col>
     </ion-row>
     <ion-row>
-      <ion-button *ngIf="data?.map_info" (click)="createGameConfig($event)"
-        >Create Game</ion-button
-      >
+      <ion-button *ngIf="data?.map_info" (click)="createGameConfig($event)">Create Game</ion-button>
     </ion-row>
   </ion-grid>
 </ion-content>

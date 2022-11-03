@@ -1,92 +1,42 @@
 <ion-content class="content">
   <h1>Register a new User</h1>
 
-  <form
-    class="form div-item"
-    [formGroup]="validations_form"
-    (ngSubmit)="onSubmit(validations_form.value)"
-  >
+  <form class="form div-item" [formGroup]="validations_form" (ngSubmit)="onSubmit(validations_form.value)">
     <ion-list>
       <ion-item class="item-input">
         <ion-icon slot="start" name="person-outline"></ion-icon>
-        <ion-input
-          inputmode="text"
-          autofocus="true"
-          formControlName="username"
-          placeholder="{{ 'username' }}"
-        ></ion-input>
+        <ion-input inputmode="text" autofocus="true" formControlName="username" placeholder="{{ 'username' }}"></ion-input>
       </ion-item>
       <ion-item class="item-input">
         <ion-icon slot="start" name="mail-outline"></ion-icon>
-        <ion-input
-          inputmode="email"
-          formControlName="email"
-          placeholder="Email"
-        ></ion-input>
+        <ion-input inputmode="email" formControlName="email" placeholder="Email"></ion-input>
       </ion-item>
-      <small
-        ion-text
-        class="errors"
-        *ngIf="
-          !validations_form.controls.email.valid &&
-          validations_form.get('email').touched
-        "
-      >
+      <small ion-text class="errors" *ngIf="!validations_form.controls.email.valid && validations_form.get('email').touched">
         {{ "Please enter an email" }}
       </small>
       <ion-item class="item-input">
         <ion-icon slot="start" name="lock-closed-outline"></ion-icon>
-        <ion-input
-          [type]="passwordType"
-          formControlName="password"
-          placeholder="{{ 'password' }}"
-        ></ion-input>
-        <ion-icon
-          [name]="passwordIcon"
-          item-end
-          (click)="showPassword()"
-        ></ion-icon>
+        <ion-input [type]="passwordType" formControlName="password" placeholder="{{ 'password' }}"></ion-input>
+        <ion-icon [name]="passwordIcon" item-end (click)="showPassword()"></ion-icon>
       </ion-item>
-      <small
-        ion-text
-        class="errors"
-        *ngIf="
-          !validations_form.controls.password.valid &&
-          validations_form.get('password').touched
-        "
-      >
+      <small ion-text class="errors" *ngIf="!validations_form.controls.password.valid && validations_form.get('password').touched">
         {{ "Password must be 8 characters minimum. Please enter again" }}
       </small>
       <ion-item class="animated fadeInRight item-input">
         <ion-icon slot="start" name="lock-closed-outline"></ion-icon>
-        <ion-input
-          [type]="passwordType"
-          formControlName="confirmpassword"
-          placeholder="{{ 'confirm password' }}"
-        ></ion-input>
-        <ion-icon
-          [name]="passwordIcon"
-          item-end
-          (click)="showPassword()"
-        ></ion-icon>
+        <ion-input [type]="passwordType" formControlName="confirmpassword" placeholder="{{ 'confirm password' }}"></ion-input>
+        <ion-icon [name]="passwordIcon" item-end (click)="showPassword()"></ion-icon>
       </ion-item>
       <small
         ion-text
         class="errors"
-        *ngIf="
-          !validations_form.controls.confirmpassword.valid &&
-          validations_form.get('confirmpassword').touched
-        "
+        *ngIf="!validations_form.controls.confirmpassword.valid && validations_form.get('confirmpassword').touched"
       >
         {{ "Password must be 8 characters minimum. Please enter again" }}
       </small>
     </ion-list>
 
-    <ion-button
-      class="btn-reg"
-      type="submit"
-      [disabled]="!validations_form.valid"
-    >
+    <ion-button class="btn-reg" type="submit" [disabled]="!validations_form.valid">
       {{ "Register" }}
     </ion-button>
   </form>

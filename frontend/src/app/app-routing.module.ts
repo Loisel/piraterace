@@ -9,13 +9,11 @@ const routes: Routes = [
   },
   {
     path: 'home',
-    loadChildren: () =>
-      import('./home/home.module').then((m) => m.HomePageModule),
+    loadChildren: () => import('./home/home.module').then((m) => m.HomePageModule),
   },
   {
     path: 'lobby',
-    loadChildren: () =>
-      import('./lobby/lobby.module').then((m) => m.LobbyModule),
+    loadChildren: () => import('./lobby/lobby.module').then((m) => m.LobbyModule),
     canLoad: [AuthGuard],
   },
   {

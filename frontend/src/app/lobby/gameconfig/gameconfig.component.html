@@ -13,48 +13,18 @@
           <ion-col>Team</ion-col>
           <ion-col>Ready?</ion-col>
         </ion-row>
-        <div
-          *ngFor="let p of gameConfig?.player_ids; let i = index"
-          [attr.data-index]="p"
-        >
-          <div
-            *ngIf="
-              p === gameConfig?.caller_id;
-              then my_player_info;
-              else other_player_info
-            "
-          ></div>
+        <div *ngFor="let p of gameConfig?.player_ids; let i = index" [attr.data-index]="p">
+          <div *ngIf="p === gameConfig?.caller_id; then my_player_info; else other_player_info"></div>
 
           <ng-template #other_player_info>
             <ion-row>
               <ion-col>{{ gameConfig?.player_names[i] }}</ion-col>
-              <ion-col
-                [ngStyle]="{ 'background-color': gameConfig?.player_colors[i] }"
-              ></ion-col>
+              <ion-col [ngStyle]="{ 'background-color': gameConfig?.player_colors[i] }"></ion-col>
               <ion-col>{{ gameConfig?.player_teams[i] }}</ion-col>
               <ion-col>
-                <span
-                  *ngIf="
-                    gameConfig?.player_ready[i];
-                    then ready_icon;
-                    else not_ready_icon
-                  "
-                  class="ion-text-center"
-                ></span>
-                <ng-template #ready_icon
-                  ><ion-icon
-                    color="success"
-                    size="large"
-                    name="checkmark-circle"
-                  ></ion-icon
-                ></ng-template>
-                <ng-template #not_ready_icon
-                  ><ion-icon
-                    color="danger"
-                    size="large"
-                    name="close-circle"
-                  ></ion-icon
-                ></ng-template>
+                <span *ngIf="gameConfig?.player_ready[i]; then ready_icon; else not_ready_icon" class="ion-text-center"></span>
+                <ng-template #ready_icon><ion-icon color="success" size="large" name="checkmark-circle"></ion-icon></ng-template>
+                <ng-template #not_ready_icon><ion-icon color="danger" size="large" name="close-circle"></ion-icon></ng-template>
               </ion-col>
             </ion-row>
           </ng-template>
@@ -64,23 +34,16 @@
               <ion-col>{{ gameConfig?.player_names[i] }}</ion-col>
               <ion-col>
                 <ion-select
-                  value="{{
-                    gameConfig?.player_colors[gameConfig?.caller_idx]
-                  }}"
+                  value="{{ gameConfig?.player_colors[gameConfig?.caller_idx] }}"
                   [ngStyle]="{
-                    'background-color':
-                      gameConfig?.player_colors[gameConfig?.caller_idx]
+                    'background-color': gameConfig?.player_colors[gameConfig?.caller_idx]
                   }"
                   id="color_select"
                   (ionChange)="onPlayerInfoChange($event)"
-                  [(ngModel)]="
-                    gameConfig?.player_colors[gameConfig?.caller_idx]
-                  "
+                  [(ngModel)]="gameConfig?.player_colors[gameConfig?.caller_idx]"
                 >
                   <ion-select-option
-                    *ngFor="
-                      let color of gameConfig?.player_color_choices | keyvalue
-                    "
+                    *ngFor="let color of gameConfig?.player_color_choices | keyvalue"
                     [attr.value]="color.value"
                     [ngStyle]="{ 'background-color': color.value }"
                     >{{ color.key }}</ion-select-option
@@ -89,9 +52,7 @@
               </ion-col>
               <ion-col>
                 <ion-input
-                  placeholder="{{
-                    gameConfig?.player_teams[gameConfig?.caller_idx]
-                  }}"
+                  placeholder="{{ gameConfig?.player_teams[gameConfig?.caller_idx] }}"
                   inputmode="numeric"
                   type="number"
                   (ionChange)="onPlayerInfoChange($event)"
@@ -101,9 +62,7 @@
               </ion-col>
               <ion-col>
                 <ion-checkbox
-                  checked="{{
-                    gameConfig?.player_ready[gameConfig?.caller_idx]
-                  }}"
+                  checked="{{ gameConfig?.player_ready[gameConfig?.caller_idx] }}"
                   id="ready_check"
                   (ionChange)="onPlayerInfoChange($event)"
                   [(ngModel)]="gameConfig?.player_ready[gameConfig?.caller_idx]"
@@ -116,10 +75,7 @@
 
         <ion-row>
           <ion-col *ngIf="gameConfig?.creator_userid === gameConfig?.caller_id">
-            <ion-button
-              [disabled]="!gameConfig?.all_ready"
-              (click)="createGame()"
-            >
+            <ion-button [disabled]="!gameConfig?.all_ready" (click)="createGame()">
               <span>Start</span>
             </ion-button>
           </ion-col>
@@ -127,10 +83,7 @@
         <ion-row>
           <ion-col>
             <ion-button color="secondary">
-              <a
-                target="_blank"
-                rel="noopener noreferrer"
-                href="https://meet.jit.si/piraterace_{{ gameConfig?.id }}"
+              <a target="_blank" rel="noopener noreferrer" href="https://meet.jit.si/piraterace_{{ gameConfig?.id }}"
                 ><ion-icon name="videocam-outline" size="large"></ion-icon
               ></a>
             </ion-button>
