@@ -285,41 +285,12 @@ class GameScene extends Phaser.Scene {
     console.log('check_player_state: ', valid);
   }
 
-  update_healthbar(boat_id: number, damage: number, time: number, value: number = undefined) {
+  update_healthbar(boat_id: number, damage: number, value: number = undefined) {
     let bar = this.boats[boat_id].getChildren()[2];
-    this.animationTimer = this.time.addEvent({
-      callback: () => {
-        if (value) {
-          bar.setHealth(value);
-        } else {
-          bar.decrease(damage);
-        }
-      },
-      callbackScope: this,
-      delay: time, // 1000 = 1 second
-      repeat: 0,
-    });
-  }
-
-  flush_down_boat(boat_id: number, time: number) {
-    let GI = this.component.gameinfo;
-    let GIplayer = this.component.gameinfo.players[boat_id];
-    time *= this.anim_frac;
-    let N = 8;
-    let frame_delay = time / N;
-    let angle = (2 * Math.PI) / N;
-    let boat = this.boats[boat_id];
-    if (frame_delay < this.anim_cutoff) {
+    if (value) {
+      bar.setHealth(value);
     } else {
-      this.animationTimer = this.time.addEvent({
-        callback: () => {
-          boat.scaleXY(-1 / N, -1 / N);
-          boat.rotate(angle);
-        },
-        callbackScope: this,
-        delay: frame_delay, // 1000 = 1 second
-        repeat: N - 1,
-      });
+      bar.decrease(damage);
     }
   }
 
@@ -448,7 +419,7 @@ class GameScene extends Phaser.Scene {
         repeat: nWiggles,
         callbackScope: this,
         onComplete: function () {
-          this.update_healthbar(action.target, action.damage, 0);
+          this.update_healthbar(action.target, action.damage);
         },
       });
     }
@@ -470,7 +441,7 @@ class GameScene extends Phaser.Scene {
         offset: offset,
         yoyo: true,
         onComplete: function () {
-          this.update_healthbar(action.target, action.damage, 0);
+          this.update_healthbar(action.target, action.damage);
         },
         callbackScope: this,
       });
@@ -493,7 +464,7 @@ class GameScene extends Phaser.Scene {
         onComplete: function (tween, target) {
           cannonball.destroy();
           if (action.other_player !== undefined) {
-            this.update_healthbar(action.other_player, action.damage, 0);
+            this.update_healthbar(action.other_player, action.damage);
           }
         },
         duration: (animation_time_ms * 2) / 3,
@@ -559,7 +530,7 @@ class GameScene extends Phaser.Scene {
           pboat.setAngle(90 * action['direction']);
         },
         onComplete: function () {
-          this.update_healthbar(action.target, 0, 0, action.health);
+          this.update_healthbar(action.target, 0, action.health);
         },
         callbackScope: this,
       });
@@ -576,7 +547,7 @@ class GameScene extends Phaser.Scene {
         offset: offset,
         duration: animation_time_ms,
         onComplete: function () {
-          this.update_healthbar(action.target, -action.val, 0);
+          this.update_healthbar(action.target, -action.val);
         },
         callbackScope: this,
       });
@@ -608,7 +579,7 @@ class GameScene extends Phaser.Scene {
         offset: offset,
         duration: 0,
         onComplete: function () {
-          this.update_healthbar(action.target, 0, 0, action.health);
+          this.update_healthbar(action.target, 0, action.health);
         },
         callbackScope: this,
       });
