@@ -150,6 +150,9 @@ export class GameComponent {
       if (this.gameinfo['state'] === 'animate') {
         return true;
       }
+      if (this.submittedCards) {
+        return true;
+      }
       return i >= this.gameinfo.players[this.gameinfo.me]['health'];
     } else {
       return false;
