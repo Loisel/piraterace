@@ -126,6 +126,7 @@ FREE_HEALTH_OFFSET = 3
 class GameConfig(models.Model):
     player_ids = ArrayField(models.IntegerField(), default=list)
     player_colors = ArrayField(models.CharField(max_length=7), default=list)
+    player_names = ArrayField(models.CharField(max_length=200), default=list)
     player_teams = ArrayField(models.IntegerField(), default=list)
     player_ready = ArrayField(models.BooleanField(default=False), default=list)
     player_start_x = ArrayField(models.PositiveSmallIntegerField(), default=list)
@@ -160,6 +161,7 @@ class GameConfig(models.Model):
         colors_to_pick = [c for c in COLORS.values() if c not in self.player_colors]
         if player.pk not in self.player_ids:
             self.player_ids.append(player.pk)
+            self.player_names.append(player.user.username)
             self.player_colors.append(random.choice(colors_to_pick))  # TODO
             self.player_teams.append(-1)
             self.player_ready.append(False)
@@ -172,6 +174,7 @@ class GameConfig(models.Model):
         else:
             idx = self.player_ids.index(player.pk)
             self.player_ids.pop(idx)
+            self.player_names.pop(idx)
             self.player_colors.pop(idx)
             self.player_teams.pop(idx)
             self.player_ready.pop(idx)

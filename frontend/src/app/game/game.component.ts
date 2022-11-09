@@ -751,6 +751,19 @@ class GameScene extends Phaser.Scene {
     boat.scaleX = boat.scaleY;
     boat.angle = player['start_direction'] * 90;
 
+    boat.setInteractive({ useHandCursor: true  });
+    boat.on('pointerdown', (function(playerid, pointer) {
+      let boat = this.boats[playerid].getChildren()[0];
+      let player = this.component.gameinfo.players[playerid];
+      let text = this.add.text(boat.x, boat.y, player["name"], { fontFamily: 'Arial', color: '#ffffff',
+                                                      fontSize: 24, backgroundColor: player["color"]}).setOrigin(0.5, 0.5);
+      this.tweens.add({
+        targets: text,
+        alpha: 0,
+        duration: 2000
+      });
+    }).bind(this, playerid));
+
     let hp = new HealthBar(
       this,
       this.getTileX(player['start_pos_x']),

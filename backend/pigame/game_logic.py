@@ -108,16 +108,18 @@ def play_stack(game):
     stack = game.cards_played
 
     players = {}
-    for pid, x, y, direction, color, team in zip(
+    for pid, x, y, direction, color, team, name in zip(
         game.config.player_ids,
         game.config.player_start_x,
         game.config.player_start_y,
         game.config.player_start_directions,
         game.config.player_colors,
         game.config.player_teams,
+        game.config.player_names
     ):
         p = types.SimpleNamespace()
         p.id = pid
+        p.name = name
         p.last_cp_x = x
         p.last_cp_y = y
         p.xpos = x
