@@ -115,7 +115,7 @@ def play_stack(game):
         game.config.player_start_directions,
         game.config.player_colors,
         game.config.player_teams,
-        game.config.player_names
+        game.config.player_names,
     ):
         p = types.SimpleNamespace()
         p.id = pid
@@ -195,8 +195,6 @@ def play_stack(game):
                     dict(
                         key="card_is_played",
                         target=playerid,
-                        posx=players[playerid].xpos,
-                        posy=players[playerid].ypos,
                         cardslot=activeCardSlot,
                         card=CARDS[cardid],
                     )

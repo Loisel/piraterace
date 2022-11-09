@@ -596,9 +596,7 @@ class GameScene extends Phaser.Scene {
       {
         // show played card on top of a boat
         let GI = this.component.gameinfo;
-        let boatGroup = this.boats[action.target].getChildren();
-        let boat = boatGroup[0];
-        let cardsprite = this.add.sprite(this.getTileX(action.posx), this.getTileY(action.posy), action.card.descr);
+        let cardsprite = this.add.sprite(0, 0, action.card.descr);
         cardsprite.displayWidth = GI.map.tilewidth;
         cardsprite.displayHeight = GI.map.tileheight;
         cardsprite.alpha = 0;
@@ -608,6 +606,14 @@ class GameScene extends Phaser.Scene {
           duration: animation_time_ms * 0.5,
           alpha: 0.5,
           callbackScope: this,
+          onStart: function () {
+            let boatGroup = this.boats[action.target].getChildren();
+            let boat = boatGroup[0];
+
+            cardsprite.x = boat.x;
+            cardsprite.y = boat.y;
+            cardsprite.angle = boat.angle;
+          },
         });
         timeline.add({
           targets: cardsprite,
@@ -743,7 +749,7 @@ class GameScene extends Phaser.Scene {
       color.color,
       0.5
     );
-    if(playerid == GI.me){
+    if (playerid == GI.me) {
       backdrop.setStrokeStyle(5, color.color);
     }
 
@@ -754,18 +760,27 @@ class GameScene extends Phaser.Scene {
     boat.scaleX = boat.scaleY;
     boat.angle = player['start_direction'] * 90;
 
-    boat.setInteractive({ useHandCursor: true  });
-    boat.on('pointerdown', (function(playerid, pointer) {
-      let boat = this.boats[playerid].getChildren()[0];
-      let player = this.component.gameinfo.players[playerid];
-      let text = this.add.text(boat.x, boat.y, player["name"], { fontFamily: 'Arial', color: '#ffffff',
-                                                      fontSize: 24, backgroundColor: player["color"]}).setOrigin(0.5, 0.5);
-      this.tweens.add({
-        targets: text,
-        alpha: 0,
-        duration: 2000
-      });
-    }).bind(this, playerid));
+    boat.setInteractive({ useHandCursor: true });
+    boat.on(
+      'pointerdown',
+      function (playerid, pointer) {
+        let boat = this.boats[playerid].getChildren()[0];
+        let player = this.component.gameinfo.players[playerid];
+        let text = this.add
+          .text(boat.x, boat.y, player['name'], {
+            fontFamily: 'Arial',
+            color: '#ffffff',
+            fontSize: 24,
+            backgroundColor: player['color'],
+          })
+          .setOrigin(0.5, 0.5);
+        this.tweens.add({
+          targets: text,
+          alpha: 0,
+          duration: 2000,
+        });
+      }.bind(this, playerid)
+    );
 
     let hp = new HealthBar(
       this,
