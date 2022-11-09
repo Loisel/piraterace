@@ -729,7 +729,7 @@ class GameScene extends Phaser.Scene {
     }
   }
 
-  drawBoat(player) {
+  drawBoat(player, playerid) {
     let GI = this.component.gameinfo;
     let color = Phaser.Display.Color.HexStringToColor(player['color']);
     let backdrop = this.add.rectangle(
@@ -738,8 +738,11 @@ class GameScene extends Phaser.Scene {
       GI.map.tilewidth,
       GI.map.tileheight,
       color.color,
-      0.75
+      0.5
     );
+    if(playerid == GI.me){
+      backdrop.setStrokeStyle(5, color.color);
+    }
 
     var boat = this.add.sprite(this.getTileX(player['start_pos_x']), this.getTileY(player['start_pos_y']), 'boat');
     //set the width of the sprite
@@ -800,7 +803,7 @@ class GameScene extends Phaser.Scene {
     this.drawCheckpoints();
 
     Object.entries(GI.players).forEach(([playerid, player]) => {
-      this.boats[playerid] = this.drawBoat(player);
+      this.boats[playerid] = this.drawBoat(player, playerid);
     });
 
     // camera draggable, start on player boat
