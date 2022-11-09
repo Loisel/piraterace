@@ -139,6 +139,7 @@ def game(request, game_id, **kwargs):
         time_per_action=TIME_PER_ACTION,
         countdown=None,
         initial_health=game.config.ncardsavail + FREE_HEALTH_OFFSET,
+        CARDS=CARDS,
     )
 
     player_states, actionstack = get_play_stack(game)

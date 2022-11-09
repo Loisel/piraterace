@@ -259,9 +259,14 @@ class GameScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('tileset', `${environment.STATIC_URL}/maps/${this.component.gameinfo.map.tilesets[0].image}`);
-    this.load.tilemapTiledJSON('tilemap', `${environment.STATIC_URL}/maps/${this.component.gameinfo.mapfile}`);
+    let GI = this.component.gameinfo;
+
+    this.load.image('tileset', `${environment.STATIC_URL}/maps/${GI.map.tilesets[0].image}`);
+    this.load.tilemapTiledJSON('tilemap', `${environment.STATIC_URL}/maps/${GI.mapfile}`);
     this.load.spritesheet('boat', `${environment.STATIC_URL}/sprites/boat.png`, { frameWidth: 24, frameHeight: 72 });
+    Object.entries(GI.CARDS).forEach(([cardid, card]) => {
+      this.load.image(card['descr'], `${environment.STATIC_URL}/${card['url']}`);
+    });
   }
 
   check_player_state() {
@@ -585,6 +590,34 @@ class GameScene extends Phaser.Scene {
 
   timeline_add_card_is_played(timeline, action, animation_time_ms, offset) {
     if (action.key === 'card_is_played' && animation_time_ms >= 100) {
+      {
+        // show played card on top of a boat
+        let GI = this.component.gameinfo;
+        let boatGroup = this.boats[action.target].getChildren();
+        let boat = boatGroup[0];
+        let cardsprite = this.add.sprite(this.getTileX(action.posx), this.getTileY(action.posy), action.card.descr);
+        cardsprite.displayWidth = GI.map.tilewidth;
+        cardsprite.displayHeight = GI.map.tileheight;
+        cardsprite.alpha = 0;
+        timeline.add({
+          targets: cardsprite,
+          offset: offset,
+          duration: animation_time_ms * 0.5,
+          alpha: 0.5,
+          callbackScope: this,
+        });
+        timeline.add({
+          targets: cardsprite,
+          offset: offset + animation_time_ms * 0.5,
+          duration: animation_time_ms * 0.5,
+          alpha: 0,
+          callbackScope: this,
+          onComplete: function () {
+            cardsprite.destroy(true);
+          },
+        });
+      }
+
       if (action.target === this.component.gameinfo.me) {
         let boatGroup = this.boats[action.target].getChildren();
         timeline.add({

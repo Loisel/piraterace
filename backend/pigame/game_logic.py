@@ -187,7 +187,19 @@ def play_stack(game):
             powerdowncards.append(playerid)
 
         else:  # obviously a player card
-            actionstack.append([dict(key="card_is_played", target=p.id, cardslot=activeCardSlot)])
+            cardid, cardrank = card_id_rank(card)
+            actionstack.append(
+                [
+                    dict(
+                        key="card_is_played",
+                        target=playerid,
+                        posx=players[playerid].xpos,
+                        posy=players[playerid].ypos,
+                        cardslot=activeCardSlot,
+                        card=CARDS[cardid],
+                    )
+                ]
+            )
             Nplayercardsplayedthisround += 1
             actions = get_actions_for_card(game, initial_map, players, players[playerid], card)
             actionstack.extend(actions)
