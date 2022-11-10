@@ -296,17 +296,16 @@ class GameScene extends Phaser.Scene {
   reset_health_bar() {
     let GI = this.component.gameinfo;
     Object.entries(GI.players).forEach(([playerid, player]) => {
-      this.update_healthbar(+playerid, 0, player['health']);
+      this.update_healthbar(+playerid, player['health']);
     });
   }
 
-  update_healthbar(boat_id: number, damage: number, value: number = undefined) {
-    let bar = this.boats[boat_id].getChildren()[2];
-    if (value) {
-      bar.setHealth(value);
-    } else {
-      bar.decrease(damage);
-    }
+  update_healthbar(boat_id: number, value: number) {
+    let hbar = this.boats[boat_id].getChildren()[2];
+    console.log('Health value ', value);
+    let frac = value / this.component.gameinfo.initial_health;
+    console.log('Health frac ', frac);
+    this.setHealthBar(hbar, frac);
   }
 
   getTileX(tileidx: number): number {
@@ -450,7 +449,7 @@ class GameScene extends Phaser.Scene {
         repeat: nWiggles,
         callbackScope: this,
         onComplete: function () {
-          this.update_healthbar(action.target, action.damage);
+          this.update_healthbar(action.target, action.health);
         },
       });
     }
@@ -472,7 +471,7 @@ class GameScene extends Phaser.Scene {
         offset: offset,
         yoyo: true,
         onComplete: function () {
-          this.update_healthbar(action.target, action.damage);
+          this.update_healthbar(action.target, action.health);
         },
         callbackScope: this,
       });
@@ -495,7 +494,7 @@ class GameScene extends Phaser.Scene {
         onComplete: function (tween, target) {
           cannonball.destroy();
           if (action.other_player !== undefined) {
-            this.update_healthbar(action.other_player, action.damage);
+            this.update_healthbar(action.other_player, action.other_player_health);
           }
         },
         duration: (animation_time_ms * 2) / 3,
@@ -566,7 +565,7 @@ class GameScene extends Phaser.Scene {
             pboat.setAngle(90 * action['direction']);
           },
           onComplete: function () {
-            this.update_healthbar(action.target, 0, action.health);
+            this.update_healthbar(action.target, action.health);
           },
           callbackScope: this,
         });
@@ -584,7 +583,7 @@ class GameScene extends Phaser.Scene {
         offset: offset,
         duration: animation_time_ms,
         onComplete: function () {
-          this.update_healthbar(action.target, -action.val);
+          this.update_healthbar(action.target, action.health);
         },
         callbackScope: this,
       });
@@ -650,7 +649,7 @@ class GameScene extends Phaser.Scene {
         offset: offset,
         duration: 0,
         onComplete: function () {
-          this.update_healthbar(action.target, 0, action.health);
+          this.update_healthbar(action.target, action.health);
         },
         callbackScope: this,
       });
@@ -738,6 +737,49 @@ class GameScene extends Phaser.Scene {
     }
   }
 
+  makeHealthBar(x, y) {
+    let cfg = this.getHealthBarConfig();
+
+    let bgbar = this.add.graphics();
+    //  BG
+    bgbar.fillStyle(0x000000);
+    bgbar.fillRect(cfg.xoffset, cfg.yoffset, cfg.width, cfg.height);
+
+    bgbar.fillStyle(0xffffff);
+    bgbar.fillRect(cfg.xoffset + 2, cfg.yoffset + 2, cfg.width - 4, cfg.height - 2);
+
+    //  Health
+    let hbar = this.add.graphics();
+    hbar.fillStyle(0x00ff00);
+    hbar.fillRect(cfg.xoffset + 2, cfg.yoffset + 2, cfg.width - 4, cfg.height - 2);
+
+    return [hbar, bgbar];
+  }
+
+  getHealthBarConfig() {
+    let GI = this.component.gameinfo;
+    return {
+      xoffset: -GI.map.tilewidth * 0.4,
+      yoffset: GI.map.tileheight * 0.3,
+      width: GI.map.tilewidth * 0.8,
+      height: GI.map.tileheight * 0.12,
+    };
+  }
+
+  setHealthBar(hbar, value) {
+    let cfg = this.getHealthBarConfig();
+    console.log('set health value:', value);
+    hbar.clear();
+    if (value <= 0.3) {
+      hbar.fillStyle(0xff0000);
+    } else if (value <= 0.6) {
+      hbar.fillStyle(0xffe900);
+    } else {
+      hbar.fillStyle(0x00ff00);
+    }
+    hbar.fillRect(cfg.xoffset + 2, cfg.yoffset + 2, value * (cfg.width - 4), cfg.height - 2);
+  }
+
   drawBoat(player, playerid) {
     let GI = this.component.gameinfo;
     let color = Phaser.Display.Color.HexStringToColor(player['color']);
@@ -782,19 +824,13 @@ class GameScene extends Phaser.Scene {
       }.bind(this, playerid)
     );
 
-    let hp = new HealthBar(
-      this,
-      this.getTileX(player['start_pos_x']),
-      this.getTileY(player['start_pos_y']),
-      GI.map.tilewidth * 0.8,
-      GI.map.tileheight * 0.12,
-      player['health']
-    );
+    let hList = this.makeHealthBar(this.getTileX(player['start_pos_x']), this.getTileY(player['start_pos_y']));
 
     let group = this.add.group();
     group.add(boat);
     group.add(backdrop);
-    group.add(hp);
+    group.add(hList[0]);
+    group.add(hList[1]);
     return group;
   }
 
@@ -862,71 +898,3 @@ class GameScene extends Phaser.Scene {
   }
 }
 
-class HealthBar extends Phaser.GameObjects.Container {
-  value: number;
-  initial_health: number;
-  width: number;
-  height: number;
-  bar: Phaser.GameObjects.Graphics;
-  scene: GameScene;
-  constructor(scene, x, y, width, height, initial_health) {
-    super(scene);
-    this.scene = scene;
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
-
-    this.bar = this.scene.add.graphics();
-    this.add(this.bar);
-
-    this.initial_health = initial_health;
-    this.value = initial_health;
-
-    this.draw();
-    this.scene.add.existing(this);
-  }
-
-  decrease(amount) {
-    this.value -= amount;
-
-    if (this.value < 0) {
-      this.value = 0;
-    }
-    this.draw();
-    return this.value === 0;
-  }
-
-  setHealth(value) {
-    //console.log('Set healthbar value... from ', this.value, ' to ', value);
-    this.value = value;
-    this.draw();
-  }
-
-  draw() {
-    this.bar.clear();
-    let GI = this.scene.component.gameinfo;
-    const xoffset = -GI.map.tilewidth * 0.4;
-    const yoffset = GI.map.tileheight * 0.3;
-
-    //  BG
-    this.bar.fillStyle(0x000000);
-    this.bar.fillRect(xoffset, yoffset, this.width, this.height);
-
-    //  Health
-
-    this.bar.fillStyle(0xffffff);
-    this.bar.fillRect(xoffset + 2, yoffset + 2, this.width - 4, this.height - 2);
-
-    console.log('initial health:', this.initial_health, 'value:', this.value);
-    if (this.value <= this.initial_health * 0.3) {
-      this.bar.fillStyle(0xff0000);
-    } else if (this.value <= this.initial_health * 0.6) {
-      this.bar.fillStyle(0xffe900);
-    } else {
-      this.bar.fillStyle(0x00ff00);
-    }
-    var d = Math.floor((this.value / this.initial_health) * (this.width - 4));
-    this.bar.fillRect(xoffset + 2, yoffset + 2, d, this.height - 2);
-  }
-}

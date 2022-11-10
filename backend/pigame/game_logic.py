@@ -189,20 +189,21 @@ def play_stack(game):
             powerdowncards.append(playerid)
 
         else:  # obviously a player card
-            cardid, cardrank = card_id_rank(card)
-            actionstack.append(
-                [
-                    dict(
-                        key="card_is_played",
-                        target=playerid,
-                        cardslot=activeCardSlot,
-                        card=CARDS[cardid],
-                    )
-                ]
-            )
             Nplayercardsplayedthisround += 1
             actions = get_actions_for_card(game, initial_map, players, players[playerid], card)
-            actionstack.extend(actions)
+            if len(actions) > 0:
+                cardid, cardrank = card_id_rank(card)
+                actionstack.append(
+                    [
+                        dict(
+                            key="card_is_played",
+                            target=playerid,
+                            cardslot=activeCardSlot,
+                            card=CARDS[cardid],
+                        )
+                    ]
+                )
+                actionstack.extend(actions)
 
         if Nplayercardsplayedthisround == len(players):  # all players played a card
             activeCardSlot += 1
@@ -333,7 +334,7 @@ def shoot_cannon_ball(gmap, xstart, ystart, xinc, yinc, players, cannon_damage=1
                         src_x=xstart,
                         src_y=ystart,
                         other_player=other_player.id,
-                        damage=cannon_damage,
+                        other_player_health=other_player.health,
                         collided_at=(x, y),
                     )
                 )
@@ -382,7 +383,7 @@ def get_actions_for_card(game, gmap, players, player, card):
         maxhealth = game.config.ncardsavail + FREE_HEALTH_OFFSET
         if player.health + CARDS[cardid]["repair"] <= maxhealth:
             player.health += CARDS[cardid]["repair"]
-            actions.append([dict(key="repair", target=player.id, val=CARDS[cardid]["repair"], posx=player.xpos, posy=player.ypos)])
+            actions.append([dict(key="repair", target=player.id, health=player.health, posx=player.xpos, posy=player.ypos)])
 
     return actions
 
@@ -393,7 +394,7 @@ def move_player_x(game, gmap, players, player, inc, push_players=True):
     if tile_prop["collision"]:
         damage = tile_prop["damage"]
         player.health -= damage
-        actions.append(dict(key="collision_x", target=player.id, val=inc, damage=damage))
+        actions.append(dict(key="collision_x", target=player.id, val=inc, health=player.health))
         if player.health <= 0:
             actions.append(dict(key="death", target=player.id, type="collision"))
             kill_player(player)
@@ -434,7 +435,7 @@ def move_player_y(game, gmap, players, player, inc, push_players=True):
     if tile_prop["collision"]:
         damage = tile_prop["damage"]
         player.health -= damage
-        actions.append(dict(key="collision_y", target=player.id, val=inc, damage=damage))
+        actions.append(dict(key="collision_y", target=player.id, val=inc, health=player.health))
         if player.health <= 0:
             actions.append(dict(key="death", target=player.id, type="collision"))
             kill_player(player)
