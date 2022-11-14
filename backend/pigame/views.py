@@ -203,7 +203,9 @@ def game(request, game_id, **kwargs):
         game.save(update_fields=["state", "timestamp", "round"])
 
         for i in range(len(game.config.player_next_card)):
-            game.config.player_next_card[i] += game.config.ncardsavail
+            if player_states[game.config.player_ids[i]].powered_down:
+                continue
+            game.config.player_next_card[i] += game.config.ncardslots
             game.config.save(update_fields=["player_next_card"])
 
         for p in player_accounts:  # increment next card pointer
