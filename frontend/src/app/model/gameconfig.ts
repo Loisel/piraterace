@@ -4,6 +4,7 @@ export interface GameConfig {
   mapfile: string;
   map_info: any;
   startinglocs: any;
+  checkpoints: any;
   player_ids: number[];
   player_names: string[];
   player_colors: string[];

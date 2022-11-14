@@ -67,8 +67,6 @@ export class GameConfigComponent implements OnInit {
 
   ionViewWillEnter() {
     let id = +this.route.snapshot.paramMap.get('id');
-    console.log(id);
-    this.updateGameConfig(id);
     this.registerupdateGameConfigInterval();
   }
 
@@ -128,6 +126,7 @@ export class GameConfigComponent implements OnInit {
     let mapinfo = this.gameConfig.map_info;
     let mapfile = this.gameConfig.mapfile;
     let startinglocs = this.gameConfig.startinglocs;
+    let checkpoints = this.gameConfig.checkpoints;
 
     function phaser_preload() {
       console.log('phaser_preload', this);
@@ -157,6 +156,19 @@ export class GameConfigComponent implements OnInit {
         //scale evenly
         boat.scaleX = boat.scaleY;
       });
+
+      Object.entries(checkpoints).forEach(([name, pos]) => {
+        let color = 'white';
+        let num = this.add.text((pos[0] + 0.5) * mapinfo.tilewidth,
+                                (pos[1] + 0.5) * mapinfo.tileheight, name, {
+          fontSize: '30px',
+          strokeThickness: 5,
+          stroke: color,
+          color: color,
+        });
+        num.setOrigin(0.5, 0.5);
+      });
+
     }
 
     let config = {
