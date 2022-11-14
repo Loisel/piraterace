@@ -101,11 +101,11 @@ export class NewGameConfigComponent {
       // create the layers we want in the right order
       map.createLayer(mapinfo.layers[0].name, tileset, 0, 0);
 
-      Object.entries(startinglocs.objects).forEach(([id, sloc]) => {
-        console.log(id, sloc);
-        var boat = this.add.sprite(sloc['x'], sloc['y'], 'boat');
+      startinglocs.forEach(([x, y]) => {
+        console.log("positions", x, y);
+        var boat = this.add.sprite(x, y, 'boat');
         //set the width of the sprite
-        boat.displayHeight = mapinfo.tileheight * 1.5;
+        boat.displayHeight = mapinfo.tileheight;
         //scale evenly
         boat.scaleX = boat.scaleY;
       });

@@ -31,6 +31,7 @@ import pytz
 from pigame.game_logic import (
     determine_next_cards_played,
     determine_starting_locations,
+    startinglocs_pixels,
     determine_checkpoint_locations,
     get_cards_on_hand,
     flatten_list_of_tuples,
@@ -379,7 +380,7 @@ def view_gameconfig(request, gameconfig_id):
     cfg["caller_id"] = caller.pk
     cfg["caller_idx"] = cfg["player_ids"].index(caller.pk)
     cfg["map_info"] = load_inital_map(cfg["mapfile"])
-    cfg["startinglocs"] = list(filter(lambda l: l["name"] == "startinglocs", cfg["map_info"]["layers"]))[0]
+    cfg["startinglocs"] = startinglocs_pixels(cfg["map_info"])
 
     return JsonResponse(cfg)
 
@@ -495,11 +496,10 @@ def create_new_gameconfig(request, **kwargs):
 
     if ret["selected_map"]:
         ret["map_info"] = load_inital_map(ret["selected_map"])
-        startinglocslayer = list(filter(lambda l: l["name"] == "startinglocs", ret["map_info"]["layers"]))[0]
-        ret["startinglocs"] = startinglocslayer
-        ret["Nmaxplayers"] = len(startinglocslayer["objects"])
+        ret["startinglocs"] = startinglocs_pixels(ret["map_info"])
+        ret["Nmaxplayers"] = len(ret["startinglocs"])
 
-    return JsonResponse(ret)
+    return JsonResponse(ret, safe=False)
 
 
 def list_gameconfigs(request):
