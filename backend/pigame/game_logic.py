@@ -69,6 +69,7 @@ def determine_next_cards_played(gamecfg):
     # print(f"cards sorted: {ret}")
     return ret
 
+
 def determine_starting_locations(initmap):
     for layer in initmap["layers"]:
         if layer["name"] == "startinglocs":
@@ -91,8 +92,7 @@ def determine_starting_locations(initmap):
 def startinglocs_pixels(initmap):
     """Get the starting coordinates in terms of pixels, boats centered."""
     locx, locy, direction = determine_starting_locations(initmap)
-    pos = [((x + 0.5)*initmap["tilewidth"], (y + 0.5)*initmap["tileheight"])
-           for x, y in zip(locx, locy)]
+    pos = [((x + 0.5) * initmap["tilewidth"], (y + 0.5) * initmap["tileheight"]) for x, y in zip(locx, locy)]
     return pos
 
 

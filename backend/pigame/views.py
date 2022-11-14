@@ -379,9 +379,6 @@ def view_gameconfig(request, gameconfig_id):
     cfg["player_color_choices"] = COLORS
     cfg["caller_id"] = caller.pk
     cfg["caller_idx"] = cfg["player_ids"].index(caller.pk)
-    cfg["map_info"] = load_inital_map(cfg["mapfile"])
-    cfg["startinglocs"] = startinglocs_pixels(cfg["map_info"])
-    cfg["checkpoints"] = determine_checkpoint_locations(cfg["map_info"])
 
     return JsonResponse(cfg)
 
@@ -496,12 +493,22 @@ def create_new_gameconfig(request, **kwargs):
         ret.update(**request.data)
 
     if ret["selected_map"]:
-        ret["map_info"] = load_inital_map(ret["selected_map"])
-        ret["startinglocs"] = startinglocs_pixels(ret["map_info"])
-        ret["Nmaxplayers"] = len(ret["startinglocs"])
-        ret["checkpoints"] = determine_checkpoint_locations(ret["map_info"])
+        ret["Nmaxplayers"] = len(startinglocs_pixels(load_inital_map(ret["selected_map"])))
 
     return JsonResponse(ret, safe=False)
+
+
+@api_view(["GET"])
+@permission_classes((IsAuthenticated,))
+def get_mapinfo(request, mapfile):
+    mapinfo = load_inital_map(os.path.join(MAPSDIR, mapfile))
+    payload = dict(
+        mapfile=mapfile,
+        startinglocs=startinglocs_pixels(mapinfo),
+        checkpoints=determine_checkpoint_locations(mapinfo),
+        map_info=mapinfo,
+    )
+    return JsonResponse(payload, safe=False)
 
 
 def list_gameconfigs(request):

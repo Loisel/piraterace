@@ -4,7 +4,6 @@ import { Router, ActivatedRoute } from '@angular/router';
 
 import { GameConfig } from '../../model/gameconfig';
 import { HttpService } from '../../services/http.service';
-import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-gameconfig',
@@ -12,9 +11,8 @@ import { environment } from '../../../environments/environment';
   styleUrls: ['./gameconfig.component.scss'],
 })
 export class GameConfigComponent implements OnInit {
-  gameConfig: GameConfig;
+  gameConfig: GameConfig = null;
   updateTimer: ReturnType<typeof setInterval>;
-  phaserGame: Phaser.Game = null;
 
   constructor(
     private httpService: HttpService,
@@ -39,9 +37,6 @@ export class GameConfigComponent implements OnInit {
         console.log('GameConfig data', this.gameConfig);
         if (this.gameConfig['game']) {
           this.router.navigate(['game', this.gameConfig['game']]);
-        }
-        if (!this.phaserGame) {
-          this.draw_phaser_snapshot();
         }
       },
       (error) => {
@@ -71,7 +66,6 @@ export class GameConfigComponent implements OnInit {
   }
 
   ionViewWillLeave() {
-    this.remove_phaser_snapshot;
     clearInterval(this.updateTimer);
     this.leaveGameConfig();
   }
@@ -80,7 +74,6 @@ export class GameConfigComponent implements OnInit {
     this.httpService.leaveGameConfig().subscribe(
       (payload) => {
         console.log(payload);
-        this.presentToast(payload['success'], 'success');
       },
       (error) => {
         console.log('Failed to leave this GameConfig:', error);
@@ -109,88 +102,5 @@ export class GameConfigComponent implements OnInit {
       duration: 5000,
     });
     toast.present();
-  }
-
-  remove_phaser_snapshot() {
-    if (this.phaserGame) {
-      // remove old game if there is any
-      this.phaserGame.destroy(true);
-    }
-  }
-
-  draw_phaser_snapshot() {
-    // draw a phaser3 map as quickview of a map
-    this.remove_phaser_snapshot();
-
-    // define variables for closure before `this` is captured by phaser
-    let mapinfo = this.gameConfig.map_info;
-    let mapfile = this.gameConfig.mapfile;
-    let startinglocs = this.gameConfig.startinglocs;
-    let checkpoints = this.gameConfig.checkpoints;
-
-    function phaser_preload() {
-      console.log('phaser_preload', this);
-      this.load.image('tileset', `${environment.STATIC_URL}/maps/${mapinfo.tilesets[0].image}`);
-      this.load.tilemapTiledJSON('tilemap', `${environment.STATIC_URL}/maps/${mapfile}`);
-      this.load.spritesheet('boat', `${environment.STATIC_URL}/sprites/boat.png`, { frameWidth: 24, frameHeight: 72 });
-    }
-
-    function phaser_create() {
-      console.log('phaser_create', this);
-      const map = this.make.tilemap({
-        key: 'tilemap',
-        tileWidth: mapinfo.tilewidth,
-        tileHeight: mapinfo.tileheight,
-      });
-
-      // add the tileset image we are using
-      const tileset = map.addTilesetImage(mapinfo.tilesets[0].name, 'tileset');
-
-      // create the layers we want in the right order
-      map.createLayer(mapinfo.layers[0].name, tileset, 0, 0);
-
-      startinglocs.forEach(([x, y]) => {
-        var boat = this.add.sprite(x, y, 'boat');
-        //set the width of the sprite
-        boat.displayHeight = mapinfo.tileheight;
-        //scale evenly
-        boat.scaleX = boat.scaleY;
-      });
-
-      Object.entries(checkpoints).forEach(([name, pos]) => {
-        let color = 'white';
-        let num = this.add.text((pos[0] + 0.5) * mapinfo.tilewidth,
-                                (pos[1] + 0.5) * mapinfo.tileheight, name, {
-          fontSize: '30px',
-          strokeThickness: 5,
-          stroke: color,
-          color: color,
-        });
-        num.setOrigin(0.5, 0.5);
-      });
-
-    }
-
-    let config = {
-      type: Phaser.AUTO,
-      physics: { default: 'None' },
-      parent: 'map-preview',
-      width: this.gameConfig.map_info.width * this.gameConfig.map_info.tilewidth,
-      height: this.gameConfig.map_info.height * this.gameConfig.map_info.tileheight,
-      scale: {
-        mode: Phaser.Scale.FIT,
-      },
-      fps: {
-        target: 0,
-        forceSetTimeOut: true,
-      },
-      scene: {
-        preload: phaser_preload,
-        create: phaser_create,
-      },
-    };
-
-    this.phaserGame = new Phaser.Game(config);
-    this.phaserGame.scene.pause('default');
   }
 }

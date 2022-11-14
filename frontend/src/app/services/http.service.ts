@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { GameConfig } from '../model/gameconfig';
 import { NewGameConfig } from '../model/newgameconfig';
+import { MapInfo } from '../model/mapinfo';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -21,6 +22,7 @@ export class HttpService {
   powerDownURL = `${environment.API_URL}/pigame/power_down`;
   player_infoURL = `${environment.API_URL}/pigame/update_gm_player_info`;
   get_leaveGameURL = `${environment.API_URL}/pigame/leave_game`;
+  get_mapinfoURL = `${environment.API_URL}/pigame/mapinfo`;
 
   constructor(private httpClient: HttpClient) {}
   getGamesList() {
@@ -28,6 +30,9 @@ export class HttpService {
   }
   getGameConfig(id: number) {
     return this.httpClient.get<GameConfig>(`${this.view_gameConfigURL}/${id}`);
+  }
+  getMapInfo(mapfile: string) {
+    return this.httpClient.get<MapInfo>(`${this.get_mapinfoURL}/${mapfile}`);
   }
   createGameConfig(data: NewGameConfig) {
     return this.httpClient.post<GameConfig>(`${this.create_gameConfigURL}`, data);

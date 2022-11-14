@@ -12,16 +12,18 @@
     </ion-row>
     <ion-row>
       <ion-col size="4">
-        <div id="map-preview"></div>
+        <div *ngIf="data?.selected_map">
+          <app-phaserpreview [mapfile]="data.selected_map"></app-phaserpreview>
+        </div>
       </ion-col>
       <ion-col>
         <ion-list>
-          <ion-item *ngIf="data?.map_info">Number of players: {{ data.Nmaxplayers }}</ion-item>
+          <ion-item *ngIf="data?.Nmaxplayers">Number of players: {{ data.Nmaxplayers }}</ion-item>
         </ion-list>
       </ion-col>
     </ion-row>
     <ion-row>
-      <ion-button *ngIf="data?.map_info" (click)="createGameConfig($event)">Create Game</ion-button>
+      <ion-button *ngIf="data?.selected_map" (click)="createGameConfig($event)">Create Game</ion-button>
     </ion-row>
   </ion-grid>
 </ion-content>
