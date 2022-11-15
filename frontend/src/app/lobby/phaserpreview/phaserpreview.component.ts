@@ -16,6 +16,8 @@ export class PhaserPreviewComponent {
   _mapfile: string;
   mapinfo: MapInfo = null;
   phaserGame: Phaser.Game = null;
+  canvasWidth: number = 350;
+  canvasHeight: number = 350;
 
   @Input() set mapfile(value: string) {
     this._mapfile = value;
@@ -91,11 +93,9 @@ export class PhaserPreviewComponent {
       type: Phaser.AUTO,
       physics: { default: 'None' },
       parent: 'map-preview',
-      width: thismapinfo.width * thismapinfo.tilewidth,
-      height: thismapinfo.height * thismapinfo.tileheight,
-      scale: {
-        mode: Phaser.Scale.FIT,
-      },
+      width: this.canvasWidth,
+      height: this.canvasHeight,
+      transparent: true,
       fps: {
         target: 0,
         forceSetTimeOut: true,
@@ -107,7 +107,28 @@ export class PhaserPreviewComponent {
     };
 
     this.phaserGame = new Phaser.Game(config);
+    this.updateCamera('default');
     this.phaserGame.scene.pause('default');
+  }
+
+  async updateCamera(scenekey) {
+    await new Promise((f) => setTimeout(f, 100));
+    let scene = this.phaserGame.scene.getScene(scenekey);
+    let camera = scene.cameras.main;
+    let mapinfo = this.mapinfo.map_info;
+    // why is there a +1 required here? I do not know...
+    let scaleX = this.canvasWidth / ((mapinfo.width + 1) * mapinfo.tilewidth);
+    let scaleY = this.canvasHeight / ((mapinfo.height + 1) * mapinfo.tileheight);
+
+    if (mapinfo.width > mapinfo.height) {
+      camera.setZoom(scaleX, scaleX);
+    } else {
+      camera.setZoom(scaleY, scaleY);
+    }
+    camera.setBounds(0, 0, 350, 350);
+    camera.centerToBounds();
+    // camera.centerOn(this.phaserGame.scale.gameSize.width, this.phaserGame.scale.gameSize.height);
+    // camera.centerToSize();
   }
 
   removePhaserSnapshot() {

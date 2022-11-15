@@ -50,7 +50,7 @@ export class GameComponent {
     private alertController: AlertController
   ) {}
 
-  ionViewWillEnter() {
+  ionViewDidEnter() {
     this.load_gameinfo().subscribe(
       (gameinfo) => {
         console.log('Game:', gameinfo);
