@@ -34,9 +34,9 @@
           <ion-row *ngIf="gameConfigs.length === 0">
             <ion-col>No games available</ion-col>
           </ion-row>
-          <ion-row [disabled]="reconnectGameId | async" [button]="true" (click)="newGameConfig()">
+          <ion-row (click)="newGameConfig()">
             <ion-col>
-              <ion-button>
+              <ion-button [disabled]="reconnectGameId | async" >
                 <ion-icon name="add-outline" size="large"></ion-icon>
                 Create New Game
               </ion-button>
