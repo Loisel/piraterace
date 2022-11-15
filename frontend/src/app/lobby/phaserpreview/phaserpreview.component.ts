@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { ToastController } from '@ionic/angular';
 import { HttpService } from '../../services/http.service';
 
@@ -10,7 +10,7 @@ import { MapInfo } from '../../model/mapinfo';
   templateUrl: './phaserpreview.component.html',
   styleUrls: ['./phaserpreview.component.scss'],
 })
-export class PhaserPreviewComponent implements OnInit {
+export class PhaserPreviewComponent {
   constructor(private httpService: HttpService, private toastController: ToastController) {}
 
   _mapfile: string;
@@ -22,18 +22,12 @@ export class PhaserPreviewComponent implements OnInit {
     this.getMapInfo();
   }
 
-  ngOnInit() {}
-
-  ionViewWillLeave() {
-    this.remove_phaser_snapshot();
-  }
-
   getMapInfo() {
     this.httpService.getMapInfo(this._mapfile).subscribe(
       (mapinfo) => {
         this.mapinfo = mapinfo;
         console.log('Load map info ', mapinfo);
-        this.draw_phaser_snapshot();
+        this.drawPhaserSnapshot();
       },
       (error) => {
         console.log('Failed to leave this GameConfig:', error);
@@ -42,9 +36,9 @@ export class PhaserPreviewComponent implements OnInit {
     );
   }
 
-  draw_phaser_snapshot() {
+  drawPhaserSnapshot() {
     // draw a phaser3 map as quickview of a map
-    this.remove_phaser_snapshot();
+    this.removePhaserSnapshot();
 
     // define variables for closure before `this` is captured by phaser
     let startinglocs = this.mapinfo.startinglocs;
@@ -116,7 +110,7 @@ export class PhaserPreviewComponent implements OnInit {
     this.phaserGame.scene.pause('default');
   }
 
-  remove_phaser_snapshot() {
+  removePhaserSnapshot() {
     if (this.phaserGame) {
       // remove old game if there is any
       this.phaserGame.destroy(true);
