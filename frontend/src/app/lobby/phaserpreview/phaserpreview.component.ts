@@ -11,7 +11,10 @@ import { MapInfo } from '../../model/mapinfo';
   styleUrls: ['./phaserpreview.component.scss'],
 })
 export class PhaserPreviewComponent {
-  constructor(private httpService: HttpService, private toastController: ToastController) {}
+  constructor(private httpService: HttpService, private toastController: ToastController) {
+    this.mapid = 'map-preview-' + Math.random().toString(36).substring(2);
+  }
+  mapid: string = null;
 
   _mapfile: string;
   mapinfo: MapInfo = null;
@@ -43,6 +46,7 @@ export class PhaserPreviewComponent {
     this.removePhaserSnapshot();
 
     // define variables for closure before `this` is captured by phaser
+    let mapid = this.mapid;
     let startinglocs = this.mapinfo.startinglocs;
     let checkpoints = this.mapinfo.checkpoints;
     let thismapfile = this._mapfile;
@@ -92,7 +96,7 @@ export class PhaserPreviewComponent {
     let config = {
       type: Phaser.AUTO,
       physics: { default: 'None' },
-      parent: 'map-preview',
+      parent: mapid,
       width: this.canvasWidth,
       height: this.canvasHeight,
       transparent: true,
