@@ -62,6 +62,7 @@ export class GameConfigComponent implements OnInit {
 
   ionViewWillEnter() {
     let id = +this.route.snapshot.paramMap.get('id');
+    this.updateGameConfig(id);
     this.registerupdateGameConfigInterval();
   }
 
