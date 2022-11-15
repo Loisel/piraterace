@@ -488,6 +488,7 @@ def create_new_gameconfig(request, **kwargs):
         selected_map=None,
         map_info=None,
         Nmaxplayers=None,
+        gamename=f"{request.user.username}'s Game"
     )
 
     if request.method == "POST":
