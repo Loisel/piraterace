@@ -12,4 +12,5 @@ export interface GameConfig {
   caller_id: number;
   player_color_choices: string[];
   all_ready: boolean;
+  gamename: string;
 }

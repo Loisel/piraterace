@@ -9,22 +9,40 @@
           Reconnect Game
         </ion-item>
 
-        <ion-list class="games">
-          <ion-item
-            [disabled]="reconnectGameId | async"
-            [button]="true"
+        <ion-grid>
+          <ion-row>
+            <ion-col>
+              <b>Game</b>
+            </ion-col>
+            <ion-col>
+              <b>Mode</b>
+            </ion-col>
+            <ion-col>
+              <b>Map</b>
+            </ion-col>
+          </ion-row>
+          <ion-row
+            class="gamelist-row"
+            [style.display]="reconnectGameId | async"
             *ngFor="let game of gameConfigs"
             (click)="joinGameConfig(game.id)"
           >
-            <span>{{ game.id }}</span>
-            <span class="badge">{{ game.mode }}</span>
-            <span class="name">{{ game.mapfile }}</span>
-          </ion-item>
-          <ion-item [disabled]="reconnectGameId | async" [button]="true" (click)="newGameConfig()">
-            <ion-icon name="add-outline" size="large"></ion-icon>
-            Create New Game
-          </ion-item>
-        </ion-list>
+            <ion-col>{{ game.gamename }}</ion-col>
+            <ion-col class="badge">{{ game.mode }}</ion-col>
+            <ion-col class="name">{{ game.mapfile }}</ion-col>
+          </ion-row>
+          <ion-row *ngIf="gameConfigs.length === 0">
+            <ion-col>No games available</ion-col>
+          </ion-row>
+          <ion-row [disabled]="reconnectGameId | async" [button]="true" (click)="newGameConfig()">
+            <ion-col>
+              <ion-button>
+                <ion-icon name="add-outline" size="large"></ion-icon>
+                Create New Game
+              </ion-button>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
       </ion-col>
     </ion-row>
   </ion-grid>

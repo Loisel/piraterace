@@ -1,5 +1,5 @@
 <ion-content>
-  <h2>GameConfig</h2>
+  <h2>{{ gameConfig?.gamename }}</h2>
   <ion-grid>
     <ion-row>
       <ion-col size="4">
@@ -33,7 +33,9 @@
 
           <ng-template #my_player_info>
             <ion-row>
-              <ion-col>{{ gameConfig?.player_names[i] }}</ion-col>
+              <ion-col
+                ><ion-input>{{ gameConfig?.player_names[i] }}</ion-input></ion-col
+              >
               <ion-col>
                 <ion-select
                   value="{{ gameConfig?.player_colors[gameConfig?.caller_idx] }}"
@@ -63,13 +65,15 @@
                 </ion-input>
               </ion-col>
               <ion-col>
-                <ion-checkbox
-                  checked="{{ gameConfig?.player_ready[gameConfig?.caller_idx] }}"
-                  id="ready_check"
-                  (ionChange)="onPlayerInfoChange($event)"
-                  [(ngModel)]="gameConfig?.player_ready[gameConfig?.caller_idx]"
-                >
-                </ion-checkbox>
+                <ion-input>
+                  <ion-checkbox
+                    checked="{{ gameConfig?.player_ready[gameConfig?.caller_idx] }}"
+                    id="ready_check"
+                    (ionChange)="onPlayerInfoChange($event)"
+                    [(ngModel)]="gameConfig?.player_ready[gameConfig?.caller_idx]"
+                  >
+                  </ion-checkbox>
+                </ion-input>
               </ion-col>
             </ion-row>
           </ng-template>

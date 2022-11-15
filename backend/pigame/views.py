@@ -454,6 +454,7 @@ def create_gameconfig(request, **kwargs):
     data = request.data
 
     mapfile = data["selected_map"]
+    gamename = data.get("gamename", "")
 
     initmap = load_inital_map(mapfile)
     errs = verify_map(initmap)
@@ -461,6 +462,7 @@ def create_gameconfig(request, **kwargs):
         return JsonResponse(errs, status=404, safe=False)
 
     gameconfig = GameConfig(
+        gamename=gamename,
         creator_userid=player.pk,
         mapfile=mapfile,
         player_ids=[],
@@ -470,7 +472,6 @@ def create_gameconfig(request, **kwargs):
     gameconfig.add_player(player)
     gameconfig.save()
 
-    payload = model_to_dict(gameconfig)
     return redirect(reverse("pigame:view_gameconfig", kwargs={"gameconfig_id": gameconfig.pk}))
 
 

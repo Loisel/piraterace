@@ -124,6 +124,7 @@ FREE_HEALTH_OFFSET = 3
 
 
 class GameConfig(models.Model):
+    gamename = models.CharField(max_length=200, blank=True)
     player_ids = ArrayField(models.IntegerField(), default=list)
     player_colors = ArrayField(models.CharField(max_length=7), default=list)
     player_names = ArrayField(models.CharField(max_length=200), default=list)
