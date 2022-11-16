@@ -19,6 +19,7 @@ import { environment } from '../../environments/environment';
   styleUrls: ['./game.component.scss'],
 })
 export class GameComponent {
+  gamedivid: string = null;
   phaserGame: Phaser.Game;
   config: Phaser.Types.Core.GameConfig;
   gameinfo: any = null;
@@ -46,7 +47,9 @@ export class GameComponent {
     private router: Router,
     private toastController: ToastController,
     private alertController: AlertController
-  ) {}
+  ) {
+    this.gamedivid = 'piraterace-game-' + Math.random().toString(36).substring(2);
+  }
 
   ionViewDidEnter() {
     this.load_gameinfo().subscribe(
@@ -56,7 +59,7 @@ export class GameComponent {
         this.Ngameround.next(gameinfo['Ngameround']);
 
         this.config = {
-          parent: 'piraterace-game',
+          parent: this.gamedivid,
           type: Phaser.AUTO,
           transparent: true,
           width: this.gameinfo.map.width * this.gameinfo.map.tilewidth,
