@@ -895,5 +895,19 @@ class GameScene extends Phaser.Scene {
       delay: 1000, // 1000 = 1 second
       loop: true,
     });
+
+    // enable zooming in and out of phaser map
+    this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY, deltaZ) => {
+      if (deltaY > 0) {
+        if (cam.zoom >= 0.3) {
+          cam.zoom -= 0.1;
+        }
+      }
+      if (deltaY < 0) {
+        if (cam.zoom < 3) {
+          cam.zoom += 0.1;
+        }
+      }
+    });
   }
 }
