@@ -37,10 +37,8 @@ export class GameComponent {
   submittedCards: boolean = false;
   poweredDown: boolean = false;
 
-  @ViewChild('game_div', { read: ElementRef }) game_div: ElementRef;
   @ViewChild('cards_menu', { read: ElementRef }) cards_menu: ElementRef;
   @ViewChild('tools_menu', { read: ElementRef }) tools_menu: ElementRef;
-  @ViewChild('game_canvas', { read: ElementRef }) game_canvas: ElementRef;
 
   constructor(
     private httpService: HttpService,
@@ -54,15 +52,13 @@ export class GameComponent {
     this.load_gameinfo().subscribe(
       (gameinfo) => {
         console.log('Game:', gameinfo);
-        console.log('Game_div size:', this.game_div.nativeElement.offsetWidth, this.game_div.nativeElement.offsetHeight);
         this.gameinfo = gameinfo;
         this.Ngameround.next(gameinfo['Ngameround']);
 
         this.config = {
           parent: 'piraterace-game',
-          type: Phaser.CANVAS,
+          type: Phaser.AUTO,
           transparent: true,
-          canvas: this.game_canvas.nativeElement,
           width: this.gameinfo.map.width * this.gameinfo.map.tilewidth,
           height: this.gameinfo.map.height * this.gameinfo.map.tileheight,
           scale: {
@@ -83,7 +79,6 @@ export class GameComponent {
 
         this.cards_menu.nativeElement.style.borderColor = gameinfo['players'][gameinfo['me']]['color'];
         this.tools_menu.nativeElement.style.borderColor = gameinfo['players'][gameinfo['me']]['color'];
-        this.game_canvas.nativeElement.style.borderColor = gameinfo['players'][gameinfo['me']]['color'];
       },
       (err) => console.error(err),
       () => console.log('observable complete')
