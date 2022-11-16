@@ -223,6 +223,9 @@ def play_stack(game):
             board_turret_actions = board_turrets(game, initial_map, players)
             actionstack.append(board_turret_actions)
 
+            board_repair_actions = board_repair(game, initial_map, players)
+            actionstack.append(board_repair_actions)
+
             # cannons
             cannon_actions = []
             for p in players.values():
@@ -276,6 +279,23 @@ def board_turrets(game, gmap, players):
                         collide_players=True,
                     )
                 )
+
+    return actions
+
+
+def board_repair(game, gmap, players):
+    actions = []
+    maxhealth = game.config.ncardsavail + FREE_HEALTH_OFFSET
+
+    for pid, p in players.items():
+        if (p.health <= 0) or (p.health >= maxhealth):
+            break
+        tile_prop = get_tile_properties(gmap, p.xpos, p.ypos)
+        if tile_prop["damage"] < 0:
+            p.health -= tile_prop["damage"]
+            if p.health >= maxhealth:
+                p.health = maxhealth
+            actions.append(dict(key="repair", target=p.id, health=p.health, posx=p.xpos, posy=p.ypos))
 
     return actions
 
