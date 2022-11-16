@@ -1,69 +1,65 @@
-<ion-content class="background">
-  <ion-grid>
-    <ion-row>
-      <ion-col size-xs="2" id="tool-column">
-        <ion-card #tools_menu>
-          <ion-card-content>
-            <ion-label>Round {{ Ngameround | async }}</ion-label>
-            <ion-button id="power_down_button" (click)="powerDown()" [disabled]="poweredDown || submittedCards">
-              <ion-icon name="construct-outline"></ion-icon>
-              <ion-label id="power_down_label">Re-Rig</ion-label>
-            </ion-button>
-            <ion-progress-bar id="time-progress-bar" [value]="countDownTimer | async" color="danger"></ion-progress-bar>
+<ion-content scroll="false" class="background">
+  <div id="piraterace-game" #game_div>
+    <canvas id="game-canvas" #game_canvas></canvas>
+  </div>
+  <ion-row>
+    <ion-col size-xs="2" id="tool-column">
+      <ion-card #tools_menu>
+        <ion-card-content>
+          <ion-label>Round {{ Ngameround | async }}</ion-label>
+          <ion-button id="power_down_button" (click)="powerDown()" [disabled]="poweredDown || submittedCards">
+            <ion-icon name="construct-outline"></ion-icon>
+            <ion-label id="power_down_label">Re-Rig</ion-label>
+          </ion-button>
+          <ion-progress-bar id="time-progress-bar" [value]="countDownTimer | async" color="danger"></ion-progress-bar>
 
-            <ion-button id="submit_cards_button" (click)="submitCards()" [disabled]="submittedCards">
-              <ion-icon name="send-outline"></ion-icon>
-              <ion-label id="submit_cards_label">Set Sails</ion-label>
-            </ion-button>
-            <ion-item-divider></ion-item-divider>
+          <ion-button id="submit_cards_button" (click)="submitCards()" [disabled]="submittedCards">
+            <ion-icon name="send-outline"></ion-icon>
+            <ion-label id="submit_cards_label">Set Sails</ion-label>
+          </ion-button>
+          <ion-item-divider></ion-item-divider>
 
-            <ion-buttons id="leave_game_button">
-              <ion-button color="primary">
-                <ion-icon name="log-out-outline"></ion-icon>
-                <ion-label id="leave_game_label">Leave Game</ion-label>
-              </ion-button>
-              <ion-popover trigger="leave_game_button" [dismissOnSelect]="true">
-                <ng-template>
-                  <ion-content>
-                    Are you sure you want to abandon your crew? You will not be able re-enter and the souls aboard will be condemned
-                    to sail on this forsaken boat for all eternity!
-                    <ion-list>
-                      <ion-button color="primary">
-                        <ion-icon name="send-outline"></ion-icon>
-                        Aye Aye! One more turn!
-                      </ion-button>
-                      <ion-button color="danger" (click)="leaveGame()">
-                        <ion-icon name="log-out-outline"></ion-icon>
-                        Yes, leave them!
-                      </ion-button>
-                    </ion-list>
-                  </ion-content>
-                </ng-template>
-              </ion-popover>
-            </ion-buttons>
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-      <ion-col size-xs="7" size-sm="8" id="game_col">
-        <div id="piraterace-game" #game_div>
-          <canvas id="game-canvas" #game_canvas></canvas>
-        </div>
-      </ion-col>
-      <ion-col size-xs="3" size-sm="2" id="card-column">
-        <ion-card #cards_menu>
-          <ion-card-content>
-            <ion-reorder-group (ionItemReorder)="onCardsReorder($event)" disabled="false">
-              <ion-reorder *ngFor="let card of cardsinfo; let i = index">
-                <ion-item-divider *ngIf="i === gameinfo?.cardslots"></ion-item-divider>
-                <ion-item class="gamecard-item" [class.active-card]="highlightCard(i)" [disabled]="cardCheck(i)">
-                  <ion-img class="gamecard-img" [src]="CARDS_URL + card[2].url"></ion-img>
-                  <ion-badge>{{ card[1] }}</ion-badge>
-                </ion-item>
-              </ion-reorder>
-            </ion-reorder-group>
-          </ion-card-content>
-        </ion-card>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+          <ion-buttons id="leave_game_button">
+            <ion-button color="primary">
+              <ion-icon name="log-out-outline"></ion-icon>
+              <ion-label id="leave_game_label">Leave Game</ion-label>
+            </ion-button>
+            <ion-popover trigger="leave_game_button" [dismissOnSelect]="true">
+              <ng-template>
+                <ion-content>
+                  Are you sure you want to abandon your crew? You will not be able re-enter and the souls aboard will be condemned
+                  to sail on this forsaken boat for all eternity!
+                  <ion-list>
+                    <ion-button color="primary">
+                      <ion-icon name="send-outline"></ion-icon>
+                      Aye Aye! One more turn!
+                    </ion-button>
+                    <ion-button color="danger" (click)="leaveGame()">
+                      <ion-icon name="log-out-outline"></ion-icon>
+                      Yes, leave them!
+                    </ion-button>
+                  </ion-list>
+                </ion-content>
+              </ng-template>
+            </ion-popover>
+          </ion-buttons>
+        </ion-card-content>
+      </ion-card>
+    </ion-col>
+    <ion-col size-xs="3" size-sm="2" id="card-column">
+      <ion-card #cards_menu>
+        <ion-card-content>
+          <ion-reorder-group (ionItemReorder)="onCardsReorder($event)" disabled="false">
+            <ion-reorder *ngFor="let card of cardsinfo; let i = index">
+              <ion-item-divider *ngIf="i === gameinfo?.cardslots"></ion-item-divider>
+              <ion-item class="gamecard-item" [class.active-card]="highlightCard(i)" [disabled]="cardCheck(i)">
+                <ion-img class="gamecard-img" [src]="CARDS_URL + card[2].url"></ion-img>
+                <ion-badge>{{ card[1] }}</ion-badge>
+              </ion-item>
+            </ion-reorder>
+          </ion-reorder-group>
+        </ion-card-content>
+      </ion-card>
+    </ion-col>
+  </ion-row>
 </ion-content>
