@@ -740,7 +740,7 @@ class GameScene extends Phaser.Scene {
   makeHealthBar(x, y) {
     let cfg = this.getHealthBarConfig();
 
-    let bgbar = this.add.graphics({x: x, y: y});
+    let bgbar = this.add.graphics({ x: x, y: y });
     //  BG
     bgbar.fillStyle(0x000000);
     bgbar.fillRect(cfg.xoffset, cfg.yoffset, cfg.width, cfg.height);
@@ -749,7 +749,7 @@ class GameScene extends Phaser.Scene {
     bgbar.fillRect(cfg.xoffset + 2, cfg.yoffset + 2, cfg.width - 4, cfg.height - 2);
 
     //  Health
-    let hbar = this.add.graphics({x: x, y: y});
+    let hbar = this.add.graphics({ x: x, y: y });
     hbar.fillStyle(0x00ff00);
     hbar.fillRect(cfg.xoffset + 2, cfg.yoffset + 2, cfg.width - 4, cfg.height - 2);
 
