@@ -66,7 +66,7 @@ export class GameComponent {
           width: this.gameinfo.map.width * this.gameinfo.map.tilewidth,
           height: this.gameinfo.map.height * this.gameinfo.map.tileheight,
           scale: {
-            mode: Phaser.Scale.NONE,
+            mode: Phaser.Scale.RESIZE,
             autoCenter: Phaser.Scale.CENTER_BOTH,
             autoRound: true,
           },
