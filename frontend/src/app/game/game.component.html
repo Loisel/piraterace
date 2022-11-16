@@ -27,16 +27,15 @@
             <ion-popover trigger="leave_game_button" [dismissOnSelect]="true">
               <ng-template>
                 <ion-content>
-                  Are you sure you want to abandon your crew? You will not be able re-enter and the souls aboard will be condemned
-                  to sail on this forsaken boat for all eternity!
+                  Really abandon your crew?
                   <ion-list>
                     <ion-button color="primary">
-                      <ion-icon name="send-outline"></ion-icon>
-                      Aye Aye! One more turn!
+                      <ion-icon slot="start" name="send-outline"></ion-icon>
+                      No! One more turn!
                     </ion-button>
                     <ion-button color="danger" (click)="leaveGame()">
-                      <ion-icon name="log-out-outline"></ion-icon>
-                      Yes, leave them!
+                      <ion-icon slot="start" name="log-out-outline"></ion-icon>
+                      Ay, leave them!
                     </ion-button>
                   </ion-list>
                 </ion-content>
