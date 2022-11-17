@@ -266,7 +266,7 @@ class GameScene extends Phaser.Scene {
     this.load.tilemapTiledJSON('tilemap', `${environment.STATIC_URL}/maps/${GI.mapfile}`);
     this.load.spritesheet('boat', `${environment.STATIC_URL}/sprites/boat.png`, { frameWidth: 24, frameHeight: 72 });
     Object.entries(GI.CARDS).forEach(([cardid, card]) => {
-      this.load.image(card['descr'], `${environment.STATIC_URL}/${card['url']}`);
+      this.load.image(card['descr'], `${environment.STATIC_URL}/${card['tile_url']}`);
     });
   }
 

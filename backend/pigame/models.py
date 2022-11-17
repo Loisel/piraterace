@@ -21,7 +21,8 @@ CARDS = {
         rot=0,
         repair=0,
         img="move_forward_1.jpg",
-        url=f"{CARDSURL}/move_forward_1.jpg",
+        url=f"{CARDSURL}/forward1-card.png",
+        tile_url=f"{CARDSURL}/forward1-tile.png",
     ),
     2: dict(
         descr="forward move 2",
@@ -29,7 +30,8 @@ CARDS = {
         rot=0,
         repair=0,
         img="move_forward_2.jpg",
-        url=f"{CARDSURL}/move_forward_2.jpg",
+        url=f"{CARDSURL}/forward2-card.png",
+        tile_url=f"{CARDSURL}/forward2-tile.png",
     ),
     10: dict(
         descr="back move 1",
@@ -37,7 +39,8 @@ CARDS = {
         rot=0,
         repair=0,
         img="move_back_1.jpg",
-        url=f"{CARDSURL}/move_back_1.jpg",
+        url=f"{CARDSURL}/backward1-card.png",
+        tile_url=f"{CARDSURL}/backward1-tile.png",
     ),
     20: dict(
         descr="rotate left",
@@ -45,7 +48,8 @@ CARDS = {
         rot=-1,
         repair=0,
         img="rot_left.jpg",
-        url=f"{CARDSURL}/rot_left.jpg",
+        url=f"{CARDSURL}/rotate-left-card.png",
+        tile_url=f"{CARDSURL}/rotate-left-tile.png",
     ),
     30: dict(
         descr="rotate right",
@@ -53,7 +57,8 @@ CARDS = {
         rot=1,
         repair=0,
         img="rot_right.jpg",
-        url=f"{CARDSURL}/rot_right.jpg",
+        url=f"{CARDSURL}/rotate-right-card.png",
+        tile_url=f"{CARDSURL}/rotate-right-tile.png",
     ),
     40: dict(
         descr="rotate uturn",
@@ -61,7 +66,8 @@ CARDS = {
         rot=2,
         repair=0,
         img="rot_u.jpg",
-        url=f"{CARDSURL}/rot_u.jpg",
+        url=f"{CARDSURL}/rotate-180-card.png",
+        tile_url=f"{CARDSURL}/rotate-180-tile.png",
     ),
     100: dict(
         descr="repair",
