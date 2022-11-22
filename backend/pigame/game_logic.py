@@ -332,7 +332,7 @@ def board_moves(game, gmap, players, fast_belt=True):
         # call board moves again for players on fast belt
         for pid, p in players.items():
             tile_prop = get_tile_properties(gmap, p.xpos, p.ypos)
-            if tile_prop["fast_belt"] == True:
+            if tile_prop.get("fast_belt", False) == True:
                 fb_players[pid] = p
         if len(fb_players) > 0:
             actions.extend(board_moves(game, gmap, fb_players, fast_belt=False))
