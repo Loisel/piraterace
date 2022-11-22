@@ -807,7 +807,7 @@ class GameScene extends Phaser.Scene {
         let boat = this.boats[playerid].getChildren()[0];
         let player = this.component.gameinfo.players[playerid];
         let text = this.add
-          .text(boat.x, boat.y, player['name'], {
+          .text(boat.x, boat.y, player['name'] + " \u2794 " + player['next_checkpoint'], {
             fontFamily: 'Arial',
             color: '#ffffff',
             fontSize: 24,
