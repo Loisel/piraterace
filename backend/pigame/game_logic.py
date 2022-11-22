@@ -11,6 +11,18 @@ BACKEND_USERID = -1
 ROUNDEND_CARDID = -1
 POWER_DOWN_CARDID = -2
 
+TILE_DEFAULTS = {
+    "collision": False,
+    "current_x": 0,
+    "current_y": 0,
+    "damage": 0,
+    "void": False,
+    "vortex": 0,
+    "turret_x": 0,
+    "turret_y": 0,
+    "fast_current": False,
+}
+
 
 def argsort(seq):
     return sorted(range(len(seq)), key=seq.__getitem__)
@@ -300,7 +312,7 @@ def board_repair(game, gmap, players):
     return actions
 
 
-def board_moves(game, gmap, players, fast_belt=True):
+def board_moves(game, gmap, players, fast_current=True):
     # TODO: disable collisions for board_moves
     actions = []
     for pid, p in players.items():
@@ -327,15 +339,15 @@ def board_moves(game, gmap, players, fast_belt=True):
                     actions.extend(move_player_y(game, gmap, players, p, tile_prop["current_y"], push_players=False))
                     if p.ypos != old_ypos:
                         player_moved[pid] = True
-    if fast_belt:
+    if fast_current:
         fb_players = {}
         # call board moves again for players on fast belt
         for pid, p in players.items():
             tile_prop = get_tile_properties(gmap, p.xpos, p.ypos)
-            if tile_prop.get("fast_belt", False) == True:
+            if tile_prop.get("fast_current", False) == True:
                 fb_players[pid] = p
         if len(fb_players) > 0:
-            actions.extend(board_moves(game, gmap, fb_players, fast_belt=False))
+            actions.extend(board_moves(game, gmap, fb_players, fast_current=False))
     return actions
 
 
@@ -510,7 +522,7 @@ def get_tile_properties(gmap, x, y):
     # for j in range(bg["height"]):
     #    print(f'bg', bg["data"][j * bg["width"]:(j+1)*bg["width"]])
     if (x < 0) or (x >= bg["width"]) or (y < 0) or (y >= bg["height"]):
-        return dict(void=True, collision=False, damage=0)
+        return TILE_DEFAULTS
     tile_id = bg["data"][y * bg["width"] + x]
     for tileset in gmap["tilesets"][::-1]:
         if tile_id >= tileset["firstgid"]:
@@ -545,7 +557,7 @@ def verify_map(mapobj):
     if len(tilesets) != 1:
         err_msg.append(f"{len(tilesets)} tilesets found. Only supporting 1 tileset.")
 
-    req_props = set(["collision", "current_x", "current_y", "damage", "void", "vortex", "turret_x", "turret_y", "fast_belt"])
+    req_props = set(TILE_DEFAULTS.keys())
     for ts in tilesets:
         for tile in ts["tiles"]:
             props = set([prop["name"] for prop in tile["properties"]])

@@ -167,7 +167,7 @@
  "nextobjectid":15,
  "orientation":"orthogonal",
  "renderorder":"right-down",
- "tiledversion":"1.9.0",
+ "tiledversion":"1.9.2",
  "tileheight":48,
  "tilesets":[
         {
@@ -204,6 +204,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":1
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -250,6 +255,11 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -292,6 +302,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":1
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -338,6 +353,11 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -380,6 +400,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":1
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -426,6 +451,11 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -468,6 +498,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":1
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -514,6 +549,11 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -556,6 +596,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -602,6 +647,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -644,6 +694,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -690,6 +745,11 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -732,6 +792,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":1
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -778,6 +843,11 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -820,6 +890,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":1
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -866,6 +941,11 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -908,6 +988,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":1
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -954,6 +1039,11 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -996,6 +1086,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":1
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -1042,6 +1137,11 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -1084,6 +1184,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":1
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -1130,6 +1235,11 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -1172,6 +1282,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":1
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -1218,6 +1333,11 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -1260,6 +1380,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":1
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -1307,6 +1432,11 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -1349,6 +1479,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":1
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -1395,6 +1530,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -1437,6 +1577,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -1483,6 +1628,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -1525,6 +1675,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":1
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -1571,6 +1726,11 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -1613,6 +1773,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":1
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -1659,6 +1824,11 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -1701,6 +1871,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":1
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -1747,6 +1922,11 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -1789,6 +1969,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":1
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -1835,6 +2020,11 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -1877,6 +2067,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -1923,6 +2118,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -1965,6 +2165,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -2011,6 +2216,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -2053,6 +2263,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -2099,6 +2314,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -2141,6 +2361,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -2187,6 +2412,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -2229,6 +2459,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -2275,6 +2510,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -2319,6 +2559,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -2361,6 +2606,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":1
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -2408,6 +2658,11 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":-1
@@ -2450,6 +2705,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":1
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -2496,6 +2756,11 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":-1
@@ -2538,6 +2803,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":1
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -2584,6 +2854,11 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":-1
@@ -2626,6 +2901,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":1
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -2672,6 +2952,11 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":-1
@@ -2714,6 +2999,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -2760,6 +3050,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -2802,6 +3097,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -2848,6 +3148,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -2890,6 +3195,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -2936,6 +3246,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -2978,6 +3293,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -3024,6 +3344,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -3066,6 +3391,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -3112,6 +3442,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -3154,6 +3489,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -3200,6 +3540,11 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":1
@@ -3242,6 +3587,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":1
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -3288,6 +3638,11 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":1
@@ -3330,6 +3685,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":1
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -3376,6 +3736,11 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":1
@@ -3420,6 +3785,11 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":1
@@ -3462,6 +3832,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":1
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -3509,6 +3884,11 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":1
@@ -3551,6 +3931,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":2
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -3597,6 +3982,11 @@
                          "value":2
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -3639,6 +4029,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":2
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -3685,6 +4080,11 @@
                          "value":2
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -3727,6 +4127,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":2
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -3773,6 +4178,11 @@
                          "value":2
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -3815,6 +4225,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":2
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -3861,6 +4276,11 @@
                          "value":2
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -3903,6 +4323,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":2
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -3949,6 +4374,11 @@
                          "value":2
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -3991,6 +4421,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":2
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -4037,6 +4472,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -4079,6 +4519,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -4125,6 +4570,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -4167,6 +4617,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -4213,6 +4668,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -4255,6 +4715,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -4301,6 +4766,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -4343,6 +4813,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -4389,6 +4864,11 @@
                          "value":2
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -4431,6 +4911,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":2
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -4477,6 +4962,11 @@
                          "value":2
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -4521,6 +5011,11 @@
                          "value":2
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -4563,6 +5058,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":2
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -4610,6 +5110,11 @@
                          "value":2
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -4652,6 +5157,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":2
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -4698,6 +5208,11 @@
                          "value":2
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -4740,6 +5255,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":2
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -4786,6 +5306,11 @@
                          "value":2
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -4828,6 +5353,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":2
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -4874,6 +5404,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -4916,6 +5451,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -4962,6 +5502,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -5004,6 +5549,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -5050,6 +5600,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -5092,6 +5647,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -5138,6 +5698,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -5180,6 +5745,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -5226,6 +5796,11 @@
                          "value":2
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -5268,6 +5843,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":2
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -5314,6 +5894,11 @@
                          "value":2
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -5356,6 +5941,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":2
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -5402,6 +5992,11 @@
                          "value":2
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -5444,6 +6039,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":2
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -5490,6 +6090,11 @@
                          "value":2
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -5532,6 +6137,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -5578,6 +6188,11 @@
                          "value":2
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -5622,6 +6237,11 @@
                          "value":2
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -5664,6 +6284,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":2
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -5711,6 +6336,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":-1
@@ -5753,6 +6383,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -5799,6 +6434,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":-1
@@ -5841,6 +6481,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -5887,6 +6532,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":-1
@@ -5929,6 +6579,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -5975,6 +6630,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":-1
@@ -6017,6 +6677,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -6063,6 +6728,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -6105,6 +6775,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -6151,6 +6826,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -6193,6 +6873,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -6239,6 +6924,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -6281,6 +6971,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -6327,6 +7022,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -6369,6 +7069,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -6415,6 +7120,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -6457,6 +7167,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -6503,6 +7218,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -6545,6 +7265,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -6591,6 +7316,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":1
@@ -6633,6 +7363,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -6679,6 +7414,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":1
@@ -6723,6 +7463,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":1
@@ -6765,6 +7510,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -6812,6 +7562,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":1
@@ -6854,6 +7609,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -6900,6 +7660,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -6942,6 +7707,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -6988,6 +7758,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -7030,6 +7805,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -7076,6 +7856,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -7118,6 +7903,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -7164,6 +7954,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -7206,6 +8001,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -7252,6 +8052,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -7294,6 +8099,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -7340,6 +8150,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -7382,6 +8197,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -7428,6 +8248,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -7470,6 +8295,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -7516,6 +8346,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -7558,6 +8393,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -7604,6 +8444,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -7646,6 +8491,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -7692,6 +8542,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -7734,6 +8589,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -7780,6 +8640,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -7824,6 +8689,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -7866,6 +8736,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":true
                         }, 
                         {
                          "name":"turret_x",
@@ -7913,6 +8788,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -7955,6 +8835,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":true
                         }, 
                         {
                          "name":"turret_x",
@@ -8001,6 +8886,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -8043,6 +8933,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":true
                         }, 
                         {
                          "name":"turret_x",
@@ -8089,6 +8984,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -8131,6 +9031,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -8177,6 +9082,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -8219,6 +9129,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -8265,6 +9180,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -8307,6 +9227,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -8353,6 +9278,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -8395,6 +9325,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -8441,6 +9376,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -8483,6 +9423,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -8529,6 +9474,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -8571,6 +9521,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -8617,6 +9572,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -8659,6 +9619,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":true
                         }, 
                         {
                          "name":"turret_x",
@@ -8705,6 +9670,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -8747,6 +9717,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":true
                         }, 
                         {
                          "name":"turret_x",
@@ -8793,6 +9768,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -8835,6 +9815,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":true
                         }, 
                         {
                          "name":"turret_x",
@@ -8881,6 +9866,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":true
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -8925,6 +9915,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -8967,6 +9962,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -9014,6 +10014,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -9056,6 +10061,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -9102,6 +10112,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -9144,6 +10159,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -9190,6 +10210,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -9232,6 +10257,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",
@@ -9278,6 +10308,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -9322,6 +10357,11 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
@@ -9364,6 +10404,11 @@
                          "name":"damage",
                          "type":"int",
                          "value":0
+                        }, 
+                        {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
                          "name":"turret_x",

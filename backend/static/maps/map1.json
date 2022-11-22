@@ -163,16 +163,21 @@
                          "value":1
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -208,16 +213,21 @@
                          "value":1
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -253,16 +263,21 @@
                          "value":1
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -298,16 +313,21 @@
                          "value":1
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -343,16 +363,21 @@
                          "value":1
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -388,16 +413,21 @@
                          "value":1
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -434,16 +464,21 @@
                          "value":1
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -479,16 +514,21 @@
                          "value":1
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -524,16 +564,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -569,16 +614,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -614,16 +664,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -659,16 +714,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":-1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -705,16 +765,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":-1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -750,16 +815,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":-1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -795,16 +865,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":-1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -840,16 +915,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":-1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -885,16 +965,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":-1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -930,16 +1015,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":-1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -976,16 +1066,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":-1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -1021,16 +1116,21 @@
                          "value":1
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -1066,16 +1166,21 @@
                          "value":1
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -1111,16 +1216,21 @@
                          "value":1
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -1156,16 +1266,21 @@
                          "value":1
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -1201,16 +1316,21 @@
                          "value":1
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -1247,16 +1367,21 @@
                          "value":1
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -1292,16 +1417,21 @@
                          "value":1
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -1337,16 +1467,21 @@
                          "value":1
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -1382,16 +1517,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -1427,16 +1567,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -1472,16 +1617,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -1518,16 +1668,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -1563,16 +1718,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -1608,16 +1768,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -1653,16 +1818,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -1698,16 +1868,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -1743,16 +1918,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -1789,16 +1969,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -1834,16 +2019,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -1879,16 +2069,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -1924,16 +2119,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -1969,16 +2169,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -2014,16 +2219,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -2060,16 +2270,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -2105,16 +2320,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -2150,16 +2370,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -2195,16 +2420,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -2240,16 +2470,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -2285,16 +2520,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -2331,16 +2571,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -2376,16 +2621,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":-1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -2421,16 +2671,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":-1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -2466,16 +2721,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":-1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -2511,16 +2771,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":-1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -2556,16 +2821,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":-1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -2602,16 +2872,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":-1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -2647,16 +2922,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":-1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -2692,16 +2972,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":-1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -2737,16 +3022,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -2782,16 +3072,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -2827,16 +3122,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -2873,16 +3173,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -2918,16 +3223,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -2963,16 +3273,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -3008,16 +3323,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -3053,16 +3373,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -3098,16 +3423,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -3144,16 +3474,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -3189,16 +3524,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -3234,16 +3574,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -3279,16 +3624,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -3324,16 +3674,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -3369,16 +3724,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -3415,16 +3775,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -3460,16 +3825,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -3505,16 +3875,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -3550,16 +3925,21 @@
                          "value":1
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -3595,16 +3975,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -3640,16 +4025,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -3686,16 +4076,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -3731,16 +4126,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -3776,16 +4176,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -3821,16 +4226,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -3866,16 +4276,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -3911,16 +4326,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -3957,16 +4377,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -4002,16 +4427,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -4047,16 +4477,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -4092,16 +4527,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":-1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -4137,16 +4577,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":-1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -4182,16 +4627,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":-1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -4228,16 +4678,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":-1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -4273,16 +4728,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":-1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -4318,16 +4778,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":-1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -4363,16 +4828,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":-1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -4408,16 +4878,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":-1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -4453,16 +4928,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -4499,16 +4979,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -4544,16 +5029,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -4589,16 +5079,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -4634,16 +5129,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -4679,16 +5179,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -4724,16 +5229,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -4770,16 +5280,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -4815,16 +5330,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -4860,16 +5380,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -4905,16 +5430,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -4950,16 +5480,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -4995,16 +5530,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -5041,16 +5581,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -5086,16 +5631,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -5131,16 +5681,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -5176,16 +5731,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -5221,16 +5781,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -5266,16 +5831,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":0
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":1
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -5312,16 +5882,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -5357,16 +5932,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -5402,16 +5982,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -5447,16 +6032,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -5492,16 +6082,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -5537,16 +6132,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -5583,16 +6183,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -5628,16 +6233,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -5673,16 +6283,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -5718,16 +6333,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -5763,16 +6383,21 @@
                          "value":2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -5808,16 +6433,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":-1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -5854,16 +6484,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":-1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -5899,16 +6534,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":-1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -5944,16 +6584,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":-1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -5989,16 +6634,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":-1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -6034,16 +6684,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":-1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -6079,16 +6734,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":-1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -6125,16 +6785,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":-1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -6170,16 +6835,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -6215,16 +6885,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -6260,16 +6935,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -6305,16 +6985,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -6350,16 +7035,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -6396,16 +7086,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -6441,16 +7136,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -6486,16 +7186,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -6531,16 +7236,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -6576,16 +7286,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -6621,16 +7336,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -6667,16 +7387,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -6712,16 +7437,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -6757,16 +7487,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -6802,16 +7537,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -6847,16 +7587,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -6892,16 +7637,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -6938,16 +7688,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -6983,16 +7738,21 @@
                          "value":0
                         }, 
                         {
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
+                        }, 
+                        {
                          "name":"turret_x",
                          "type":"int",
                          "value":1
-                        }, 
+                        },
+                    
                         {
                          "name":"turret_y",
                          "type":"int",
                          "value":0
-                        },
-                    
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -7028,16 +7788,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -7073,16 +7838,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -7118,16 +7888,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -7163,16 +7938,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -7209,16 +7989,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -7254,16 +8039,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -7299,16 +8089,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -7344,16 +8139,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -7389,16 +8189,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -7434,16 +8239,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -7480,16 +8290,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -7525,16 +8340,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -7570,16 +8390,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -7615,16 +8440,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -7660,16 +8490,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -7705,16 +8540,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -7751,16 +8591,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -7796,16 +8641,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -7841,16 +8691,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -7886,16 +8741,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -7931,16 +8791,21 @@
                          "value":-2
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -7976,16 +8841,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":true
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -8022,16 +8892,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":true
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -8067,16 +8942,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":true
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -8112,16 +8992,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":true
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -8157,16 +9042,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":true
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -8202,16 +9092,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":true
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -8247,16 +9142,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -8293,16 +9193,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -8338,16 +9243,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -8383,16 +9293,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -8428,16 +9343,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -8473,16 +9393,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -8518,16 +9443,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -8564,16 +9494,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -8609,16 +9544,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -8654,16 +9594,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -8699,16 +9644,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -8744,16 +9694,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -8789,16 +9744,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -8835,16 +9795,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":true
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -8880,16 +9845,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":true
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -8925,16 +9895,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":true
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -8970,16 +9945,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":true
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -9015,16 +9995,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":true
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -9060,16 +10045,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":true
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -9106,16 +10096,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -9151,16 +10146,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -9196,16 +10196,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -9241,16 +10246,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -9286,16 +10296,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -9331,16 +10346,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -9377,16 +10397,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -9422,16 +10447,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -9467,16 +10497,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -9512,16 +10547,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
@@ -9557,16 +10597,21 @@
                          "value":0
                         }, 
                         {
-                         "name":"turret_x",
-                         "type":"int",
-                         "value":0
+                         "name":"fast_current",
+                         "type":"bool",
+                         "value":false
                         }, 
                         {
-                         "name":"turret_y",
+                         "name":"turret_x",
                          "type":"int",
                          "value":0
                         },
                     
+                        {
+                         "name":"turret_y",
+                         "type":"int",
+                         "value":0
+                        }, 
                         {
                          "name":"void",
                          "type":"bool",
