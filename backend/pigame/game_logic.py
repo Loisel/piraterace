@@ -3,9 +3,11 @@ import os
 import random
 import types
 
+from django.core.cache import cache
+
 from piraterace.settings import MAPSDIR
 from piplayer.models import Account
-from pigame.models import card_id_rank, CARDS, DEFAULT_DECK, DIRID2MOVE, DIRID2NAME, FREE_HEALTH_OFFSET
+from pigame.models import add_repair_cards, card_id_rank, CARDS, DEFAULT_DECK, DIRID2MOVE, DIRID2NAME, FREE_HEALTH_OFFSET
 
 BACKEND_USERID = -1
 ROUNDEND_CARDID = -1
@@ -32,23 +34,38 @@ def flatten_list_of_tuples(lot):
     return [i for j in lot for i in j]
 
 
+def set_player_deck(gamecfg, playerid, deck):
+    cachestr = f"player_deck_{gamecfg.pk}_{playerid}"
+    cache.set(cachestr, deck, None)
+
+
+def get_player_deck(gamecfg, playerid):
+    cachestr = f"player_deck_{gamecfg.pk}_{playerid}"
+    deck = cache.get(cachestr)
+    if deck is None:
+        deck = add_repair_cards(Account.objects.get(pk=playerid).deck, gamecfg.percentage_repaircards)
+        random.shuffle(deck)
+        cache.set(cachestr, deck, None)
+    return deck
+
+
 def get_cards_on_hand(gamecfg, playeridx, ncards):
     """
     get next ncards that a player can draw from his deck
         return list of tuples of (playerid, card)
     """
     next_card = gamecfg.player_next_card[playeridx]
-    deck = gamecfg.player_decks[playeridx]
+    deck = get_player_deck(gamecfg, gamecfg.player_ids[playeridx])
 
     if next_card + ncards > len(deck):
         remaining_cards = deck[next_card:]
         old_cards = deck[:next_card]
         random.shuffle(old_cards)
-        gamecfg.player_decks[playeridx] = remaining_cards + old_cards
+        deck = remaining_cards + old_cards
+        set_player_deck(gamecfg, gamecfg.player_ids[playeridx], deck)
         gamecfg.player_next_card[playeridx] = 0
-        gamecfg.save(update_fields=["player_next_card", "player_decks"])
+        gamecfg.save(update_fields=["player_next_card"])
         next_card = gamecfg.player_next_card[playeridx]
-        deck = gamecfg.player_decks[playeridx]
 
     res = []
     for i in range(0, ncards):
@@ -205,7 +222,6 @@ def play_stack(game):
                         dict(key="respawn", target=p.id, health=p.health, posx=p.xpos, posy=p.ypos, direction=p.direction)
                     )
             actionstack.append(respawn_actions)
-
 
         elif card == POWER_DOWN_CARDID:
             powerdowncards.append(playerid)

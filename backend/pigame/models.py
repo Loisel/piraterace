@@ -33,6 +33,15 @@ CARDS = {
         url=f"{CARDSURL}/forward2-card.png",
         tile_url=f"{CARDSURL}/forward2-tile.png",
     ),
+    3: dict(
+        descr="forward move 3",
+        move=3,
+        rot=0,
+        repair=0,
+        img="forward3-card.png",
+        url=f"{CARDSURL}/forward3-card.png",
+        tile_url=f"{CARDSURL}/forward3-tile.png",
+    ),
     10: dict(
         descr="back move 1",
         move=-1,
@@ -91,6 +100,8 @@ def gen_default_deck():
 
     for rank in range(10, NRANKINGS // 2, 10):
         c.append(2 * NRANKINGS + rank)
+    for rank in range(10, NRANKINGS // 4, 10):
+        c.append(3 * NRANKINGS + rank)
 
     return c
 
@@ -139,7 +150,6 @@ class GameConfig(models.Model):
     player_start_x = ArrayField(models.PositiveSmallIntegerField(), default=list)
     player_start_y = ArrayField(models.PositiveSmallIntegerField(), default=list)
     player_start_directions = ArrayField(models.PositiveSmallIntegerField(), default=list)
-    player_decks = ArrayField(ArrayField(models.IntegerField(null=True, blank=True), null=True, blank=True))
     player_next_card = ArrayField(models.IntegerField(), default=list)
     nmaxplayers = models.PositiveSmallIntegerField(default=1)
     mode = models.CharField(max_length=1, choices=GAME_MODES, default="c")

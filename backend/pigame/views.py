@@ -3,7 +3,6 @@ from django.shortcuts import get_object_or_404
 from django.forms.models import model_to_dict
 from django.shortcuts import redirect
 from django.urls import reverse
-from django.core import serializers
 from django.db import transaction
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -11,19 +10,16 @@ from django.core.cache import cache
 
 import os
 import glob
-import random
 from piraterace.settings import MAPSDIR
 
 from pigame.models import (
     BaseGame,
     ClassicGame,
-    DEFAULT_DECK,
     FREE_HEALTH_OFFSET,
     GameConfig,
     CARDS,
     COLORS,
     card_id_rank,
-    add_repair_cards,
 )
 from piplayer.models import Account
 import datetime
@@ -41,6 +37,8 @@ from pigame.game_logic import (
     BACKEND_USERID,
     ROUNDEND_CARDID,
     POWER_DOWN_CARDID,
+    get_player_deck,
+    set_player_deck,
 )
 
 TIME_PER_ACTION = 0.6
@@ -97,12 +95,11 @@ def player_cards(request, **kwargs):
             )
 
         # move card into place
-        deck = gamecfg.player_decks[pidx]
+        deck = get_player_deck(gamecfg, player.pk)
         next_card = gamecfg.player_next_card[pidx]
         tmp = deck.pop(next_card + src)
         deck.insert(next_card + target, tmp)
-
-        gamecfg.save(update_fields=["player_decks"])
+        set_player_deck(gamecfg, player.pk, deck)
 
     cards = []
     for playerid, card in get_cards_on_hand(gamecfg, pidx, gamecfg.ncardsavail):
@@ -218,7 +215,6 @@ def game(request, game_id, **kwargs):
 
     payload["Ngameround"] = game.round
     payload["state"] = game.state
-    payload["player_decks"] = game.config.player_decks
     payload["players"] = {}
     for p in player_states.values():
         payload["players"][p.id] = dict(
@@ -333,10 +329,7 @@ def create_game(request, gameconfig_id, **kwargs):
     config.player_start_directions = dirs[: len(players)]
 
     for i, pid in enumerate(config.player_ids):
-        deck = players.get(pk=pid).deck
-        deck = add_repair_cards(deck, config.percentage_repaircards)
-        random.shuffle(deck)
-        config.player_decks.append(deck)
+        set_player_deck(config, pid, None)
         config.player_next_card.append(0)
 
     game = ClassicGame()
@@ -466,7 +459,6 @@ def create_gameconfig(request, **kwargs):
         creator_userid=player.pk,
         mapfile=mapfile,
         player_ids=[],
-        player_decks=[],
         nmaxplayers=data["Nmaxplayers"],
     )
     gameconfig.add_player(player)
