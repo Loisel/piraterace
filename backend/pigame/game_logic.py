@@ -40,7 +40,7 @@ def get_cards_on_hand(gamecfg, playeridx, ncards):
     next_card = gamecfg.player_next_card[playeridx]
     deck = gamecfg.player_decks[playeridx]
 
-    if next_card + ncards - 1 > len(deck):
+    if next_card + ncards > len(deck):
         remaining_cards = deck[next_card:]
         old_cards = deck[:next_card]
         random.shuffle(old_cards)
