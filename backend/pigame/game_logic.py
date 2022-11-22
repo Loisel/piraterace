@@ -182,6 +182,19 @@ def play_stack(game):
                     player.last_cp_x = player.xpos
                     player.last_cp_y = player.ypos
 
+            for player in players.values():
+                player.powered_down = False
+            powerdownrepair_actions = []
+            for pid in powerdowncards:
+                print(f"Player powered down. health {players[pid].health}")
+                if players[pid].health <= 0:
+                    continue
+                players[pid].health = game.config.ncardsavail + FREE_HEALTH_OFFSET
+                players[pid].powered_down = True
+                powerdownrepair_actions.append(dict(key="powerdownrepair", target=pid, health=players[pid].health))
+            actionstack.append(powerdownrepair_actions)
+            powerdowncards = []
+
             # respawns
             respawn_actions = []
             for p in players.values():
@@ -194,15 +207,6 @@ def play_stack(game):
                     )
             actionstack.append(respawn_actions)
 
-            for player in players.values():
-                player.powered_down = False
-            powerdownrepair_actions = []
-            for pid in powerdowncards:
-                players[pid].health = game.config.ncardsavail + FREE_HEALTH_OFFSET
-                players[pid].powered_down = True
-                powerdownrepair_actions.append(dict(key="powerdownrepair", target=pid, health=players[pid].health))
-            actionstack.append(powerdownrepair_actions)
-            powerdowncards = []
 
         elif card == POWER_DOWN_CARDID:
             powerdowncards.append(playerid)
