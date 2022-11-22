@@ -312,7 +312,7 @@ def power_down(request, **kwargs):
     account.game.cards_played.extend((account.pk, POWER_DOWN_CARDID))
     account.game.save(update_fields=["cards_played"])
 
-    return JsonResponse(f"Power down requested", safe=False)
+    return JsonResponse(f"Next round will be used to re-rig the sails.", safe=False)
 
 
 @api_view(["GET"])
