@@ -301,7 +301,7 @@ def board_repair(game, gmap, players):
 
     for pid, p in players.items():
         if (p.health <= 0) or (p.health >= maxhealth):
-            break
+            continue
         tile_prop = get_tile_properties(gmap, p.xpos, p.ypos)
         if tile_prop["damage"] < 0:
             p.health -= tile_prop["damage"]
