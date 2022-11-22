@@ -186,7 +186,6 @@ def play_stack(game):
                 player.powered_down = False
             powerdownrepair_actions = []
             for pid in powerdowncards:
-                print(f"Player powered down. health {players[pid].health}")
                 if players[pid].health <= 0:
                     continue
                 players[pid].health = game.config.ncardsavail + FREE_HEALTH_OFFSET
