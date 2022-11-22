@@ -307,7 +307,7 @@ def power_down(request, **kwargs):
         if card == ROUNDEND_CARDID:
             break
         elif (card == POWER_DOWN_CARDID) and (pid == account.pk):
-            return JsonResponse(f"You already requested a power down.", status=404, safe=False)
+            return JsonResponse(f"You already requested to re-rig the sails.", status=404, safe=False)
 
     account.game.cards_played.extend((account.pk, POWER_DOWN_CARDID))
     account.game.save(update_fields=["cards_played"])
