@@ -10,10 +10,12 @@ from pigame.models import BaseGame, GameConfig, gen_default_deck
 class Account(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     game = models.ForeignKey(BaseGame, on_delete=models.SET_NULL, null=True, blank=True)
-    deck = ArrayField(models.IntegerField(), default=gen_default_deck)
 
-    # avatar =
     time_submitted = models.DateTimeField(blank=True, null=True)
+
+    @property
+    def deck(self):
+        return gen_default_deck()
 
 
 @receiver(post_save, sender=User)
