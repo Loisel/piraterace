@@ -26,6 +26,5 @@ def userDetail(request, **kwargs):
         account = user.account
         accountdict = model_to_dict(account)
         payload["game"] = accountdict["game"]
-        payload["deck"] = accountdict["deck"]
 
     return JsonResponse(payload)
