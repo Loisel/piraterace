@@ -17,6 +17,12 @@ export class GameConfigComponent implements OnInit {
   updateTimer: ReturnType<typeof setInterval>;
   cfgOptionsRequestId: number = 0;
   cfgOptionsForm: FormGroup = null;
+  cfgOptionsLabels: any = {
+    ncardslots: 'Number of cards to be played',
+    ncardsavail: 'Number of cards on hand',
+    countdown: 'Countdown duration (seconds)',
+    percentage_repaircards: 'Fraction of repaircards in deck',
+  };
 
   constructor(
     private httpService: HttpService,
@@ -41,6 +47,14 @@ export class GameConfigComponent implements OnInit {
           ncardslots: new FormControl(
             this.gameConfig.ncardslots,
             Validators.compose([Validators.required, Validators.min(1), Validators.pattern('^[0-9]+$')])
+          ),
+          countdown: new FormControl(
+            this.gameConfig.countdown,
+            Validators.compose([Validators.required, Validators.min(1), Validators.pattern('^[0-9]+$')])
+          ),
+          percentage_repaircards: new FormControl(
+            this.gameConfig.percentage_repaircards,
+            Validators.compose([Validators.required, Validators.min(0), Validators.max(100), Validators.pattern('^[0-9]+$')])
           ),
         },
         { validators: cardsSlotsLECardsAvailValidator }
@@ -110,6 +124,8 @@ export class GameConfigComponent implements OnInit {
         this.cfgOptionsForm.setValue({
           ncardsavail: gameconfig['ncardsavail'],
           ncardslots: gameconfig['ncardslots'],
+          countdown: gameconfig['countdown'],
+          percentage_repaircards: gameconfig['percentage_repaircards'],
         });
       }
       if (this.gameConfig['game']) {

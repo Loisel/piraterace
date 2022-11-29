@@ -16,4 +16,6 @@ export interface GameConfig {
   request_id: number;
   ncardsavail: number;
   ncardslots: number;
+  countdown: number;
+  percentage_repaircards: number;
 }

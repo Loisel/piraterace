@@ -92,31 +92,84 @@
           </ion-card-header>
           <div *ngIf="gameConfig?.creator_userid !== gameConfig?.caller_id">
             <ion-row>
-              <ion-col sizeMd="3">ncardslots</ion-col>
+              <ion-col sizeMd="3">{{ cfgOptionsLabels["ncardslots"] }}</ion-col>
               <ion-col sizeMd="2">{{ gameConfig?.ncardslots }}</ion-col>
             </ion-row>
             <ion-row>
-              <ion-col sizeMd="3">ncardsavail</ion-col>
+              <ion-col sizeMd="3">{{ cfgOptionsLabels["ncardsavail"] }}</ion-col>
               <ion-col sizeMd="2">{{ gameConfig?.ncardsavail }}</ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col sizeMd="3">{{ cfgOptionsLabels["countdown"] }}</ion-col>
+              <ion-col sizeMd="2">{{ gameConfig?.countdown }}</ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col sizeMd="3">{{ cfgOptionsLabels["percentage_repaircards"] }}</ion-col>
+              <ion-col sizeMd="2">{{ gameConfig?.percentage_repaircards }}</ion-col>
             </ion-row>
           </div>
           <form class="form div-item" *ngIf="cfgOptionsForm" [formGroup]="cfgOptionsForm">
-            <ion-list>
-              <ion-item class="item-input">
-                <ion-label>ncardslots</ion-label>
+            <ion-row>
+              <ion-col size-lg="3" sizeMd="4" class="ion-padding">
+                <ion-icon name="layers"></ion-icon> {{ cfgOptionsLabels["ncardslots"] }}
+              </ion-col>
+              <ion-col size-lg="1" size-md="2" size-xs="3">
                 <ion-input type="number" formControlName="ncardslots"></ion-input>
-              </ion-item>
-              <small ion-text class="errors" *ngIf="cfgOptionsForm && cfgOptionsForm.errors?.['slotsLTavail']">
-                Slots have to be less than avail.
-              </small>
-              <small ion-text class="errors" *ngIf="cfgOptionsForm && !cfgOptionsForm?.controls.ncardslots.valid">
-                Slots have to positive numbers.
-              </small>
-              <ion-item class="item-input">
-                <ion-label>ncardsavail</ion-label>
+              </ion-col>
+              <ion-col class="ion-padding">
+                <ion-text color="danger" *ngIf="cfgOptionsForm && cfgOptionsForm.errors?.['slotsLTavail']">
+                  <ion-icon name="warning"></ion-icon> {{ cfgOptionsLabels["ncardslots"] }} has to be less than
+                  {{ cfgOptionsLabels["ncardsavail"] }}.
+                </ion-text>
+                <ion-text color="danger" *ngIf="cfgOptionsForm && !cfgOptionsForm?.controls.ncardslots.valid">
+                  <ion-icon name="warning"></ion-icon> {{ cfgOptionsLabels["ncardslots"] }} has to be a positive number.
+                </ion-text>
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col size-lg="3" sizeMd="4" class="ion-padding">
+                <ion-icon name="layers"></ion-icon> {{ cfgOptionsLabels["ncardsavail"] }}
+              </ion-col>
+              <ion-col size-lg="1" size-md="2" size-xs="3">
                 <ion-input type="number" formControlName="ncardsavail"></ion-input>
-              </ion-item>
-            </ion-list>
+              </ion-col>
+              <ion-col class="ion-padding">
+                <ion-text color="danger" *ngIf="cfgOptionsForm && cfgOptionsForm.errors?.['slotsLTavail']">
+                  <ion-icon name="warning"></ion-icon> {{ cfgOptionsLabels["ncardslots"] }} has to be less than
+                  {{ cfgOptionsLabels["ncardsavail"] }}.
+                </ion-text>
+                <ion-text color="danger" *ngIf="cfgOptionsForm && !cfgOptionsForm?.controls.ncardsavail.valid">
+                  <ion-icon name="warning"></ion-icon> {{ cfgOptionsLabels["ncardsavail"] }} has to be a positive number.
+                </ion-text>
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col size-lg="3" sizeMd="4" class="ion-padding">
+                <ion-icon name="hourglass"></ion-icon> {{ cfgOptionsLabels["countdown"] }}
+              </ion-col>
+              <ion-col size-lg="1" size-md="2" size-xs="3">
+                <ion-input type="number" formControlName="countdown"></ion-input>
+              </ion-col>
+              <ion-col class="ion-padding">
+                <ion-text color="danger" *ngIf="cfgOptionsForm && !cfgOptionsForm?.controls.countdown.valid">
+                  <ion-icon name="warning"></ion-icon> {{ cfgOptionsLabels["countdown"] }} has to be a positive number.
+                </ion-text>
+              </ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col size-lg="3" sizeMd="4" class="ion-padding">
+                <ion-icon name="medkit"></ion-icon> {{ cfgOptionsLabels["percentage_repaircards"] }}
+              </ion-col>
+              <ion-col size-lg="1" size-md="2" size-xs="3">
+                <ion-input type="number" formControlName="percentage_repaircards"></ion-input>
+              </ion-col>
+              <ion-col class="ion-padding">
+                <ion-text color="danger" *ngIf="cfgOptionsForm && !cfgOptionsForm?.controls.percentage_repaircards.valid">
+                  <ion-icon name="warning"></ion-icon> {{ cfgOptionsLabels["percentage_repaircards"] }} has to be a positive number
+                  below 100.
+                </ion-text>
+              </ion-col>
+            </ion-row>
           </form>
         </ion-card>
 
