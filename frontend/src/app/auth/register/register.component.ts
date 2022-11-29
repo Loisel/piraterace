@@ -35,8 +35,8 @@ export class RegisterComponent implements OnInit {
         '',
         Validators.compose([Validators.required, Validators.pattern('^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$')])
       ),
-      password: new FormControl('', Validators.compose([Validators.minLength(8), Validators.required])),
-      confirmpassword: new FormControl('', Validators.compose([Validators.minLength(8), Validators.required])),
+      password: new FormControl('', Validators.compose([Validators.minLength(4), Validators.required])),
+      confirmpassword: new FormControl('', Validators.compose([Validators.minLength(4), Validators.required])),
     });
   }
 
@@ -53,8 +53,19 @@ export class RegisterComponent implements OnInit {
       (ret) => {
         console.log('register return', ret);
         this.presentToast('User registered', 'success');
-        this.authService.login(ret['username'], values['password']);
-        this.router.navigateByUrl('/auth/userdetail');
+        this.authService.login(ret['username'], values['password']).subscribe(
+          (ret) => {
+            console.log('login return', ret);
+            this.router.navigateByUrl('/lobby');
+          },
+          (error) => {
+            console.log('login returned with error', error);
+            let errmsg = '';
+            Object.entries(error.error).forEach(([key, value]) => (errmsg += value + ' '));
+            this.presentToast(errmsg, 'danger');
+          }
+        );
+        this.router.navigateByUrl('/');
       },
       (error) => {
         console.log('register returned with error', error);
