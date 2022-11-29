@@ -9,96 +9,100 @@
       </ion-col>
 
       <ion-col>
-        <ion-row>
-          <ion-col>Player</ion-col>
-          <ion-col>Color</ion-col>
-          <ion-col>Team</ion-col>
-          <ion-col>Ready?</ion-col>
-        </ion-row>
-        <div *ngFor="let p of gameConfig?.player_ids; let i = index" [attr.data-index]="p">
-          <div *ngIf="p === gameConfig?.caller_id; then my_player_info; else other_player_info"></div>
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Players</ion-card-title>
+          </ion-card-header>
+          <ion-row>
+            <ion-col>Player</ion-col>
+            <ion-col>Color</ion-col>
+            <ion-col>Team</ion-col>
+            <ion-col>Ready?</ion-col>
+          </ion-row>
+          <div *ngFor="let p of gameConfig?.player_ids; let i = index" [attr.data-index]="p">
+            <div *ngIf="p === gameConfig?.caller_id; then my_player_info; else other_player_info"></div>
 
-          <ng-template #other_player_info>
-            <ion-row>
-              <ion-col>{{ gameConfig?.player_names[i] }}</ion-col>
-              <ion-col [ngStyle]="{ 'background-color': gameConfig?.player_colors[i] }"></ion-col>
-              <ion-col>{{ gameConfig?.player_teams[i] }}</ion-col>
-              <ion-col>
-                <span *ngIf="gameConfig?.player_ready[i]; then ready_icon; else not_ready_icon" class="ion-text-center"></span>
-                <ng-template #ready_icon><ion-icon color="success" size="large" name="checkmark-circle"></ion-icon></ng-template>
-                <ng-template #not_ready_icon><ion-icon color="danger" size="large" name="close-circle"></ion-icon></ng-template>
-              </ion-col>
-            </ion-row>
-          </ng-template>
+            <ng-template #other_player_info>
+              <ion-row>
+                <ion-col>{{ gameConfig?.player_names[i] }}</ion-col>
+                <ion-col [ngStyle]="{ 'background-color': gameConfig?.player_colors[i] }"></ion-col>
+                <ion-col>{{ gameConfig?.player_teams[i] }}</ion-col>
+                <ion-col>
+                  <span *ngIf="gameConfig?.player_ready[i]; then ready_icon; else not_ready_icon" class="ion-text-center"></span>
+                  <ng-template #ready_icon><ion-icon color="success" size="large" name="checkmark-circle"></ion-icon></ng-template>
+                  <ng-template #not_ready_icon><ion-icon color="danger" size="large" name="close-circle"></ion-icon></ng-template>
+                </ion-col>
+              </ion-row>
+            </ng-template>
 
-          <ng-template #my_player_info>
-            <ion-row>
-              <ion-col
-                ><ion-input>{{ gameConfig?.player_names[i] }}</ion-input></ion-col
-              >
-              <ion-col>
-                <ion-select
-                  value="{{ gameConfig?.player_colors[gameConfig?.caller_idx] }}"
-                  [ngStyle]="{
-                    'background-color': gameConfig?.player_colors[gameConfig?.caller_idx]
-                  }"
-                  id="color_select"
-                  (ionChange)="onPlayerInfoChange($event)"
-                  [(ngModel)]="gameConfig?.player_colors[gameConfig?.caller_idx]"
-                >
-                  <ion-select-option
-                    *ngFor="let color of gameConfig?.player_color_choices | keyvalue"
-                    [attr.value]="color.value"
-                    [ngStyle]="{ 'background-color': color.value }"
-                    >{{ color.key }}</ion-select-option
-                  >
-                </ion-select>
-              </ion-col>
-              <ion-col>
-                <ion-input
-                  placeholder="{{ gameConfig?.player_teams[gameConfig?.caller_idx] }}"
-                  inputmode="numeric"
-                  type="number"
-                  (ionChange)="onPlayerInfoChange($event)"
-                  [(ngModel)]="gameConfig?.player_teams[gameConfig?.caller_idx]"
-                >
-                </ion-input>
-              </ion-col>
-              <ion-col>
-                <ion-input>
-                  <ion-checkbox
-                    checked="{{ gameConfig?.player_ready[gameConfig?.caller_idx] }}"
-                    id="ready_check"
+            <ng-template #my_player_info>
+              <ion-row>
+                <ion-col
+                  ><ion-input>{{ gameConfig?.player_names[i] }}</ion-input></ion-col
+                                                                             >
+                <ion-col>
+                  <ion-select
+                    value="{{ gameConfig?.player_colors[gameConfig?.caller_idx] }}"
+                    [ngStyle]="{
+                               'background-color': gameConfig?.player_colors[gameConfig?.caller_idx]
+                               }"
+                    id="color_select"
                     (ionChange)="onPlayerInfoChange($event)"
-                    [(ngModel)]="gameConfig?.player_ready[gameConfig?.caller_idx]"
-                  >
-                  </ion-checkbox>
-                </ion-input>
-              </ion-col>
-            </ion-row>
-          </ng-template>
-        </div>
+                    [(ngModel)]="gameConfig?.player_colors[gameConfig?.caller_idx]"
+                    >
+                    <ion-select-option
+                      *ngFor="let color of gameConfig?.player_color_choices | keyvalue"
+                      [attr.value]="color.value"
+                      [ngStyle]="{ 'background-color': color.value }"
+                      >{{ color.key }}</ion-select-option
+                                        >
+                  </ion-select>
+                </ion-col>
+                <ion-col>
+                  <ion-input
+                    placeholder="{{ gameConfig?.player_teams[gameConfig?.caller_idx] }}"
+                    inputmode="numeric"
+                    type="number"
+                    (ionChange)="onPlayerInfoChange($event)"
+                    [(ngModel)]="gameConfig?.player_teams[gameConfig?.caller_idx]"
+                    >
+                  </ion-input>
+                </ion-col>
+                <ion-col>
+                  <ion-input>
+                    <ion-checkbox
+                      checked="{{ gameConfig?.player_ready[gameConfig?.caller_idx] }}"
+                      id="ready_check"
+                      (ionChange)="onPlayerInfoChange($event)"
+                      [(ngModel)]="gameConfig?.player_ready[gameConfig?.caller_idx]"
+                      >
+                    </ion-checkbox>
+                  </ion-input>
+                </ion-col>
+              </ion-row>
+            </ng-template>
+          </div>
+        </ion-card>
 
         <form class="form div-item" *ngIf="cfgOptionsForm" [formGroup]="cfgOptionsForm">
-          <ion-row>
-            <ion-col>
-              <ion-item>ncardslots</ion-item>
-            </ion-col>
-            <ion-col>
-              <ion-item class="item-input">
-                <ion-input type="number" formControlName="ncardslots"></ion-input>
-              </ion-item>
-              <small ion-text class="errors" *ngIf="cfgOptionsForm && !cfgOptionsForm?.controls.ncardslots.valid">
-                {{ "invalid number of cards" }}
-              </small>
-            </ion-col>
-            <ion-col>
-              <ion-item>ncardsavail</ion-item>
-            </ion-col>
-            <ion-col class="item-input">
+          <ion-card>
+            <ion-card-header>
+              <ion-card-title>Settings</ion-card-title>
+            </ion-card-header>
+          <ion-list>
+            <ion-item class="item-input">
+              <ion-label>ncardslots</ion-label>
+              <ion-input type="number" formControlName="ncardslots"></ion-input>
+            </ion-item>
+            <small ion-text class="errors" *ngIf="cfgOptionsForm && !cfgOptionsForm?.controls.ncardslots.valid">
+              {{ "invalid number of cards" }}
+            </small>
+            <ion-item class="item-input">
+              <ion-label>ncardsavail</ion-label>
               <ion-input type="number" formControlName="ncardsavail"></ion-input>
-            </ion-col>
-          </ion-row>
+            </ion-item>
+          </ion-list>
+          </ion-card>
         </form>
 
         <ion-row>
