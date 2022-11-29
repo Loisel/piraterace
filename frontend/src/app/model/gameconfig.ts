@@ -13,4 +13,7 @@ export interface GameConfig {
   player_color_choices: string[];
   all_ready: boolean;
   gamename: string;
+  request_id: number;
+  ncardsavail: number;
+  ncardslots: number;
 }

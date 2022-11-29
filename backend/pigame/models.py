@@ -156,17 +156,16 @@ class GameConfig(models.Model):
     # nplayers = models.PositiveSmallIntegerField(null=True, blank=True)
     # playerlist ist ein account set, oder?
     mapfile = models.CharField(max_length=256)
-    nlives = models.PositiveSmallIntegerField(default=3)
     damage_on_hit = models.PositiveSmallIntegerField(default=10)
-    npause_on_repair = models.PositiveSmallIntegerField(default=1)
-    npause_on_destroy = models.PositiveSmallIntegerField(default=1)
     ncardslots = models.PositiveSmallIntegerField(default=5)
     ncardsavail = models.PositiveSmallIntegerField(default=7)
-    allow_transfer = models.BooleanField(default=False)
+    # allow_transfer = models.BooleanField(default=False)
     creator_userid = models.PositiveIntegerField()
     countdown_mode = models.CharField(max_length=1, choices=CHOICE_MODES, default="d")
     countdown = models.PositiveIntegerField(default=30)
     percentage_repaircards = models.PositiveSmallIntegerField(default=5)
+
+    request_id = models.PositiveIntegerField(default=0)
 
     game = models.OneToOneField("BaseGame", related_name="config", null=True, blank=True, on_delete=models.CASCADE)
 
@@ -196,6 +195,10 @@ class GameConfig(models.Model):
             self.player_teams.pop(idx)
             self.player_ready.pop(idx)
         return True
+
+    def save(self, *args, **kwargs):
+        self.request_id += 1
+        super(GameConfig, self).save(*args, **kwargs)
 
 
 class BaseGame(PolymorphicModel):

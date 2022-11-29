@@ -22,9 +22,9 @@
             <ion-label>Game Name:</ion-label>
             <ion-input [(ngModel)]="data.gamename"> </ion-input>
           </ion-item>
-          <ion-item *ngIf="data?.Nmaxplayers">
-            Selected Map: {{ data.selected_map }}, Number of players: {{ data.Nmaxplayers }}
-          </ion-item>
+          <ion-item *ngIf="data?.selected_map"> Selected Map: {{ data.selected_map }} </ion-item>
+
+          <ion-item *ngIf="data?.Nmaxplayers"> Number of players: {{ data.Nmaxplayers }} </ion-item>
         </ion-list>
       </ion-col>
     </ion-row>

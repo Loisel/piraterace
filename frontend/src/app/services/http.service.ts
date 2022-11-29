@@ -20,7 +20,8 @@ export class HttpService {
   player_cardsURL = `${environment.API_URL}/pigame/player_cards`;
   submitCardsURL = `${environment.API_URL}/pigame/submit_cards`;
   powerDownURL = `${environment.API_URL}/pigame/power_down`;
-  player_infoURL = `${environment.API_URL}/pigame/update_gm_player_info`;
+  player_infoURL = `${environment.API_URL}/pigame/update_gamecfg_player_info`;
+  updateGamecfgOptionsURL = `${environment.API_URL}/pigame/update_gamecfg_options`;
   get_leaveGameURL = `${environment.API_URL}/pigame/leave_game`;
   get_mapinfoURL = `${environment.API_URL}/pigame/mapinfo`;
 
@@ -62,9 +63,12 @@ export class HttpService {
     let data = [from, to];
     return this.httpClient.post(`${this.player_cardsURL}`, data);
   }
-  updateGMPlayerInfo(id: number, data) {
+  updateGameCfgPlayerInfo(id: number, data) {
     console.log(data);
-    return this.httpClient.post(`${this.player_infoURL}/${id}`, data);
+    return this.httpClient.post<GameConfig>(`${this.player_infoURL}/${id}`, data);
+  }
+  updateGameCfgOptions(id: number, request_id: number, data) {
+    return this.httpClient.post<GameConfig>(`${this.updateGamecfgOptionsURL}/${id}/${request_id}`, data);
   }
   get_create_new_gameConfig() {
     return this.httpClient.get<NewGameConfig>(`${this.create_new_gameConfigURL}`);

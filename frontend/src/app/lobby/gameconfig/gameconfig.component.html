@@ -79,6 +79,28 @@
           </ng-template>
         </div>
 
+        <form class="form div-item" *ngIf="cfgOptionsForm" [formGroup]="cfgOptionsForm">
+          <ion-row>
+            <ion-col>
+              <ion-item>ncardslots</ion-item>
+            </ion-col>
+            <ion-col>
+              <ion-item class="item-input">
+                <ion-input type="number" formControlName="ncardslots"></ion-input>
+              </ion-item>
+              <small ion-text class="errors" *ngIf="cfgOptionsForm && !cfgOptionsForm?.controls.ncardslots.valid">
+                {{ "invalid number of cards" }}
+              </small>
+            </ion-col>
+            <ion-col>
+              <ion-item>ncardsavail</ion-item>
+            </ion-col>
+            <ion-col class="item-input">
+              <ion-input type="number" formControlName="ncardsavail"></ion-input>
+            </ion-col>
+          </ion-row>
+        </form>
+
         <ion-row>
           <ion-col *ngIf="gameConfig?.creator_userid === gameConfig?.caller_id">
             <ion-button [disabled]="!gameConfig?.all_ready" (click)="createGame()">

@@ -378,19 +378,49 @@ def view_gameconfig(request, gameconfig_id):
 
 @api_view(["POST"])
 @permission_classes((IsAuthenticated,))
-def update_gm_player_info(request, gameconfig_id):
+def update_gamecfg_player_info(request, gameconfig_id):
     caller = request.user.account
-    gm = get_object_or_404(GameConfig, pk=gameconfig_id)
+    gamecfg = get_object_or_404(GameConfig, pk=gameconfig_id)
 
     data = request.data
-    idx = gm.player_ids.index(caller.pk)
+    idx = gamecfg.player_ids.index(caller.pk)
 
-    gm.player_colors[idx] = data["color"]
-    gm.player_teams[idx] = data["team"]
-    gm.player_ready[idx] = data["ready"]
-    gm.save()
+    gamecfg.player_colors[idx] = data["color"]
+    gamecfg.player_teams[idx] = data["team"]
+    gamecfg.player_ready[idx] = data["ready"]
+    gamecfg.save()
 
-    return redirect(reverse("pigame:view_gameconfig", kwargs={"gameconfig_id": gm.pk}))
+    return redirect(reverse("pigame:view_gameconfig", kwargs={"gameconfig_id": gamecfg.pk}))
+
+
+@api_view(["POST"])
+@permission_classes((IsAuthenticated,))
+def update_gamecfg_options(request, gameconfig_id, request_id):
+    caller = request.user.account
+    gamecfg = get_object_or_404(GameConfig, pk=gameconfig_id)
+
+    if caller.pk != gamecfg.creator_userid:
+        return JsonResponse(f"Only the Game Creator can change options", status=404, safe=False)
+
+    if request_id <= gamecfg.request_id:
+        return JsonResponse(
+            f"Found old gamecfg change options request backend {gamecfg.request_id} request {request_id}", status=404, safe=False
+        )
+
+    data = request.data
+
+    if data["ncardslots"] > data["ncardsavail"]:
+        return JsonResponse(f"Number of cards to play has to be smaller than number of cards on hand", status=404, safe=False)
+
+    if data["ncardslots"] < 1:
+        return JsonResponse(f"Number of cards to play has to be at least 1", status=404, safe=False)
+
+    gamecfg.request_id = request_id
+    gamecfg.ncardsavail = data["ncardsavail"]
+    gamecfg.ncardslots = data["ncardslots"]
+    gamecfg.save()
+
+    return redirect(reverse("pigame:view_gameconfig", kwargs={"gameconfig_id": gamecfg.pk}))
 
 
 def clean_up_configs(player):
