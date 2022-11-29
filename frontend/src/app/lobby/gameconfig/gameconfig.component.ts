@@ -30,28 +30,29 @@ export class GameConfigComponent implements OnInit {
 
   buildcfgOptionsForm() {
     if (!this.gameConfig) return;
-    this.cfgOptionsForm = this.formBuilder.group(
-      {
-        ncardsavail: new FormControl(
-          this.gameConfig.ncardsavail,
-          Validators.compose([Validators.required, Validators.min(1), Validators.pattern('^[0-9]+$')])
-        ),
-        ncardslots: new FormControl(
-          this.gameConfig.ncardslots,
-          Validators.compose([Validators.required, Validators.min(1), Validators.pattern('^[0-9]+$')])
-        ),
-      },
-      { validators: cardsSlotsLECardsAvailValidator }
-    );
 
-    if (this.gameConfig['creator_userid'] !== this.gameConfig['caller_id']) {
-      // disable form controls if we are not game admin
-      this.cfgOptionsForm.disable({ emitEvent: false });
-    } else {
+    if (this.gameConfig['creator_userid'] === this.gameConfig['caller_id']) {
+      this.cfgOptionsForm = this.formBuilder.group(
+        {
+          ncardsavail: new FormControl(
+            this.gameConfig.ncardsavail,
+            Validators.compose([Validators.required, Validators.min(1), Validators.pattern('^[0-9]+$')])
+          ),
+          ncardslots: new FormControl(
+            this.gameConfig.ncardslots,
+            Validators.compose([Validators.required, Validators.min(1), Validators.pattern('^[0-9]+$')])
+          ),
+        },
+        { validators: cardsSlotsLECardsAvailValidator }
+      );
+
       this.cfgOptionsForm.valueChanges
         .pipe(
           debounceTime(1000),
           distinctUntilChanged((prev, curr) => {
+            if (!prev) {
+              prev = curr;
+            }
             return JSON.stringify(prev) === JSON.stringify(curr);
           })
         )
@@ -101,14 +102,16 @@ export class GameConfigComponent implements OnInit {
       this.gameConfig = gameconfig;
       this.cfgOptionsRequestId = gameconfig.request_id;
 
-      if (!this.cfgOptionsForm) {
-        this.buildcfgOptionsForm();
-      }
+      if (gameconfig.creator_userid === gameconfig.caller_id) {
+        if (!this.cfgOptionsForm) {
+          this.buildcfgOptionsForm();
+        }
 
-      this.cfgOptionsForm.setValue({
-        ncardsavail: gameconfig['ncardsavail'],
-        ncardslots: gameconfig['ncardslots'],
-      });
+        this.cfgOptionsForm.setValue({
+          ncardsavail: gameconfig['ncardsavail'],
+          ncardslots: gameconfig['ncardslots'],
+        });
+      }
       if (this.gameConfig['game']) {
         this.router.navigate(['game', this.gameConfig['game']]);
       }
@@ -159,15 +162,21 @@ export class GameConfigComponent implements OnInit {
 
   onPlayerInfoChange(event) {
     // console.log("Color", this.playerColor);
+    this.cfgOptionsRequestId += 1;
     this.httpService
-      .updateGameCfgPlayerInfo(this.gameConfig.id, {
+      .updateGameCfgPlayerInfo(this.gameConfig.id, this.cfgOptionsRequestId, {
         color: this.gameConfig['player_colors'][this.gameConfig['caller_idx']],
         team: this.gameConfig['player_teams'][this.gameConfig['caller_idx']],
         ready: this.gameConfig['player_ready'][this.gameConfig['caller_idx']],
       })
-      .subscribe((data: any) => {
-        this.gameConfig = data;
-      });
+      .subscribe(
+        (data: any) => {
+          this.handleNewGameConfig(data);
+        },
+        (error) => {
+          this.presentToast(error.error, 'danger');
+        }
+      );
   }
 
   async presentToast(msg, color = 'primary') {
@@ -184,5 +193,6 @@ export const cardsSlotsLECardsAvailValidator: ValidatorFn = (control: AbstractCo
   const slots = control.get('ncardslots');
   const avail = control.get('ncardsavail');
 
-  return slots && avail && slots.value > avail.value ? { slotsLTavail: true } : null;
+  let ret = slots && avail && slots.value > avail.value ? { slotsLTavail: true } : null;
+  return ret;
 };

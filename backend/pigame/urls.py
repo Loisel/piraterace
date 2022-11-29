@@ -9,7 +9,7 @@ urlpatterns = [
     path("game/<int:game_id>", views.game, name="game"),
     path("leave_game", views.leave_game, name="leave_game"),
     path("create_game/<int:gameconfig_id>", views.create_game),
-    path("update_gamecfg_player_info/<int:gameconfig_id>", views.update_gamecfg_player_info),
+    path("update_gamecfg_player_info/<int:gameconfig_id>/<int:request_id>", views.update_gamecfg_player_info),
     path("update_gamecfg_options/<int:gameconfig_id>/<int:request_id>", views.update_gamecfg_options),
     path("create_new_gameconfig", views.create_new_gameconfig),
     path("create_gameconfig", views.create_gameconfig),

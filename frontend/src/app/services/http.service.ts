@@ -63,9 +63,9 @@ export class HttpService {
     let data = [from, to];
     return this.httpClient.post(`${this.player_cardsURL}`, data);
   }
-  updateGameCfgPlayerInfo(id: number, data) {
+  updateGameCfgPlayerInfo(id: number, request_id: number, data) {
     console.log(data);
-    return this.httpClient.post<GameConfig>(`${this.player_infoURL}/${id}`, data);
+    return this.httpClient.post<GameConfig>(`${this.player_infoURL}/${id}/${request_id}`, data);
   }
   updateGameCfgOptions(id: number, request_id: number, data) {
     return this.httpClient.post<GameConfig>(`${this.updateGamecfgOptionsURL}/${id}/${request_id}`, data);

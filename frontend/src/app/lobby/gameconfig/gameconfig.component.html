@@ -39,23 +39,23 @@
               <ion-row>
                 <ion-col
                   ><ion-input>{{ gameConfig?.player_names[i] }}</ion-input></ion-col
-                                                                             >
+                >
                 <ion-col>
                   <ion-select
                     value="{{ gameConfig?.player_colors[gameConfig?.caller_idx] }}"
                     [ngStyle]="{
-                               'background-color': gameConfig?.player_colors[gameConfig?.caller_idx]
-                               }"
+                      'background-color': gameConfig?.player_colors[gameConfig?.caller_idx]
+                    }"
                     id="color_select"
                     (ionChange)="onPlayerInfoChange($event)"
                     [(ngModel)]="gameConfig?.player_colors[gameConfig?.caller_idx]"
-                    >
+                  >
                     <ion-select-option
                       *ngFor="let color of gameConfig?.player_color_choices | keyvalue"
                       [attr.value]="color.value"
                       [ngStyle]="{ 'background-color': color.value }"
                       >{{ color.key }}</ion-select-option
-                                        >
+                    >
                   </ion-select>
                 </ion-col>
                 <ion-col>
@@ -65,7 +65,7 @@
                     type="number"
                     (ionChange)="onPlayerInfoChange($event)"
                     [(ngModel)]="gameConfig?.player_teams[gameConfig?.caller_idx]"
-                    >
+                  >
                   </ion-input>
                 </ion-col>
                 <ion-col>
@@ -75,7 +75,7 @@
                       id="ready_check"
                       (ionChange)="onPlayerInfoChange($event)"
                       [(ngModel)]="gameConfig?.player_ready[gameConfig?.caller_idx]"
-                      >
+                    >
                     </ion-checkbox>
                   </ion-input>
                 </ion-col>
@@ -84,26 +84,41 @@
           </div>
         </ion-card>
 
-        <form class="form div-item" *ngIf="cfgOptionsForm" [formGroup]="cfgOptionsForm">
-          <ion-card>
-            <ion-card-header>
-              <ion-card-title>Settings</ion-card-title>
-            </ion-card-header>
-          <ion-list>
-            <ion-item class="item-input">
-              <ion-label>ncardslots</ion-label>
-              <ion-input type="number" formControlName="ncardslots"></ion-input>
-            </ion-item>
-            <small ion-text class="errors" *ngIf="cfgOptionsForm && !cfgOptionsForm?.controls.ncardslots.valid">
-              {{ "invalid number of cards" }}
-            </small>
-            <ion-item class="item-input">
-              <ion-label>ncardsavail</ion-label>
-              <ion-input type="number" formControlName="ncardsavail"></ion-input>
-            </ion-item>
-          </ion-list>
-          </ion-card>
-        </form>
+        <ion-card *ngIf="gameConfig?.creator_userid === gameConfig?.caller_id"> </ion-card>
+
+        <ion-card>
+          <ion-card-header>
+            <ion-card-title>Settings</ion-card-title>
+          </ion-card-header>
+          <div *ngIf="gameConfig?.creator_userid !== gameConfig?.caller_id">
+            <ion-row>
+              <ion-col sizeMd="3">ncardslots</ion-col>
+              <ion-col sizeMd="2">{{ gameConfig?.ncardslots }}</ion-col>
+            </ion-row>
+            <ion-row>
+              <ion-col sizeMd="3">ncardsavail</ion-col>
+              <ion-col sizeMd="2">{{ gameConfig?.ncardsavail }}</ion-col>
+            </ion-row>
+          </div>
+          <form class="form div-item" *ngIf="cfgOptionsForm" [formGroup]="cfgOptionsForm">
+            <ion-list>
+              <ion-item class="item-input">
+                <ion-label>ncardslots</ion-label>
+                <ion-input type="number" formControlName="ncardslots"></ion-input>
+              </ion-item>
+              <small ion-text class="errors" *ngIf="cfgOptionsForm && cfgOptionsForm.errors?.['slotsLTavail']">
+                Slots have to be less than avail.
+              </small>
+              <small ion-text class="errors" *ngIf="cfgOptionsForm && !cfgOptionsForm?.controls.ncardslots.valid">
+                Slots have to positive numbers.
+              </small>
+              <ion-item class="item-input">
+                <ion-label>ncardsavail</ion-label>
+                <ion-input type="number" formControlName="ncardsavail"></ion-input>
+              </ion-item>
+            </ion-list>
+          </form>
+        </ion-card>
 
         <ion-row>
           <ion-col *ngIf="gameConfig?.creator_userid === gameConfig?.caller_id">

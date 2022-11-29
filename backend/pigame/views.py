@@ -378,16 +378,21 @@ def view_gameconfig(request, gameconfig_id):
 
 @api_view(["POST"])
 @permission_classes((IsAuthenticated,))
-def update_gamecfg_player_info(request, gameconfig_id):
+def update_gamecfg_player_info(request, gameconfig_id, request_id):
     caller = request.user.account
     gamecfg = get_object_or_404(GameConfig, pk=gameconfig_id)
 
+    if request_id <= gamecfg.request_id:
+        return JsonResponse(
+            f"Found old gamecfg change options request backend {gamecfg.request_id} request {request_id}", status=404, safe=False
+        )
     data = request.data
     idx = gamecfg.player_ids.index(caller.pk)
 
     gamecfg.player_colors[idx] = data["color"]
     gamecfg.player_teams[idx] = data["team"]
     gamecfg.player_ready[idx] = data["ready"]
+    gamecfg.request_id = request_id
     gamecfg.save()
 
     return redirect(reverse("pigame:view_gameconfig", kwargs={"gameconfig_id": gamecfg.pk}))
