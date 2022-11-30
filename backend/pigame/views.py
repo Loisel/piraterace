@@ -420,6 +420,14 @@ def update_gamecfg_options(request, gameconfig_id, request_id):
     if data["ncardslots"] < 1:
         return JsonResponse(f"Number of cards to play has to be at least 1", status=404, safe=False)
 
+    if data["percentage_repaircards"] < 0:
+        return JsonResponse(f"Repair card fraction has to be a positive number", status=404, safe=False)
+    if data["percentage_repaircards"] > 100:
+        return JsonResponse(f"Repair card fraction has to be less than 100%", status=404, safe=False)
+
+    if data["countdown"] < 0:
+        return JsonResponse(f"Countdown has to be a positive number", status=404, safe=False)
+
     gamecfg.request_id = request_id
     gamecfg.ncardsavail = data["ncardsavail"]
     gamecfg.ncardslots = data["ncardslots"]
