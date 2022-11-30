@@ -22,8 +22,6 @@
                 </ion-select-option>
               </ion-select>
             </ion-item>
-            <ion-item color="none" lines="none" *ngIf="data?.selected_map"> Selected Map: {{ data.selected_map }} </ion-item>
-
             <ion-item color="none" lines="none" *ngIf="data?.Nmaxplayers"> Number of players: {{ data.Nmaxplayers }} </ion-item>
             <ion-item color="none" lines="none" *ngIf="data?.selected_map">
               <ion-button (click)="createGameConfig($event)">Create Game</ion-button>
