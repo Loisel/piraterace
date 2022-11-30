@@ -30,6 +30,10 @@ ion-content.background{
     --background: url(./assets/img/sea-fight.jpg) no-repeat center center / cover;
 }
 
-ion-col.foreground{
+.foreground{
     background: rgba(white, 0.5);
+}
+
+.bg-transparent{
+  background: transparent;
 }
