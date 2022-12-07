@@ -9,6 +9,35 @@
             <ion-icon name="construct-outline"></ion-icon>
             <ion-label id="power_down_label">Re-Rig</ion-label>
           </ion-button>
+          <ion-item id="cannon-direction-group">
+            <ion-card id="cannon-direction-card">
+              <ion-row>
+                <ion-col size-md="12" size-lg="4">
+                  <ion-img style="width: 40px" src="../../assets/img/cannon.png"></ion-img>
+                </ion-col>
+                <ion-col>
+                  <ion-radio-group value="custom-checked">
+                    <ion-button fill="clear" [disabled]="poweredDown || submittedCards">
+                      <ion-icon class="icon-cannon-direction" name="arrow-up"></ion-icon>
+                      <ion-radio value="forward"></ion-radio>
+                    </ion-button>
+                    <ion-button fill="clear" [disabled]="poweredDown || submittedCards">
+                      <ion-icon class="icon-cannon-direction" name="arrow-down"></ion-icon>
+                      <ion-radio value="backward"></ion-radio>
+                    </ion-button>
+                    <ion-button fill="clear" [disabled]="poweredDown || submittedCards">
+                      <ion-icon class="icon-cannon-direction" name="arrow-forward"></ion-icon>
+                      <ion-radio value="left"></ion-radio>
+                    </ion-button>
+                    <ion-button fill="clear" [disabled]="poweredDown || submittedCards">
+                      <ion-icon class="icon-cannon-direction" name="arrow-back"></ion-icon>
+                      <ion-radio value="right"></ion-radio>
+                    </ion-button>
+                  </ion-radio-group>
+                </ion-col>
+              </ion-row>
+            </ion-card>
+          </ion-item>
           <ion-progress-bar id="time-progress-bar" [value]="countDownTimer | async" color="danger"></ion-progress-bar>
 
           <ion-button id="submit_cards_button" (click)="submitCards()" [disabled]="submittedCards">

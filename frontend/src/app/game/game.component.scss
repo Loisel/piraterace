@@ -94,3 +94,28 @@ ion-card-content {
 .active-card {
   border-style: ridge;
 }
+
+.icon-cannon-direction {
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+
+#cannon-direction-group {
+  border: 2px solid var(--ion-color-primary);
+  border-radius: 0.4em;
+  width: 94%;
+  margin: 2%;
+}
+
+#cannon-direction-card {
+  width: 100%;
+  ion-button {
+    --padding-start: 5px;
+    --padding-end: 5px;
+  }
+}
+
+#cannon-direction-label {
+  margin: 0;
+}
