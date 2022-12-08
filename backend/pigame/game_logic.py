@@ -2,12 +2,21 @@ import json
 import os
 import random
 import types
-
 from django.core.cache import cache
 
 from piraterace.settings import MAPSDIR
 from piplayer.models import Account
-from pigame.models import add_repair_cards, card_id_rank, CARDS, DEFAULT_DECK, DIRID2MOVE, DIRID2NAME, FREE_HEALTH_OFFSET
+from pigame.models import (
+    add_repair_cards,
+    card_id_rank,
+    CARDS,
+    DEFAULT_DECK,
+    DIRID2MOVE,
+    DIRID2NAME,
+    FREE_HEALTH_OFFSET,
+    CANNON_DIRECTION,
+    CANNON_DIRECTION_CARDS,
+)
 
 BACKEND_USERID = -1
 ROUNDEND_CARDID = -1
@@ -164,6 +173,7 @@ def play_stack(game):
         p.start_pos_y = y
         p.direction = direction
         p.start_direction = direction
+        p.cannon_direction = CANNON_DIRECTION.FORWARD
         p.next_checkpoint = 1
         p.color = color
         p.team = team
@@ -225,6 +235,9 @@ def play_stack(game):
 
         elif card == POWER_DOWN_CARDID:
             powerdowncards.append(playerid)
+
+        elif card in CANNON_DIRECTION_CARDS:
+            players[playerid].cannon_direction = CANNON_DIRECTION_CARDS[card]["direction"]
 
         else:  # obviously a player card
             Nplayercardsplayedthisround += 1
@@ -371,12 +384,13 @@ def board_moves(game, gmap, players, fast_current=True):
 
 
 def shoot_player_cannon(game, gmap, players, player):
+    cannon_direction = (player.direction + player.cannon_direction) % 4
     return shoot_cannon_ball(
         gmap,
         xstart=player.xpos,
         ystart=player.ypos,
-        xinc=DIRID2MOVE[player.direction][0],
-        yinc=DIRID2MOVE[player.direction][1],
+        xinc=DIRID2MOVE[cannon_direction][0],
+        yinc=DIRID2MOVE[cannon_direction][1],
         players=players,
         cannon_damage=1,
         collide_terrain=True,

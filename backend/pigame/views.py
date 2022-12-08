@@ -12,15 +12,7 @@ import os
 import glob
 from piraterace.settings import MAPSDIR
 
-from pigame.models import (
-    BaseGame,
-    ClassicGame,
-    FREE_HEALTH_OFFSET,
-    GameConfig,
-    CARDS,
-    COLORS,
-    card_id_rank,
-)
+from pigame.models import BaseGame, ClassicGame, FREE_HEALTH_OFFSET, GameConfig, CARDS, COLORS, card_id_rank, CANNON_DIRECTION_CARDS
 from piplayer.models import Account
 import datetime
 import pytz
@@ -107,6 +99,37 @@ def player_cards(request, **kwargs):
         cards.append([cardid, cardrank, CARDS[cardid]])
 
     return JsonResponse(cards, safe=False)
+
+
+@api_view(["GET"])
+@permission_classes((IsAuthenticated,))
+@transaction.atomic
+def player_cannon_direction(request, direction, **kwargs):
+    player = request.user.account
+
+    if player.game.state in ["animate", "end"]:
+        return JsonResponse(
+            {
+                "message": f"You are not allowed to modify the cannon direction during the animation phase.",
+            },
+            status=404,
+            safe=False,
+        )
+
+    card_id = direction - 10
+    if card_id not in CANNON_DIRECTION_CARDS:
+        return JsonResponse(
+            {
+                "message": f"Can not change cannon direction: {direction} is not a valid cannon direction.",
+            },
+            status=404,
+            safe=False,
+        )
+
+    player.game.cards_played.extend((player.pk, card_id))
+    player.game.save(update_fields=["cards_played"])
+
+    return JsonResponse({"success": True}, safe=False)
 
 
 @api_view(["GET"])

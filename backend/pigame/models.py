@@ -1,4 +1,5 @@
 from django.db import models
+from enum import Enum
 from polymorphic.models import PolymorphicModel
 from django.contrib.postgres.fields import ArrayField
 import matplotlib.colors as mcolors
@@ -86,6 +87,21 @@ CARDS = {
         img="repair-card.png",
         url=f"{CARDSURL}/repair-card.png",
     ),
+}
+
+
+class CANNON_DIRECTION(Enum):
+    FORWARD = 0
+    RIGHT = 1
+    BACKWARD = 2
+    LEFT = 3
+
+
+CANNON_DIRECTION_CARDS = {
+    -10: dict(descr="cannon direction forward", direction=CANNON_DIRECTION.FORWARD),
+    -11: dict(descr="cannon direction right", direction=CANNON_DIRECTION.RIGHT),
+    -12: dict(descr="cannon direction backward", direction=CANNON_DIRECTION.BACKWARD),
+    -13: dict(descr="cannon direction left", direction=CANNON_DIRECTION.LEFT),
 }
 
 
