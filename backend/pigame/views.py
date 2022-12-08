@@ -120,18 +120,14 @@ def player_cannon_direction(request, direction_id, **kwargs):
 
     if player.game.state in ["animate", "end"]:
         return JsonResponse(
-            {
-                "message": f"You are not allowed to modify the cannon direction during the animation phase.",
-            },
+            f"You are not allowed to modify the cannon direction during the animation phase.",
             status=404,
             safe=False,
         )
 
     if direction_id not in CANNON_DIRECTION_CARDS:
         return JsonResponse(
-            {
-                "message": f"Can not change cannon direction: {direction_id} is not a valid cannon direction.",
-            },
+            f"Can not change cannon direction: {direction_id} is not a valid cannon direction.",
             status=404,
             safe=False,
         )
