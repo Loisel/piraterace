@@ -1,4 +1,5 @@
 from django.db import models
+from enum import Enum
 from polymorphic.models import PolymorphicModel
 from django.contrib.postgres.fields import ArrayField
 import matplotlib.colors as mcolors
@@ -87,6 +88,25 @@ CARDS = {
         url=f"{CARDSURL}/repair-card.png",
     ),
 }
+
+
+class CANNON_DIRECTION:
+    FORWARD = 0
+    RIGHT = 1
+    BACKWARD = 2
+    LEFT = 3
+
+
+CANNON_DIRECTION_CARDS = {
+    -10: dict(descr="cannon_forward", direction=int(CANNON_DIRECTION.FORWARD)),
+    -11: dict(descr="cannon_right", direction=int(CANNON_DIRECTION.RIGHT)),
+    -12: dict(descr="cannon_backward", direction=int(CANNON_DIRECTION.BACKWARD)),
+    -13: dict(descr="cannon_left", direction=int(CANNON_DIRECTION.LEFT)),
+}
+
+CANNON_DIRECTION_DESCR2ID = {val["descr"]: key for key, val in CANNON_DIRECTION_CARDS.items()}
+
+CANNON_DIRECTION_DIRID2CARDID = {val["direction"]: key for key, val in CANNON_DIRECTION_CARDS.items()}
 
 
 def gen_default_deck():

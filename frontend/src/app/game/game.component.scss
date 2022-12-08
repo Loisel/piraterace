@@ -58,24 +58,24 @@ ion-card-content {
   margin: 2%;
 }
 
-#submit_cards_button {
-  padding-left: 0.2em;
-  height: 2.2em;
-  width: 95%;
-  ion-icon {
-    padding-right: 0.2em;
-    font-size: 1em;
+#tool-column {
+  ion-button {
+    padding: 0.2em;
+    height: 2.2em;
+    width: 95%;
+    ion-icon {
+      padding-right: 0.2em;
+      font-size: 1em;
+    }
   }
 }
 
-#power_down_button {
-  padding-left: 0.2em;
-  height: 2.2em;
-  width: 95%;
-  ion-icon {
-    padding-right: 0.2em;
-    font-size: 1em;
-  }
+ion-modal#cannon-modal {
+  --width: fit-content;
+  --min-width: 250px;
+  --height: auto;
+  --border-radius: 6px;
+  --box-shadow: 0 28px 48px rgba(0, 0, 0, 0.4);
 }
 
 .gamecard-item {
@@ -93,4 +93,29 @@ ion-card-content {
 
 .active-card {
   border-style: ridge;
+}
+
+.icon-cannon-direction {
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+
+#cannon-direction-group {
+  border: 2px solid var(--ion-color-primary);
+  border-radius: 0.4em;
+  width: 94%;
+  margin: 2%;
+}
+
+#cannon-direction-card {
+  width: 100%;
+  ion-button {
+    --padding-start: 5px;
+    --padding-end: 5px;
+  }
+}
+
+#cannon-direction-label {
+  margin: 0;
 }

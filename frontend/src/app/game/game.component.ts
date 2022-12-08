@@ -1,4 +1,5 @@
 import { IonicModule } from '@ionic/angular';
+import { IonModal } from '@ionic/angular';
 import { ToastController } from '@ionic/angular';
 import { AlertController } from '@ionic/angular';
 import { Platform } from '@ionic/angular';
@@ -40,6 +41,7 @@ export class GameComponent {
 
   @ViewChild('cards_menu', { read: ElementRef }) cards_menu: ElementRef;
   @ViewChild('tools_menu', { read: ElementRef }) tools_menu: ElementRef;
+  @ViewChild(IonModal) cannonModal: IonModal;
 
   constructor(
     private httpService: HttpService,
@@ -240,6 +242,18 @@ export class GameComponent {
       ],
     });
     await alert.present();
+  }
+
+  changeCannonDirection(event) {
+    this.httpService.changeCannonDirection(event.detail.value).subscribe(
+      (ret) => {
+        console.log('Changed Cannon Direction');
+        this.presentToast('Redirected deadly cannons.', 'success');
+      },
+      (error) => {
+        this.presentToast(error.error, 'danger');
+      }
+    );
   }
 }
 

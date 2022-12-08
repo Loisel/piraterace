@@ -20,6 +20,9 @@ from pigame.models import (
     CARDS,
     COLORS,
     card_id_rank,
+    CANNON_DIRECTION_DESCR2ID,
+    CANNON_DIRECTION_DIRID2CARDID,
+    CANNON_DIRECTION_CARDS,
 )
 from piplayer.models import Account
 import datetime
@@ -112,6 +115,36 @@ def player_cards(request, **kwargs):
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
 @transaction.atomic
+def player_cannon_direction(request, direction_id, **kwargs):
+    player = request.user.account
+
+    if player.game.state in ["animate", "end"]:
+        return JsonResponse(
+            {
+                "message": f"You are not allowed to modify the cannon direction during the animation phase.",
+            },
+            status=404,
+            safe=False,
+        )
+
+    if direction_id not in CANNON_DIRECTION_CARDS:
+        return JsonResponse(
+            {
+                "message": f"Can not change cannon direction: {direction_id} is not a valid cannon direction.",
+            },
+            status=404,
+            safe=False,
+        )
+
+    player.game.cards_played.extend((player.pk, direction_id))
+    player.game.save(update_fields=["cards_played"])
+
+    return JsonResponse({"success": True}, safe=False)
+
+
+@api_view(["GET"])
+@permission_classes((IsAuthenticated,))
+@transaction.atomic
 def game(request, game_id, **kwargs):
     try:
         game = BaseGame.objects.filter(pk=game_id).select_for_update()[0]
@@ -138,6 +171,7 @@ def game(request, game_id, **kwargs):
         countdown=None,
         initial_health=game.config.ncardsavail + FREE_HEALTH_OFFSET,
         CARDS=CARDS,
+        CANNON_DIRECTION_DESCR2ID=CANNON_DIRECTION_DESCR2ID,
     )
 
     player_states, actionstack = get_play_stack(game)
@@ -230,6 +264,7 @@ def game(request, game_id, **kwargs):
             team=p.team,
             health=p.health,
             powered_down=p.powered_down,
+            cannon_direction=str(CANNON_DIRECTION_DIRID2CARDID[p.cannon_direction]),
         )
 
     if game.state in ["end"]:

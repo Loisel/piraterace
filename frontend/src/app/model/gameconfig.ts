@@ -18,4 +18,5 @@ export interface GameConfig {
   ncardslots: number;
   countdown: number;
   percentage_repaircards: number;
+  CANNON_DIRECTION_DESCR2ID: any;
 }

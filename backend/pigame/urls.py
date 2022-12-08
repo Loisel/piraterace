@@ -1,8 +1,21 @@
-from django.urls import path
+from django.urls import path, register_converter
 
 from pigame import views
 
 app_name = "pigame"
+
+
+class NegativeIntConverter:
+    regex = "-?\d+"
+
+    def to_python(self, value):
+        return int(value)
+
+    def to_url(self, value):
+        return "%d" % value
+
+
+register_converter(NegativeIntConverter, "negint")
 
 urlpatterns = [
     path("player_cards", views.player_cards, name="player_cards"),
@@ -19,5 +32,6 @@ urlpatterns = [
     path("list_gameconfigs", views.list_gameconfigs),
     path("submit_cards", views.submit_cards),
     path("power_down", views.power_down),
+    path("cannon_direction/<negint:direction_id>", views.player_cannon_direction, name="cannon_direction"),
     path("mapinfo/<str:mapfile>", views.get_mapinfo),
 ]
