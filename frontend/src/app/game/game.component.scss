@@ -58,24 +58,24 @@ ion-card-content {
   margin: 2%;
 }
 
-#submit_cards_button {
-  padding-left: 0.2em;
-  height: 2.2em;
-  width: 95%;
-  ion-icon {
-    padding-right: 0.2em;
-    font-size: 1em;
+#tool-column {
+  ion-button {
+    padding-left: 0.2em;
+    height: 2.2em;
+    width: 95%;
+    ion-icon {
+      padding-right: 0.2em;
+      font-size: 1em;
+    }
   }
 }
 
-#power_down_button {
-  padding-left: 0.2em;
-  height: 2.2em;
-  width: 95%;
-  ion-icon {
-    padding-right: 0.2em;
-    font-size: 1em;
-  }
+ion-modal#cannon-modal {
+  --width: fit-content;
+  --min-width: 250px;
+  --height: auto;
+  --border-radius: 6px;
+  --box-shadow: 0 28px 48px rgba(0, 0, 0, 0.4);
 }
 
 .gamecard-item {
