@@ -20,6 +20,7 @@ export class HttpService {
   player_cardsURL = `${environment.API_URL}/pigame/player_cards`;
   submitCardsURL = `${environment.API_URL}/pigame/submit_cards`;
   powerDownURL = `${environment.API_URL}/pigame/power_down`;
+  cannonDirectionURL = `${environment.API_URL}/pigame/cannon_direction`;
   player_infoURL = `${environment.API_URL}/pigame/update_gamecfg_player_info`;
   updateGamecfgOptionsURL = `${environment.API_URL}/pigame/update_gamecfg_options`;
   get_leaveGameURL = `${environment.API_URL}/pigame/leave_game`;
@@ -43,6 +44,9 @@ export class HttpService {
   }
   joinGameConfig(id: number) {
     return this.httpClient.get<GameConfig>(`${this.join_gameConfigURL}/${id}`);
+  }
+  changeCannonDirection(id: number) {
+    return this.httpClient.get<any>(`${this.cannonDirectionURL}/${id}`);
   }
   leaveGameConfig() {
     return this.httpClient.get(`${this.leave_gameConfigURL}`);

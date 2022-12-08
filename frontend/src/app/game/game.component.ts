@@ -243,6 +243,18 @@ export class GameComponent {
     });
     await alert.present();
   }
+
+  changeCannonDirection(event) {
+    this.httpService.changeCannonDirection(event.detail.value).subscribe(
+      (ret) => {
+        console.log('Changed Cannon Direction');
+        this.presentToast('Redirected deadly cannons.', 'success');
+      },
+      (error) => {
+        this.presentToast(error.error, 'danger');
+      }
+    );
+  }
 }
 
 class GameScene extends Phaser.Scene {

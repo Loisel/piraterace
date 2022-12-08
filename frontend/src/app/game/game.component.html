@@ -9,11 +9,11 @@
             <ion-icon name="construct-outline"></ion-icon>
             <ion-label id="power_down_label">Re-Rig</ion-label>
           </ion-button>
-          <ion-button id="cannon-direction-button" (click)="cannonDirectionAlert()" [disabled]="poweredDown || submittedCards">
+          <ion-button id="cannon-direction-button" [disabled]="poweredDown || submittedCards">
             <ion-img style="width: 40px" src="../../assets/img/cannon.png"></ion-img>
             <ion-label id="power_down_label">Cannon Mount</ion-label>
           </ion-button>
-          <ion-modal id="cannon-modal" trigger="cannon-direction-button" (willDismiss)="onWillDismiss($event)">
+          <ion-modal id="cannon-modal" trigger="cannon-direction-button">
             <ng-template>
               <ion-item lines="none">
                 <ion-thumbnail slot="start">
@@ -23,13 +23,16 @@
               </ion-item>
               <ion-row class="ion-justify-content-center">
                 <ion-col>
-                  <ion-radio-group value="custom-checked">
+                  <ion-radio-group
+                    [value]="gameinfo?.players[gameinfo.me].cannon_direction"
+                    (ionChange)="changeCannonDirection($event)"
+                  >
                     <ion-row>
                       <ion-col> </ion-col>
                       <ion-col class="ion-text-center">
                         <ion-button fill="clear" [disabled]="poweredDown || submittedCards">
                           <ion-icon class="icon-cannon-direction" name="arrow-up"></ion-icon>
-                          <ion-radio value="forward"></ion-radio>
+                          <ion-radio value="{{ gameinfo?.CANNON_DIRECTION_DESCR2ID.cannon_forward }}"></ion-radio>
                         </ion-button>
                       </ion-col>
                       <ion-col> </ion-col>
@@ -38,7 +41,7 @@
                       <ion-col class="ion-text-center">
                         <ion-button fill="clear" [disabled]="poweredDown || submittedCards">
                           <ion-icon class="icon-cannon-direction" name="arrow-back"></ion-icon>
-                          <ion-radio value="right"></ion-radio>
+                          <ion-radio value="{{ gameinfo?.CANNON_DIRECTION_DESCR2ID.cannon_left }}"></ion-radio>
                         </ion-button>
                       </ion-col>
                       <ion-col class="ion-text-center">
@@ -47,7 +50,7 @@
                       <ion-col class="ion-text-center">
                         <ion-button fill="clear" [disabled]="poweredDown || submittedCards">
                           <ion-icon class="icon-cannon-direction" name="arrow-forward"></ion-icon>
-                          <ion-radio value="left"></ion-radio>
+                          <ion-radio value="{{ gameinfo?.CANNON_DIRECTION_DESCR2ID.cannon_right }}"></ion-radio>
                         </ion-button>
                       </ion-col>
                     </ion-row>
@@ -56,7 +59,7 @@
                       <ion-col class="ion-text-center">
                         <ion-button fill="clear" [disabled]="poweredDown || submittedCards">
                           <ion-icon class="icon-cannon-direction" name="arrow-down"></ion-icon>
-                          <ion-radio value="backward"></ion-radio>
+                          <ion-radio value="{{ gameinfo?.CANNON_DIRECTION_DESCR2ID.cannon_backward }}"></ion-radio>
                         </ion-button>
                       </ion-col>
                       <ion-col> </ion-col>

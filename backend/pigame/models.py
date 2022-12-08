@@ -90,7 +90,7 @@ CARDS = {
 }
 
 
-class CANNON_DIRECTION(Enum):
+class CANNON_DIRECTION:
     FORWARD = 0
     RIGHT = 1
     BACKWARD = 2
@@ -98,11 +98,15 @@ class CANNON_DIRECTION(Enum):
 
 
 CANNON_DIRECTION_CARDS = {
-    -10: dict(descr="cannon direction forward", direction=CANNON_DIRECTION.FORWARD),
-    -11: dict(descr="cannon direction right", direction=CANNON_DIRECTION.RIGHT),
-    -12: dict(descr="cannon direction backward", direction=CANNON_DIRECTION.BACKWARD),
-    -13: dict(descr="cannon direction left", direction=CANNON_DIRECTION.LEFT),
+    -10: dict(descr="cannon_forward", direction=int(CANNON_DIRECTION.FORWARD)),
+    -11: dict(descr="cannon_right", direction=int(CANNON_DIRECTION.RIGHT)),
+    -12: dict(descr="cannon_backward", direction=int(CANNON_DIRECTION.BACKWARD)),
+    -13: dict(descr="cannon_left", direction=int(CANNON_DIRECTION.LEFT)),
 }
+
+CANNON_DIRECTION_DESCR2ID = {val["descr"]: key for key, val in CANNON_DIRECTION_CARDS.items()}
+
+CANNON_DIRECTION_DIRID2CARDID = {val["direction"]: key for key, val in CANNON_DIRECTION_CARDS.items()}
 
 
 def gen_default_deck():
