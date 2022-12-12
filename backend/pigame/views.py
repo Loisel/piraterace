@@ -463,6 +463,7 @@ def update_gamecfg_options(request, gameconfig_id, request_id):
     gamecfg.ncardsavail = data["ncardsavail"]
     gamecfg.ncardslots = data["ncardslots"]
     gamecfg.countdown = data["countdown"]
+    gamecfg.path_highlighting = data["path_highlighting"]
     gamecfg.percentage_repaircards = data["percentage_repaircards"]
     gamecfg.save()
 

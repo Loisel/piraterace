@@ -179,7 +179,7 @@ class GameConfig(models.Model):
     damage_on_hit = models.PositiveSmallIntegerField(default=10)
     ncardslots = models.PositiveSmallIntegerField(default=5)
     ncardsavail = models.PositiveSmallIntegerField(default=7)
-    # allow_transfer = models.BooleanField(default=False)
+    path_highlighting = models.BooleanField(default=False)
     creator_userid = models.PositiveIntegerField()
     countdown_mode = models.CharField(max_length=1, choices=CHOICE_MODES, default="d")
     countdown = models.PositiveIntegerField(default=30)

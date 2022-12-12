@@ -22,6 +22,7 @@ export class GameConfigComponent implements OnInit {
     ncardsavail: 'Number of cards on hand',
     countdown: 'Countdown duration (seconds)',
     percentage_repaircards: 'Fraction of repaircards in deck',
+    path_highlighting: 'Preview ship path',
   };
 
   constructor(
@@ -56,6 +57,7 @@ export class GameConfigComponent implements OnInit {
             this.gameConfig.percentage_repaircards,
             Validators.compose([Validators.required, Validators.min(0), Validators.max(100), Validators.pattern('^[0-9]+$')])
           ),
+          path_highlighting: new FormControl(this.gameConfig.path_highlighting),
         },
         { validators: cardsSlotsLECardsAvailValidator }
       );
@@ -126,6 +128,7 @@ export class GameConfigComponent implements OnInit {
           ncardslots: gameconfig['ncardslots'],
           countdown: gameconfig['countdown'],
           percentage_repaircards: gameconfig['percentage_repaircards'],
+          path_highlighting: gameconfig['path_highlighting'],
         });
       }
       if (this.gameConfig['game']) {
