@@ -438,17 +438,25 @@ def predict_path(request):
     gamecfg = player.game.config
     game = player.game
     player_states, old_actionstack = get_play_stack(game)
-    cards_played = game.cards_played
+
     player_idx = gamecfg.player_ids.index(player.pk)
     cards_played_next = get_cards_on_hand(gamecfg, player_idx, gamecfg.ncardslots)
-    cards_played.extend(flatten_list_of_tuples(cards_played_next))
-    cards_played.extend((BACKEND_USERID, ROUNDEND_CARDID))
-    game.cards_played = cards_played
+
+    # effectively remove other players from game
+    # fields that are not overwritten have wrong values but we (hopefully) do not care
+    gamecfg.player_ids = [player.pk]
+    gamecfg.player_start_x = [player_states[player.pk].xpos]
+    gamecfg.player_start_y = [player_states[player.pk].ypos]
+    gamecfg.player_start_directions = [player_states[player.pk].direction]
+
+    game.cards_played = flatten_list_of_tuples(cards_played_next)
+    game.cards_played.extend((BACKEND_USERID, ROUNDEND_CARDID))
+
     player_states, actionstack = play_stack(game)
     path = []
-    for i in range(len(old_actionstack), len(actionstack)):
-        for action in actionstack[i]:
-            if ("move" in action.get("key", "")) and (action["target"] == player.pk):
+    for actiongroup in actionstack:
+        for action in actiongroup:
+            if "move" in action.get("key", ""):
                 path.append(action["target_pos"])
 
     return JsonResponse(path, safe=False)

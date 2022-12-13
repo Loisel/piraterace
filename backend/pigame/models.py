@@ -223,10 +223,6 @@ class GameConfig(models.Model):
 
 class BaseGame(PolymorphicModel):
 
-    mode = models.CharField(max_length=1, choices=GAME_MODES, default="c")
-    # nplayers = models.PositiveSmallIntegerField(null=True, blank=True)
-    # playerlist ist ein account set, oder?
-    mapfile = models.CharField(max_length=256)
     round = models.PositiveIntegerField(default=1)
 
     time_started = models.DateTimeField(auto_now_add=True)
