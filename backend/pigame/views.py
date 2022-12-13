@@ -448,7 +448,7 @@ def predict_path(request):
     path = []
     for i in range(len(old_actionstack), len(actionstack)):
         for action in actionstack[i]:
-            if "move" in action.get("key", ""):
+            if ("move" in action.get("key", "")) and (action["target"] == player.pk):
                 path.append(action["target_pos"])
 
     return JsonResponse(path, safe=False)
