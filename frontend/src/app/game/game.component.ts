@@ -26,7 +26,7 @@ export class GameComponent {
   phaserGame: Phaser.Game;
   config: Phaser.Types.Core.GameConfig;
   gameinfo: any = null;
-  cardsinfo: any = [];
+  cardsinfo: BehaviorSubject<Array<any>> = new BehaviorSubject<Array<any>>([]);
   CARDS_URL = environment.STATIC_URL;
   Ngameround = new BehaviorSubject<number>(0);
 
@@ -138,9 +138,13 @@ export class GameComponent {
     return this.httpService.getGame(id);
   }
 
+  loadPathHighlighting() {
+    return this.httpService.predictPath();
+  }
+
   getPlayerCards() {
     this.httpService.getPlayerCards().subscribe((result) => {
-      this.cardsinfo = result;
+      this.cardsinfo.next(result);
     });
   }
 
@@ -170,12 +174,12 @@ export class GameComponent {
     this.httpService.switchPlayerCards(event.detail.from, event.detail.to).subscribe(
       (result) => {
         console.log('switch cards:', result);
-        this.cardsinfo = result;
+        this.cardsinfo.next(result);
       },
       (error) => {
         console.log('failed reorder cards: ', error);
         this.presentToast(error.error.message, 'danger');
-        this.cardsinfo = error.error.cards;
+        this.cardsinfo.next(error.error.cards);
       }
     );
   }

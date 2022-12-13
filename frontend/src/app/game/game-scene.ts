@@ -6,6 +6,7 @@ export class GameScene extends Phaser.Scene {
   updateTimer: Phaser.Time.TimerEvent;
   animationTimer: Phaser.Time.TimerEvent;
   boats: any = {};
+  pathHighlights: Phaser.GameObjects.Group;
   last_played_action: number = 0;
   component: any = null;
   // animation config
@@ -666,5 +667,35 @@ export class GameScene extends Phaser.Scene {
         }
       }
     });
+
+    this.pathHighlights = this.add.group();
+    this.component.cardsinfo.subscribe((cardsinfo) => {
+      this.pathHighlighting();
+    });
+  }
+
+  pathHighlighting() {
+    this.component.loadPathHighlighting().subscribe(
+      (path) => {
+        this.pathHighlights.clear(true, true);
+        let GI = this.component.gameinfo;
+        let player = GI.players[GI.me];
+        let color = Phaser.Display.Color.HexStringToColor(player['color']);
+        path.forEach(([x, y]) => {
+          let backdrop = this.add.rectangle(
+            this.getTileX(x),
+            this.getTileY(y),
+            GI.map.tilewidth,
+            GI.map.tileheight,
+            color.color,
+            0.5
+          );
+          this.pathHighlights.add(backdrop);
+        });
+      },
+      (error) => {
+        console.log('Error: ', error);
+      }
+    );
   }
 }

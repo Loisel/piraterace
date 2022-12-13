@@ -429,6 +429,12 @@ def update_gamecfg_player_info(request, gameconfig_id, request_id):
     return redirect(reverse("pigame:view_gameconfig", kwargs={"gameconfig_id": gamecfg.pk}))
 
 
+@api_view(["GET"])
+@permission_classes((IsAuthenticated,))
+def predict_path(request):
+    return JsonResponse([(1, 1), (2, 2), (3, 3)], safe=False)
+
+
 @api_view(["POST"])
 @permission_classes((IsAuthenticated,))
 def update_gamecfg_options(request, gameconfig_id, request_id):
