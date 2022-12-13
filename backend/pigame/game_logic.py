@@ -483,14 +483,30 @@ def move_player_x(game, gmap, players, player, inc, push_players=True):
 
     if tile_prop["void"]:
         player.health = 0
-        actions.append({"key": "move_x", "target": player.id, "from": player.xpos, "to": player.xpos + inc})
+        actions.append(
+            {
+                "key": "move_x",
+                "target": player.id,
+                "from": player.xpos,
+                "to": player.xpos + inc,
+                "target_pos": (player.xpos + inc, player.ypos),
+            }
+        )
         actions.append(dict(key="death", target=player.id, type="void"))
         kill_player(player)
         return actions
 
     if (player.xpos + inc < 0) or (player.xpos + inc >= gmap["width"]):
         player.health = 0
-        actions.append({"key": "move_x", "target": player.id, "from": player.xpos, "to": player.xpos + inc})
+        actions.append(
+            {
+                "key": "move_x",
+                "target": player.id,
+                "from": player.xpos,
+                "to": player.xpos + inc,
+                "target_pos": (player.xpos + inc, player.ypos),
+            }
+        )
         actions.append(dict(key="death", target=player.id, type="void"))
         kill_player(player)
         return actions
@@ -504,7 +520,15 @@ def move_player_x(game, gmap, players, player, inc, push_players=True):
                 break
             else:
                 return actions
-    actions.append({"key": "move_x", "target": player.id, "from": player.xpos, "to": player.xpos + inc})
+    actions.append(
+        {
+            "key": "move_x",
+            "target": player.id,
+            "from": player.xpos,
+            "to": player.xpos + inc,
+            "target_pos": (player.xpos + inc, player.ypos),
+        }
+    )
     player.xpos += inc
     return actions
 
@@ -524,14 +548,30 @@ def move_player_y(game, gmap, players, player, inc, push_players=True):
 
     if tile_prop["void"]:
         player.health = 0
-        actions.append({"key": "move_y", "target": player.id, "from": player.ypos, "to": player.ypos + inc})
+        actions.append(
+            {
+                "key": "move_y",
+                "target": player.id,
+                "from": player.ypos,
+                "to": player.ypos + inc,
+                "target_pos": (player.xpos, player.ypos + inc),
+            }
+        )
         actions.append(dict(key="death", target=player.id, type="void"))
         kill_player(player)
         return actions
 
     if (player.ypos + inc < 0) or (player.ypos + inc >= gmap["height"]):
         player.health = 0
-        actions.append({"key": "move_y", "target": player.id, "from": player.ypos, "to": player.ypos + inc})
+        actions.append(
+            {
+                "key": "move_y",
+                "target": player.id,
+                "from": player.ypos,
+                "to": player.ypos + inc,
+                "target_pos": (player.xpos, player.ypos + inc),
+            }
+        )
         actions.append(dict(key="death", target=player.id, type="void"))
         kill_player(player)
         return actions
@@ -545,7 +585,15 @@ def move_player_y(game, gmap, players, player, inc, push_players=True):
                 break
             else:
                 return actions
-    actions.append({"key": "move_y", "target": player.id, "from": player.ypos, "to": player.ypos + inc})
+    actions.append(
+        {
+            "key": "move_y",
+            "target": player.id,
+            "from": player.ypos,
+            "to": player.ypos + inc,
+            "target_pos": (player.xpos, player.ypos + inc),
+        }
+    )
     player.ypos += inc
     return actions
 
