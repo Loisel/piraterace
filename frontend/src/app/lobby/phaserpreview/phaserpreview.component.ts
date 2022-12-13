@@ -4,6 +4,7 @@ import { HttpService } from '../../services/http.service';
 
 import { environment } from '../../../environments/environment';
 import { MapInfo } from '../../model/mapinfo';
+import Phaser from 'phaser';
 
 @Component({
   selector: 'app-phaserpreview',

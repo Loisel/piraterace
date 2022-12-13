@@ -429,6 +429,31 @@ def update_gamecfg_player_info(request, gameconfig_id, request_id):
     return redirect(reverse("pigame:view_gameconfig", kwargs={"gameconfig_id": gamecfg.pk}))
 
 
+@api_view(["GET"])
+@permission_classes((IsAuthenticated,))
+def predict_path(request):
+    player = request.user.account
+    if not player.game:
+        return JsonResponse(f"Can not predict path. You are not in a game.", status=404, safe=False)
+    gamecfg = player.game.config
+    game = player.game
+    player_states, old_actionstack = get_play_stack(game)
+    cards_played = game.cards_played
+    player_idx = gamecfg.player_ids.index(player.pk)
+    cards_played_next = get_cards_on_hand(gamecfg, player_idx, gamecfg.ncardslots)
+    cards_played.extend(flatten_list_of_tuples(cards_played_next))
+    cards_played.extend((BACKEND_USERID, ROUNDEND_CARDID))
+    game.cards_played = cards_played
+    player_states, actionstack = play_stack(game)
+    path = []
+    for i in range(len(old_actionstack), len(actionstack)):
+        for action in actionstack[i]:
+            if "move" in action.get("key", ""):
+                path.append(action["target_pos"])
+
+    return JsonResponse(path, safe=False)
+
+
 @api_view(["POST"])
 @permission_classes((IsAuthenticated,))
 def update_gamecfg_options(request, gameconfig_id, request_id):

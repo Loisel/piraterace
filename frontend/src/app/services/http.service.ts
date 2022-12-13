@@ -25,6 +25,7 @@ export class HttpService {
   updateGamecfgOptionsURL = `${environment.API_URL}/pigame/update_gamecfg_options`;
   get_leaveGameURL = `${environment.API_URL}/pigame/leave_game`;
   get_mapinfoURL = `${environment.API_URL}/pigame/mapinfo`;
+  predictPathURL = `${environment.API_URL}/pigame/predict_path`;
 
   constructor(private httpClient: HttpClient) {}
   getGamesList() {
@@ -55,7 +56,7 @@ export class HttpService {
     return this.httpClient.get(`${this.get_gameURL}/${id}`);
   }
   getPlayerCards() {
-    return this.httpClient.get(`${this.player_cardsURL}`);
+    return this.httpClient.get<Array<any>>(`${this.player_cardsURL}`);
   }
   submitCards() {
     return this.httpClient.get(`${this.submitCardsURL}`);
@@ -63,9 +64,12 @@ export class HttpService {
   powerDown() {
     return this.httpClient.get(`${this.powerDownURL}`);
   }
+  predictPath() {
+    return this.httpClient.get<Array<Array<number>>>(this.predictPathURL);
+  }
   switchPlayerCards(from: number, to: number) {
     let data = [from, to];
-    return this.httpClient.post(`${this.player_cardsURL}`, data);
+    return this.httpClient.post<any[]>(`${this.player_cardsURL}`, data);
   }
   updateGameCfgPlayerInfo(id: number, request_id: number, data) {
     console.log(data);

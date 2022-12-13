@@ -107,7 +107,7 @@
       <ion-card #cards_menu>
         <ion-card-content>
           <ion-reorder-group (ionItemReorder)="onCardsReorder($event)" disabled="false">
-            <ion-reorder *ngFor="let card of cardsinfo; let i = index">
+            <ion-reorder *ngFor="let card of cardsinfo | async; let i = index">
               <ion-item-divider *ngIf="i === gameinfo?.cardslots"></ion-item-divider>
               <ion-item class="gamecard-item" [class.active-card]="highlightCard(i)" [disabled]="cardCheck(i)">
                 <ion-img class="gamecard-img" [src]="CARDS_URL + card[2].url"></ion-img>

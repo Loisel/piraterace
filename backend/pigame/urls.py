@@ -32,6 +32,7 @@ urlpatterns = [
     path("list_gameconfigs", views.list_gameconfigs),
     path("submit_cards", views.submit_cards),
     path("power_down", views.power_down),
+    path("predict_path", views.predict_path),
     path("cannon_direction/<negint:direction_id>", views.player_cannon_direction, name="cannon_direction"),
     path("mapinfo/<str:mapfile>", views.get_mapinfo),
 ]
