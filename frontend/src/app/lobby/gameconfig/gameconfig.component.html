@@ -75,15 +75,13 @@
                     </ion-input>
                   </ion-col>
                   <ion-col>
-                    <ion-input>
-                      <ion-checkbox
+                    <ion-checkbox
                         checked="{{ gameConfig?.player_ready[gameConfig?.caller_idx] }}"
                         id="ready_check"
                         (ionChange)="onPlayerInfoChange($event)"
                         [(ngModel)]="gameConfig?.player_ready[gameConfig?.caller_idx]"
                       >
                       </ion-checkbox>
-                    </ion-input>
                   </ion-col>
                 </ion-row>
               </ng-template>
