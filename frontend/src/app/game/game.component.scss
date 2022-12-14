@@ -68,6 +68,14 @@ ion-card-content {
       font-size: 1em;
     }
   }
+  @media (max-width: 450px) {
+    #cannon_mount_label {
+      display: none;
+    }
+    #leave_game_label {
+      display: none;
+    }
+  }
 }
 
 ion-modal#cannon-modal {

@@ -60,8 +60,7 @@ export class AppComponent {
 
   async hideStatusBar() {
     await StatusBar.hide();
-  };
-
+  }
 
   initializeApp() {
     this.platform.ready().then(() => {
