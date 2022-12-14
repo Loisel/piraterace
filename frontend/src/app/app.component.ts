@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
-import { MenuController } from '@ionic/angular';
+import { MenuController, Platform } from '@ionic/angular';
 import { StorageService } from './services/storage.service';
 import { AuthService } from './services/auth.service';
 import { HttpService } from './services/http.service';
 import { BehaviorSubject } from 'rxjs';
 import { ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { StatusBar } from '@capacitor/status-bar';
 
 @Component({
   selector: 'app-root',
@@ -18,8 +19,11 @@ export class AppComponent {
     public authService: AuthService,
     private httpService: HttpService,
     private router: Router,
-    private toastController: ToastController
-  ) {}
+    private toastController: ToastController,
+    private platform: Platform
+  ) {
+    this.initializeApp();
+  }
 
   leaveGame() {
     this.httpService.get_leaveGame().subscribe(
@@ -52,5 +56,16 @@ export class AppComponent {
       duration: 5000,
     });
     toast.present();
+  }
+
+  async hideStatusBar() {
+    await StatusBar.hide();
+  };
+
+
+  initializeApp() {
+    this.platform.ready().then(() => {
+      this.hideStatusBar();
+    });
   }
 }
