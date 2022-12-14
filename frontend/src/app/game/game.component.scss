@@ -84,6 +84,9 @@ ion-modal#cannon-modal {
   --height: auto;
   --border-radius: 6px;
   --box-shadow: 0 28px 48px rgba(0, 0, 0, 0.4);
+  ion-radio {
+    transform: scale(2);
+  }
 }
 
 .gamecard-item {
