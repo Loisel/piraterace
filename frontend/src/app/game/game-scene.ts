@@ -675,6 +675,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   pathHighlighting() {
+    if (!this.component.gameinfo.path_highlighting) {
+      return;
+    }
     this.component.loadPathHighlighting().subscribe(
       (path) => {
         this.pathHighlights.clear(true, true);
@@ -695,6 +698,7 @@ export class GameScene extends Phaser.Scene {
       },
       (error) => {
         console.log('Error: ', error);
+        this.component.presentToast(error.error, 'danger');
       }
     );
   }

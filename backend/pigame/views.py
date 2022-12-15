@@ -435,6 +435,8 @@ def predict_path(request):
     player = request.user.account
     if not player.game:
         return JsonResponse(f"Can not predict path. You are not in a game.", status=404, safe=False)
+    if not player.game.config.path_highlighting:
+        return JsonResponse(f"Can not predict path. Path highlighting is disabled.", status=404, safe=False)
     gamecfg = player.game.config
     game = player.game
     player_states, old_actionstack = get_play_stack(game)
