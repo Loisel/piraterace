@@ -153,13 +153,12 @@ def play_stack(game):
     stack = game.cards_played
 
     players = {}
-    for pid, x, y, direction, color, team, name in zip(
+    for pid, x, y, direction, color, name in zip(
         game.config.player_ids,
         game.config.player_start_x,
         game.config.player_start_y,
         game.config.player_start_directions,
         game.config.player_colors,
-        game.config.player_teams,
         game.config.player_names,
     ):
         p = types.SimpleNamespace()
@@ -176,7 +175,6 @@ def play_stack(game):
         p.cannon_direction = CANNON_DIRECTION.FORWARD
         p.next_checkpoint = 1
         p.color = color
-        p.team = team
         p.health = game.config.ncardsavail + FREE_HEALTH_OFFSET
         p.powered_down = False
         players[pid] = p

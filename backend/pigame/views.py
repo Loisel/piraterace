@@ -257,7 +257,6 @@ def game(request, game_id, **kwargs):
             start_direction=p.start_direction,
             next_checkpoint=p.next_checkpoint,
             color=p.color,
-            team=p.team,
             health=p.health,
             powered_down=p.powered_down,
             cannon_direction=str(CANNON_DIRECTION_DIRID2CARDID[p.cannon_direction]),
@@ -421,7 +420,6 @@ def update_gamecfg_player_info(request, gameconfig_id, request_id):
     idx = gamecfg.player_ids.index(caller.pk)
 
     gamecfg.player_colors[idx] = data["color"]
-    gamecfg.player_teams[idx] = data["team"]
     gamecfg.player_ready[idx] = data["ready"]
     gamecfg.request_id = request_id
     gamecfg.save()

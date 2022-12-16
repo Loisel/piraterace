@@ -185,7 +185,6 @@ export class GameConfigComponent implements OnInit {
     this.httpService
       .updateGameCfgPlayerInfo(this.gameConfig.id, this.cfgOptionsRequestId, {
         color: this.gameConfig['player_colors'][this.gameConfig['caller_idx']],
-        team: this.gameConfig['player_teams'][this.gameConfig['caller_idx']],
         ready: this.gameConfig['player_ready'][this.gameConfig['caller_idx']],
       })
       .subscribe(

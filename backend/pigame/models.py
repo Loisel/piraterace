@@ -165,7 +165,6 @@ class GameConfig(models.Model):
     player_ids = ArrayField(models.IntegerField(), default=list)
     player_colors = ArrayField(models.CharField(max_length=7), default=list)
     player_names = ArrayField(models.CharField(max_length=200), default=list)
-    player_teams = ArrayField(models.IntegerField(), default=list)
     player_ready = ArrayField(models.BooleanField(default=False), default=list)
     player_start_x = ArrayField(models.PositiveSmallIntegerField(), default=list)
     player_start_y = ArrayField(models.PositiveSmallIntegerField(), default=list)
@@ -199,7 +198,6 @@ class GameConfig(models.Model):
             self.player_ids.append(player.pk)
             self.player_names.append(player.user.username)
             self.player_colors.append(random.choice(colors_to_pick))  # TODO
-            self.player_teams.append(-1)
             self.player_ready.append(False)
         return self.player_ids.index(player.pk)
 
@@ -212,7 +210,6 @@ class GameConfig(models.Model):
             self.player_ids.pop(idx)
             self.player_names.pop(idx)
             self.player_colors.pop(idx)
-            self.player_teams.pop(idx)
             self.player_ready.pop(idx)
         return True
 
@@ -238,17 +235,3 @@ class ClassicGame(BaseGame):
 class TeamsGame(BaseGame):
     fog_of_war = models.BooleanField(default=False)
     pass
-
-
-# class GameRound(models.Model):
-#    game = models.ForeignKey(BaseGame, on_delete=models.CASCADE)
-#    time_started = models.DateTimeField(auto_now_add=True)
-#    #rmap = models.OneToOneField(
-#    #    Map,
-#    #    on_delete=models.CASCADE,
-#    #    primary_key=True,)
-
-# class Map(models.Model):
-#    nx = models.PositiveSmallIntegerField()
-#    ny = models.PositiveSmallIntegerField()
-#    #start_locations = models.CharField() # with integer validator

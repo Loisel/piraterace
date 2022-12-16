@@ -20,7 +20,6 @@
             <ion-row>
               <ion-col>Player</ion-col>
               <ion-col>Color</ion-col>
-              <ion-col>Team</ion-col>
               <ion-col>Ready?</ion-col>
             </ion-row>
             <div *ngFor="let p of gameConfig?.player_ids; let i = index" [attr.data-index]="p">
@@ -30,7 +29,6 @@
                 <ion-row>
                   <ion-col>{{ gameConfig?.player_names[i] }}</ion-col>
                   <ion-col [ngStyle]="{ 'background-color': gameConfig?.player_colors[i] }"></ion-col>
-                  <ion-col>{{ gameConfig?.player_teams[i] }}</ion-col>
                   <ion-col>
                     <span *ngIf="gameConfig?.player_ready[i]; then ready_icon; else not_ready_icon" class="ion-text-center"></span>
                     <ng-template #ready_icon
@@ -63,16 +61,6 @@
                         >{{ color.key }}</ion-select-option
                       >
                     </ion-select>
-                  </ion-col>
-                  <ion-col>
-                    <ion-input
-                      placeholder="{{ gameConfig?.player_teams[gameConfig?.caller_idx] }}"
-                      inputmode="numeric"
-                      type="number"
-                      (ionChange)="onPlayerInfoChange($event)"
-                      [(ngModel)]="gameConfig?.player_teams[gameConfig?.caller_idx]"
-                    >
-                    </ion-input>
                   </ion-col>
                   <ion-col>
                     <ion-checkbox
