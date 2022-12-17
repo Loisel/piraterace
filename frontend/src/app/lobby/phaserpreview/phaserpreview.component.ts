@@ -57,7 +57,7 @@ export class PhaserPreviewComponent {
       console.log('phaser_preload', this);
       this.load.image('tileset', `${environment.STATIC_URL}/maps/${thismapinfo.tilesets[0].image}`);
       this.load.tilemapTiledJSON('tilemap', `${environment.STATIC_URL}/maps/${thismapfile}`);
-      this.load.spritesheet('boat', `${environment.STATIC_URL}/sprites/boat.png`, { frameWidth: 24, frameHeight: 72 });
+      this.load.spritesheet('boat', `${environment.STATIC_URL}/sprites/boat.png`, { frameWidth: 160, frameHeight: 160 });
     }
 
     function phaser_create() {
