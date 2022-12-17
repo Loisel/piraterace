@@ -24,7 +24,7 @@ export class GameScene extends Phaser.Scene {
 
     this.load.image('tileset', `${environment.STATIC_URL}/maps/${GI.map.tilesets[0].image}`);
     this.load.tilemapTiledJSON('tilemap', `${environment.STATIC_URL}/maps/${GI.mapfile}`);
-    this.load.spritesheet('boat', `${environment.STATIC_URL}/sprites/boat.png`, { frameWidth: 24, frameHeight: 72 });
+    this.load.spritesheet('boat', `${environment.STATIC_URL}/sprites/boat.png`, { frameWidth: 160, frameHeight: 160 });
     Object.entries(GI.CARDS).forEach(([cardid, card]) => {
       this.load.image(card['descr'], `${environment.STATIC_URL}/${card['tile_url']}`);
     });
@@ -92,6 +92,7 @@ export class GameScene extends Phaser.Scene {
         this.check_player_state();
         this.reset_health_bar();
         this.component.highlightedCardSlot = -1;
+        this.updateBoatFrames();
       },
       callbackScope: this,
     });
@@ -408,6 +409,7 @@ export class GameScene extends Phaser.Scene {
         duration: 0,
         onComplete: function () {
           this.update_healthbar(action.target, action.health);
+          this.boats[action.target].getChildren()[0].setFrame(1);
         },
         callbackScope: this,
       });
@@ -554,6 +556,8 @@ export class GameScene extends Phaser.Scene {
     }
 
     var boat = this.add.sprite(this.getTileX(player['start_pos_x']), this.getTileY(player['start_pos_y']), 'boat');
+    boat.setFrame(0);
+
     //set the width of the sprite
     boat.displayHeight = GI.map.tileheight * 1.1;
     //scale evenly
@@ -590,6 +594,21 @@ export class GameScene extends Phaser.Scene {
     group.add(hList[0]);
     group.add(hList[1]);
     return group;
+  }
+
+  updateBoatFrames() {
+    let GI = this.component.gameinfo;
+    for (let playerid in GI.players) {
+      let boat = this.boats[playerid].getChildren()[0];
+      let player = GI.players[playerid];
+      if (player.is_zombie) {
+        boat.setFrame(2);
+      } else if (player.powered_down) {
+        boat.setFrame(1);
+      } else {
+        boat.setFrame(0);
+      }
+    }
   }
 
   updateEvent(): void {
@@ -630,7 +649,7 @@ export class GameScene extends Phaser.Scene {
     Object.entries(GI.players).forEach(([playerid, player]) => {
       this.boats[playerid] = this.drawBoat(player, playerid);
     });
-
+    this.updateBoatFrames();
     // camera draggable, start on player boat
     var cam = this.cameras.main;
     var myBoat = this.boats[GI.me].getChildren()[0];

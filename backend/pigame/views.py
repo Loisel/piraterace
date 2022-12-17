@@ -259,6 +259,7 @@ def game(request, game_id, **kwargs):
             color=p.color,
             health=p.health,
             powered_down=p.powered_down,
+            is_zombie=p.id not in game.account_set.values_list("user_id", flat=True),
             cannon_direction=str(CANNON_DIRECTION_DIRID2CARDID[p.cannon_direction]),
         )
 
