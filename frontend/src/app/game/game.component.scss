@@ -78,12 +78,15 @@ ion-card-content {
   }
 }
 
-ion-modal#cannon-modal {
+ion-modal {
   --width: fit-content;
   --min-width: 250px;
   --height: auto;
   --border-radius: 6px;
   --box-shadow: 0 28px 48px rgba(0, 0, 0, 0.4);
+}
+
+ion-modal#cannon-modal {
   ion-radio {
     transform: scale(2);
   }

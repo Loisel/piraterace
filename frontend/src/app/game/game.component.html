@@ -5,15 +5,37 @@
       <ion-card #tools_menu>
         <ion-card-content>
           <ion-label>Round {{ Ngameround | async }}</ion-label>
-          <ion-button id="power_down_button" (click)="powerDown()" [disabled]="poweredDown || submittedCards">
+          <ion-button id="power_down_button" [disabled]="poweredDown || submittedCards">
             <ion-icon name="construct-outline"></ion-icon>
             <ion-label id="power_down_label">Re-Rig</ion-label>
           </ion-button>
-          <ion-button id="cannon-direction-button" [disabled]="poweredDown || submittedCards">
+          <ion-button id="cannon-direction-button">
             <ion-img style="width: 40px" src="../../assets/img/cannon.png"></ion-img>
             <ion-label id="cannon_mount_label">Cannon Mount</ion-label>
           </ion-button>
-          <ion-modal id="cannon-modal" trigger="cannon-direction-button">
+          <ion-modal id="rerig-modal" trigger="power_down_button" #rerigModal>
+            <ng-template>
+              <ion-header>
+                <ion-title>Re-rig the sails of your boat</ion-title>
+              </ion-header>
+
+              <ion-row class="ion-justify-content-center">
+                <ion-col>
+                  <p>
+                    Scoop out the water from under deck and plug the holes.<br />
+                    You will have a freshly repaired boat next round but<br />
+                    <b>you will not take any turns</b>.
+                  </p>
+                  <ion-button id="power_down_button_action" (click)="powerDown()" [disabled]="poweredDown || submittedCards">
+                    <ion-icon name="construct-outline"></ion-icon>
+                    <ion-label id="power_down_label">Re-Rig</ion-label>
+                  </ion-button>
+                  <ion-button (click)="rerigModal.dismiss()">Cancel</ion-button>
+                </ion-col>
+              </ion-row>
+            </ng-template>
+          </ion-modal>
+          <ion-modal id="cannon-modal" trigger="cannon-direction-button" #cannonModal>
             <ng-template>
               <ion-item lines="none">
                 <ion-thumbnail slot="start">
@@ -30,7 +52,7 @@
                     <ion-row>
                       <ion-col> </ion-col>
                       <ion-col class="ion-text-center">
-                        <ion-button fill="clear" [disabled]="poweredDown || submittedCards">
+                        <ion-button fill="clear">
                           <ion-icon class="icon-cannon-direction" name="arrow-up"></ion-icon>
                           <ion-radio mode="md" value="{{ gameinfo?.CANNON_DIRECTION_DESCR2ID.cannon_forward }}"></ion-radio>
                         </ion-button>
@@ -39,7 +61,7 @@
                     </ion-row>
                     <ion-row>
                       <ion-col class="ion-text-center">
-                        <ion-button fill="clear" [disabled]="poweredDown || submittedCards">
+                        <ion-button fill="clear">
                           <ion-icon class="icon-cannon-direction" name="arrow-back"></ion-icon>
                           <ion-radio mode="md" value="{{ gameinfo?.CANNON_DIRECTION_DESCR2ID.cannon_left }}"></ion-radio>
                         </ion-button>
@@ -48,7 +70,7 @@
                         <ion-img src="../../assets/img/boat.png"></ion-img>
                       </ion-col>
                       <ion-col class="ion-text-center">
-                        <ion-button fill="clear" [disabled]="poweredDown || submittedCards">
+                        <ion-button fill="clear">
                           <ion-icon class="icon-cannon-direction" name="arrow-forward"></ion-icon>
                           <ion-radio mode="md" value="{{ gameinfo?.CANNON_DIRECTION_DESCR2ID.cannon_right }}"></ion-radio>
                         </ion-button>
@@ -57,7 +79,7 @@
                     <ion-row>
                       <ion-col> </ion-col>
                       <ion-col class="ion-text-center">
-                        <ion-button fill="clear" [disabled]="poweredDown || submittedCards">
+                        <ion-button fill="clear">
                           <ion-icon class="icon-cannon-direction" name="arrow-down"></ion-icon>
                           <ion-radio mode="md" value="{{ gameinfo?.CANNON_DIRECTION_DESCR2ID.cannon_backward }}"></ion-radio>
                         </ion-button>
@@ -67,8 +89,41 @@
                   </ion-radio-group>
                 </ion-col>
               </ion-row>
+              <ion-item>
+                <ion-button (click)="cannonModal.dismiss()" slot="end">Cancel</ion-button>
+              </ion-item>
             </ng-template>
           </ion-modal>
+
+          <ion-modal id="leave-modal" trigger="leave_game_button" #leaveModal>
+            <ng-template>
+              <ion-header>
+                <ion-title>Really abandon ship?</ion-title>
+              </ion-header>
+
+              <ion-row class="ion-justify-content-center">
+                <ion-col>
+                  <p>
+                    Are you sure you want to abandon your crew?<br />
+                    <b>You will not be able re-enter</b><br />
+                    and the souls aboard will be condemned<br />
+                    to sail on this forsaken boat for all eternity!
+                  </p>
+                  <ion-list>
+                    <ion-button color="primary" (click)="leaveModal.dismiss()">
+                      <ion-icon slot="start" name="send-outline"></ion-icon>
+                      One more turn!
+                    </ion-button>
+                    <ion-button color="danger" (click)="leaveGame()">
+                      <ion-icon slot="start" name="log-out-outline"></ion-icon>
+                      Ay, leave them!
+                    </ion-button>
+                  </ion-list>
+                </ion-col>
+              </ion-row>
+            </ng-template>
+          </ion-modal>
+
           <ion-progress-bar id="time-progress-bar" [value]="countDownTimer | async" color="danger"></ion-progress-bar>
 
           <ion-button id="submit_cards_button" (click)="submitCards()" [disabled]="submittedCards">
@@ -77,29 +132,10 @@
           </ion-button>
           <ion-item-divider></ion-item-divider>
 
-          <ion-buttons id="leave_game_button">
-            <ion-button color="primary">
-              <ion-icon name="log-out-outline"></ion-icon>
-              <ion-label id="leave_game_label">Leave Game</ion-label>
-            </ion-button>
-            <ion-popover trigger="leave_game_button" [dismissOnSelect]="true">
-              <ng-template>
-                <ion-content>
-                  Really abandon your crew?
-                  <ion-list>
-                    <ion-button color="primary">
-                      <ion-icon slot="start" name="send-outline"></ion-icon>
-                      No! One more turn!
-                    </ion-button>
-                    <ion-button color="danger" (click)="leaveGame()">
-                      <ion-icon slot="start" name="log-out-outline"></ion-icon>
-                      Ay, leave them!
-                    </ion-button>
-                  </ion-list>
-                </ion-content>
-              </ng-template>
-            </ion-popover>
-          </ion-buttons>
+          <ion-button color="primary" id="leave_game_button">
+            <ion-icon name="log-out-outline"></ion-icon>
+            <ion-label id="leave_game_label">Leave Game</ion-label>
+          </ion-button>
         </ion-card-content>
       </ion-card>
     </ion-col>

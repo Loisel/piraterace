@@ -43,7 +43,9 @@ export class GameComponent {
 
   @ViewChild('cards_menu', { read: ElementRef }) cards_menu: ElementRef;
   @ViewChild('tools_menu', { read: ElementRef }) tools_menu: ElementRef;
-  @ViewChild(IonModal) cannonModal: IonModal;
+  @ViewChild('cannonModal') cannonModal: IonModal;
+  @ViewChild('rerigModal') rerigModal: IonModal;
+  @ViewChild('leaveModal') leaveModal: IonModal;
 
   constructor(
     private httpService: HttpService,
@@ -201,15 +203,18 @@ export class GameComponent {
       (ret) => {
         this.poweredDown = true;
         this.presentToast(ret, 'success');
+        this.rerigModal.dismiss();
       },
       (error) => {
         this.presentToast(error.error, 'danger');
         this.poweredDown = true;
+        this.rerigModal.dismiss();
       }
     );
   }
 
   leaveGame() {
+    this.leaveModal.dismiss();
     this.httpService.get_leaveGame().subscribe(
       (ret) => {
         console.log('Success leave game: ', ret);
@@ -253,11 +258,13 @@ export class GameComponent {
   changeCannonDirection(event) {
     this.httpService.changeCannonDirection(event.detail.value).subscribe(
       (ret) => {
-        console.log('Changed Cannon Direction');
+        this.cannonModal.dismiss();
+        console.log('Changed Cannon Direction', this.cannonModal);
         this.presentToast('Redirected deadly cannons.', 'success');
       },
       (error) => {
         this.presentToast(error.error, 'danger');
+        this.cannonModal.dismiss();
       }
     );
   }
