@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ToastController } from '@ionic/angular';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormGroup, FormBuilder, FormControl, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, distinctUntilKeyChanged } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, distinctUntilKeyChanged, tap } from 'rxjs/operators';
 
 import { GameConfig } from '../../model/gameconfig';
 import { HttpService } from '../../services/http.service';
@@ -24,6 +24,7 @@ export class GameConfigComponent implements OnInit {
     percentage_repaircards: 'Fraction of repaircards in deck',
     path_highlighting: 'Preview ship path',
   };
+  startButtonActive: boolean = true;
 
   constructor(
     private httpService: HttpService,
@@ -64,7 +65,7 @@ export class GameConfigComponent implements OnInit {
 
       this.cfgOptionsForm.valueChanges
         .pipe(
-          debounceTime(1000),
+          debounceTime(100),
           distinctUntilChanged((prev, curr) => {
             if (!prev) {
               prev = curr;
@@ -144,12 +145,14 @@ export class GameConfigComponent implements OnInit {
       this.presentToast('Cant start game until options are all valid', 'danger');
       return;
     }
+    this.startButtonActive = false;
     this.httpService.createGame(this.gameConfig.id).subscribe(
       (payload) => {
         console.log(payload);
         // this.router.navigate(['game', payload['game_id']]);
       },
       (error) => {
+        this.startButtonActive = true;
         console.log('Failed this.httpService.createGame:', error);
         this.presentToast(error.error, 'danger');
       }

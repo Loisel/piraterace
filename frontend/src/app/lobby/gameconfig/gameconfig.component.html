@@ -182,7 +182,7 @@
             </form>
             <ion-row>
               <ion-col *ngIf="gameConfig?.creator_userid === gameConfig?.caller_id">
-                <ion-button [disabled]="!gameConfig?.all_ready" (click)="createGame()">
+                <ion-button [disabled]="!startButtonActive || !gameConfig?.all_ready" (click)="createGame()">
                   <span>Start</span>
                 </ion-button>
               </ion-col>

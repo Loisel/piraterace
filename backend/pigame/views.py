@@ -352,6 +352,9 @@ def create_game(request, gameconfig_id, **kwargs):
     if not all(config.player_ready):
         return JsonResponse(f"Not all players ready yet", status=404, safe=False)
 
+    if config.game is not None:
+        return JsonResponse(f"The game is about to start, go grab some grok! {config.game}", status=404, safe=False)
+
     players = Account.objects.filter(pk__in=config.player_ids)
     initmap = load_inital_map(config.mapfile)
     xpos, ypos, dirs = determine_starting_locations(initmap)
@@ -367,6 +370,7 @@ def create_game(request, gameconfig_id, **kwargs):
     game.save()
 
     config.game = game
+    config.request_id = 2**14
     config.save()
 
     for n, p in enumerate(players):
@@ -499,6 +503,8 @@ def update_gamecfg_options(request, gameconfig_id, request_id):
     gamecfg.countdown = data["countdown"]
     gamecfg.path_highlighting = data["path_highlighting"]
     gamecfg.percentage_repaircards = data["percentage_repaircards"]
+    for i, p in enumerate(gamecfg.player_ready):  # set all player ready flags to false if something in the config changed
+        gamecfg.player_ready[i] = False
     gamecfg.save()
 
     return redirect(reverse("pigame:view_gameconfig", kwargs={"gameconfig_id": gamecfg.pk}))
