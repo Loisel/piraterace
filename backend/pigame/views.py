@@ -168,6 +168,7 @@ def game(request, game_id, **kwargs):
         initial_health=game.config.ncardsavail + FREE_HEALTH_OFFSET,
         CARDS=CARDS,
         CANNON_DIRECTION_DESCR2ID=CANNON_DIRECTION_DESCR2ID,
+        path_highlighting=game.config.path_highlighting,
     )
 
     player_states, actionstack = get_play_stack(game)
