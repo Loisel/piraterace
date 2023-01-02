@@ -64,7 +64,9 @@ export class AppComponent {
 
   initializeApp() {
     this.platform.ready().then(() => {
-      this.hideStatusBar();
+      if (this.platform.is('mobile')) {
+        this.hideStatusBar();
+      }
     });
   }
 }
