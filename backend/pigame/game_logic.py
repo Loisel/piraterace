@@ -614,11 +614,27 @@ def get_tile_properties(gmap, x, y):
 
 
 def load_inital_map(fname):
+    cachename = f"map_{fname}"
+
+    gmap = cache.get(cachename)
+    if gmap is not None:
+        return gmap
+
     with open(os.path.join(MAPSDIR, fname)) as fh:
-        dt = json.load(fh)
-    # tl = dt.layers[0].data
-    # colliding = []
-    return dt
+        gmap = json.load(fh)
+
+    bg = list(filter(lambda l: l["name"] == "background", gmap["layers"]))[0]
+    property_locations = {}
+    for x in range(bg["width"]):
+        for y in range(bg["height"]):
+            prop = get_tile_properties(gmap, x, y)
+            for p, v in prop.items():
+                if v:
+                    property_locations.setdefault(p, []).append((x, y))
+    gmap["property_locations"] = property_locations
+
+    cache.set(cachename, gmap, None)
+    return gmap
 
 
 def verify_map(mapobj):

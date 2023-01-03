@@ -28,6 +28,7 @@ export class GameScene extends Phaser.Scene {
     Object.entries(GI.CARDS).forEach(([cardid, card]) => {
       this.load.image(card['descr'], `${environment.STATIC_URL}/${card['tile_url']}`);
     });
+    this.load.spritesheet('octopus', `../../assets/img/octopus.png`, { frameWidth: 48, frameHeight: 48 });
   }
 
   check_player_state() {
@@ -642,6 +643,7 @@ export class GameScene extends Phaser.Scene {
 
     // create the layers we want in the right order
     map.createLayer(GI.map.layers[0].name, tileset, 0, 0);
+    this.animateOctopus();
 
     this.drawGrid();
     this.drawCheckpoints();
@@ -691,6 +693,27 @@ export class GameScene extends Phaser.Scene {
     this.component.cardsinfo.subscribe((cardsinfo) => {
       this.pathHighlighting();
     });
+  }
+
+  animateOctopus() {
+    this.anims.create({
+      key: 'octopus_animation',
+      frames: 'octopus',
+      frameRate: 5,
+      repeat: -1,
+    });
+
+    let anim = this.anims.get('octopus_animation');
+
+    let voids = this.component.gameinfo.map['property_locations']['void'];
+    if (voids !== undefined) {
+      for (let v of voids) {
+        this.add.sprite(this.getTileX(+v[0]), this.getTileY(+v[1]), 'octopus').play({
+          key: 'octopus_animation',
+          startFrame: Phaser.Math.RND.between(0, anim.getTotalFrames() - 1),
+        });
+      }
+    }
   }
 
   pathHighlighting() {
