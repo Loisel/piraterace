@@ -21,6 +21,7 @@ from pigame.models import (
 BACKEND_USERID = -1
 ROUNDEND_CARDID = -1
 POWER_DOWN_CARDID = -2
+BOARD_CANNON_PLAYERID = -1
 
 TILE_DEFAULTS = {
     "collision": False,
@@ -300,6 +301,7 @@ def board_turrets(game, gmap, players):
                         ystart=y,
                         xinc=tile_prop["turret_x"],
                         yinc=0,
+                        source_player=BOARD_CANNON_PLAYERID,
                         players=players,
                         cannon_damage=1,
                         collide_terrain=True,
@@ -315,6 +317,7 @@ def board_turrets(game, gmap, players):
                         ystart=y,
                         xinc=0,
                         yinc=tile_prop["turret_y"],
+                        source_player=BOARD_CANNON_PLAYERID,
                         players=players,
                         cannon_damage=1,
                         collide_terrain=True,
@@ -337,7 +340,9 @@ def board_repair(game, gmap, players):
             p.health -= tile_prop["damage"]
             if p.health >= maxhealth:
                 p.health = maxhealth
-            actions.append(dict(key="repair", target=p.id, health=p.health, posx=p.xpos, posy=p.ypos))
+            actions.append(
+                dict(key="repair", target=p.id, health_repair=-tile_prop["damage"], health=p.health, posx=p.xpos, posy=p.ypos)
+            )
 
     return actions
 
@@ -389,6 +394,7 @@ def shoot_player_cannon(game, gmap, players, player):
         ystart=player.ypos,
         xinc=DIRID2MOVE[cannon_direction][0],
         yinc=DIRID2MOVE[cannon_direction][1],
+        source_player=player.id,
         players=players,
         cannon_damage=1,
         collide_terrain=True,
@@ -396,7 +402,9 @@ def shoot_player_cannon(game, gmap, players, player):
     )
 
 
-def shoot_cannon_ball(gmap, xstart, ystart, xinc, yinc, players, cannon_damage=1, collide_terrain=True, collide_players=True):
+def shoot_cannon_ball(
+    gmap, xstart, ystart, xinc, yinc, source_player, players, cannon_damage=1, collide_terrain=True, collide_players=True
+):
     actions = []
     x, y = xstart, ystart
     while (x >= 0 and x < gmap["width"]) and (y >= 0 and y < gmap["height"]):
@@ -412,13 +420,15 @@ def shoot_cannon_ball(gmap, xstart, ystart, xinc, yinc, players, cannon_damage=1
                         key="shot",
                         src_x=xstart,
                         src_y=ystart,
+                        source_player=source_player,
+                        cannon_damage=cannon_damage,
                         other_player=other_player.id,
                         other_player_health=other_player.health,
                         collided_at=(x, y),
                     )
                 )
                 if other_player.health <= 0:
-                    actions.append(dict(key="death", target=other_player.id, type="cannon"))
+                    actions.append(dict(key="death", source_player=source_player, target=other_player.id, type="cannon"))
                     kill_player(other_player)
 
                 if collide_players:
@@ -431,6 +441,60 @@ def shoot_cannon_ball(gmap, xstart, ystart, xinc, yinc, players, cannon_damage=1
 
     actions.append(dict(key="shot", src_x=xstart, src_y=ystart, collided_at=(x, y)))
     return actions
+
+
+def calc_stats(game):
+    players, actionstack = play_stack(game)
+    ids = [(p.id, p.next_checkpoint) for p in players.values()]
+    ids.append((BOARD_CANNON_PLAYERID, 0))
+    ids.sort(key=lambda x: x[1], reverse=True)
+    stats = {
+        "move_count": {pid: 0 for pid, _ in ids},
+        "rotation_count": {pid: 0 for pid, _ in ids},
+        "death_count": {pid: 0 for pid, _ in ids},
+        "void_count": {pid: 0 for pid, _ in ids},
+        "cannondeath_count": {pid: 0 for pid, _ in ids},
+        "damage_dealt": {pid: {other_pid: 0 for other_pid, _ in ids} for pid, _ in ids},
+        "damage_taken": {pid: {other_pid: 0 for other_pid, _ in ids} for pid, _ in ids},
+        "repair_count": {pid: 0 for pid, _ in ids},
+        "powerdown_count": {pid: 0 for pid, _ in ids},
+        "checkpoints": {pid: cp for pid, cp in ids},
+        "kills": {pid: {other_pid: 0 for other_pid, _ in ids} for pid, _ in ids},
+    }
+    for actiongrp in actionstack:
+        for action in actiongrp:
+            if "move" in action["key"]:
+                stats["move_count"][action["target"]] += 1
+            elif "rotate" in action["key"]:
+                stats["rotation_count"][action["target"]] += 1
+            elif "death" in action["key"]:
+                stats["death_count"][action["target"]] += 1
+                if "void" == action["type"]:
+                    stats["void_count"][action["target"]] += 1
+                if "cannon" == action["type"]:
+                    stats["cannondeath_count"][action["target"]] += 1
+                    source_player = action.get("source_player")
+                    stats["kills"][source_player][action["target"]] += 1
+            elif "shot" == action["key"]:
+                other_player = action.get("other_player")
+                if other_player:
+                    source_player = action.get("source_player")
+                    stats["damage_taken"][other_player][source_player] += action["cannon_damage"]
+                    stats["damage_dealt"][source_player][other_player] += action["cannon_damage"]
+            elif "repair" == action["key"]:
+                stats["repair_count"][action["target"]] += action["health_repair"]
+            elif "powerdownrepair" == action["key"]:
+                stats["powerdown_count"][action["target"]] += 1
+
+    liststats = {}
+    for field in stats:
+        liststats[field] = [(pid, stats[field][pid]) for pid, _ in ids]
+        for n in range(len(liststats[field])):
+            pid, val = liststats[field][n]
+            if type(val) == dict:
+                liststats[field][n] = (pid, [(other_pid, val[other_pid]) for other_pid, _ in ids])
+
+    return liststats
 
 
 def get_actions_for_card(game, gmap, players, player, card):
@@ -462,7 +526,18 @@ def get_actions_for_card(game, gmap, players, player, card):
         maxhealth = game.config.ncardsavail + FREE_HEALTH_OFFSET
         if player.health + CARDS[cardid]["repair"] <= maxhealth:
             player.health += CARDS[cardid]["repair"]
-            actions.append([dict(key="repair", target=player.id, health=player.health, posx=player.xpos, posy=player.ypos)])
+            actions.append(
+                [
+                    dict(
+                        key="repair",
+                        target=player.id,
+                        health=player.health,
+                        health_repair=CARDS[cardid]["repair"],
+                        posx=player.xpos,
+                        posy=player.ypos,
+                    )
+                ]
+            )
 
     return actions
 

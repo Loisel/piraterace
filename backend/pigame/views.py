@@ -42,6 +42,7 @@ from pigame.game_logic import (
     POWER_DOWN_CARDID,
     get_player_deck,
     set_player_deck,
+    calc_stats,
 )
 
 TIME_PER_ACTION = 0.6
@@ -276,6 +277,7 @@ def game(request, game_id, **kwargs):
                     )
                     break
 
+    payload["stats"] = calc_stats(game)
     return JsonResponse(payload)
 
 
