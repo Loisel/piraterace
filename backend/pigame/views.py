@@ -265,19 +265,22 @@ def game(request, game_id, **kwargs):
             cannon_direction=str(CANNON_DIRECTION_DIRID2CARDID[p.cannon_direction]),
         )
 
+    summary = None
     if game.state in ["end"]:
         for a in payload["actionstack"][::-1]:
             if len(a) > 0:
                 if a[0]["key"] == "win":
                     winner_id = a[0]["target"]
                     winner = Account.objects.get(pk=winner_id)
-                    payload["summary"] = dict(
+                    summary = dict(
                         winner_id=winner_id,
                         winner=winner.user.username,
                     )
                     break
 
-    payload["stats"] = calc_stats(game)
+    stats = calc_stats(game)
+    stats["summary"] = summary
+    payload["stats"] = stats
     return JsonResponse(payload)
 
 

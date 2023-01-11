@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { GameConfig } from '../model/gameconfig';
 import { NewGameConfig } from '../model/newgameconfig';
 import { MapInfo } from '../model/mapinfo';
+import { GameInfo } from '../model/gameinfo';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -53,7 +54,7 @@ export class HttpService {
     return this.httpClient.get(`${this.leave_gameConfigURL}`);
   }
   getGame(id: number) {
-    return this.httpClient.get(`${this.get_gameURL}/${id}`);
+    return this.httpClient.get<GameInfo>(`${this.get_gameURL}/${id}`);
   }
   getPlayerCards() {
     return this.httpClient.get<Array<any>>(`${this.player_cardsURL}`);

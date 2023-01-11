@@ -13,6 +13,7 @@ import Phaser from 'phaser';
 
 import { HttpService } from '../services/http.service';
 import { environment } from '../../environments/environment';
+import { GameInfo } from '../model/gameinfo';
 
 import { GameScene } from './game-scene';
 
@@ -25,7 +26,7 @@ export class GameComponent {
   gamedivid: string = null;
   phaserGame: Phaser.Game;
   config: Phaser.Types.Core.GameConfig;
-  gameinfo: any = null;
+  gameinfo: GameInfo = null;
   cardsinfo: BehaviorSubject<Array<any>> = new BehaviorSubject<Array<any>>([]);
   CARDS_URL = environment.STATIC_URL;
   Ngameround = new BehaviorSubject<number>(0);
@@ -238,7 +239,7 @@ export class GameComponent {
   }
 
   async presentSummary() {
-    let winner = this.gameinfo.summary.winner;
+    let winner = this.gameinfo.stats.summary.winner;
     const alert = await this.alertController.create({
       header: 'Race finished',
       //subHeader: ''
