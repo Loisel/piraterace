@@ -3,10 +3,11 @@ import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { GameComponent } from './game.component';
+import { StatsComponent } from './stats/stats.component';
 import { GameRoutingModule } from './game-routing.module';
 
 @NgModule({
   imports: [CommonModule, FormsModule, IonicModule, GameRoutingModule],
-  declarations: [GameComponent],
+  declarations: [GameComponent, StatsComponent],
 })
 export class GameModule {}

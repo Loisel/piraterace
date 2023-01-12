@@ -1,0 +1,59 @@
+<ion-title> {{ gameinfo.stats.summary?.winner }} is quite a Seadog and finished first! </ion-title>
+<div style="overflow: scroll">
+  <table class="stats-table">
+    <tr>
+      <th>Player</th>
+      <th>Checkpoint</th>
+      <th>Distance</th>
+      <th>Rotations</th>
+      <th>Deaths</th>
+      <th>.. by cannon</th>
+      <th>.. by kraken</th>
+      <th>Repairs</th>
+      <th>Re-Rigs</th>
+    </tr>
+    <tr *ngFor="let cpinfo of gameinfo.stats.checkpoints.slice(0, -1); let i = index">
+      <td>
+        {{ gameinfo.players[cpinfo[0]].name }}
+      </td>
+      <td>
+        <span [ngClass]="{ max: cpinfo[1] === getMinMaxStat('checkpoints').max }">{{ cpinfo[1] - 1 }}</span>
+      </td>
+      <td>
+        <span [ngClass]="{ max: gameinfo.stats.move_count[i][1] === getMinMaxStat('move_count').max }">
+          {{ gameinfo.stats.move_count[i][1] }}
+        </span>
+      </td>
+      <td>
+        <span [ngClass]="{ max: gameinfo.stats.rotation_count[i][1] === getMinMaxStat('rotation_count').max }">
+          {{ gameinfo.stats.rotation_count[i][1] }}
+        </span>
+      </td>
+      <td>
+        <span [ngClass]="{ max: gameinfo.stats.death_count[i][1] === getMinMaxStat('death_count').max }">
+          {{ gameinfo.stats.death_count[i][1] }}
+        </span>
+      </td>
+      <td>
+        <span [ngClass]="{ max: gameinfo.stats.cannondeath_count[i][1] === getMinMaxStat('cannondeath_count').max }">
+          {{ gameinfo.stats.cannondeath_count[i][1] }}
+        </span>
+      </td>
+      <td>
+        <span [ngClass]="{ max: gameinfo.stats.void_count[i][1] === getMinMaxStat('void_count').max }">
+          {{ gameinfo.stats.void_count[i][1] }}
+        </span>
+      </td>
+      <td>
+        <span [ngClass]="{ max: gameinfo.stats.repair_count[i][1] === getMinMaxStat('repair_count').max }">
+          {{ gameinfo.stats.repair_count[i][1] }}
+        </span>
+      </td>
+      <td>
+        <span [ngClass]="{ max: gameinfo.stats.powerdown_count[i][1] === getMinMaxStat('powerdown_count').max }">
+          {{ gameinfo.stats.powerdown_count[i][1] }}
+        </span>
+      </td>
+    </tr>
+  </table>
+</div>

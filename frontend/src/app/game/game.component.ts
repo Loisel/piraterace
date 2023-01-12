@@ -47,6 +47,7 @@ export class GameComponent {
   @ViewChild('cannonModal') cannonModal: IonModal;
   @ViewChild('rerigModal') rerigModal: IonModal;
   @ViewChild('leaveModal') leaveModal: IonModal;
+  @ViewChild('statsModal') statsModal: IonModal;
 
   constructor(
     private httpService: HttpService,

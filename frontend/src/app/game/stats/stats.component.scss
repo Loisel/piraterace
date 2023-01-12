@@ -1,0 +1,20 @@
+.stats-table {
+  th {
+    padding: 0.3em;
+    text-align: center;
+  }
+  td {
+    text-align: center;
+  }
+  tr:nth-child(even) {
+    background: #ccc;
+  }
+  tr:nth-child(odd) {
+    background: #fff;
+  }
+}
+
+.max {
+  font-weight: bold;
+  font-size: large;
+}
