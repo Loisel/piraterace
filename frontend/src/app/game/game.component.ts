@@ -239,22 +239,8 @@ export class GameComponent {
     toast.present();
   }
 
-  async presentSummary() {
-    let winner = this.gameinfo.stats.summary.winner;
-    const alert = await this.alertController.create({
-      header: 'Race finished',
-      //subHeader: ''
-      message: `Yo Ho Ho, turns out the mighty ${winner} is quite a Seadog and finished first!`,
-      buttons: [
-        {
-          text: 'Okay, leave',
-          handler: () => {
-            this.leaveGame();
-          },
-        },
-      ],
-    });
-    await alert.present();
+  presentSummary() {
+    this.statsModal.present();
   }
 
   changeCannonDirection(event) {

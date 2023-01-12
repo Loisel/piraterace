@@ -13,7 +13,7 @@
             <ion-img style="width: 40px" src="../../assets/img/cannon.png"></ion-img>
             <ion-label id="cannon_mount_label">Cannon Mount</ion-label>
           </ion-button>
-          <ion-button id="open-stats-button">
+          <ion-button id="open-stats-button" (click)="presentSummary()">
             <ion-label id="cannon_mount_label">Open Stats</ion-label>
           </ion-button>
           <ion-modal id="rerig-modal" trigger="power_down_button" #rerigModal>
@@ -97,7 +97,7 @@
               </ion-item>
             </ng-template>
           </ion-modal>
-          <ion-modal id="stats-modal" trigger="open-stats-button" #statsModal>
+          <ion-modal id="stats-modal" #statsModal>
             <ng-template>
               <app-stats *ngIf="gameinfo" [gameinfo]="gameinfo"></app-stats>
               <ion-item>
