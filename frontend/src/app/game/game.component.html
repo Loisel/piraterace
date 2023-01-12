@@ -98,7 +98,12 @@
             </ng-template>
           </ion-modal>
           <ion-modal id="stats-modal" trigger="open-stats-button" #statsModal>
-            <app-stats *ngIf="gameinfo" [gameinfo]="gameinfo"></app-stats>
+            <ng-template>
+              <app-stats *ngIf="gameinfo" [gameinfo]="gameinfo"></app-stats>
+              <ion-item>
+                <ion-button (click)="statsModal.dismiss(); leaveGame()" slot="end">Leave Game</ion-button>
+              </ion-item>
+            </ng-template>
           </ion-modal>
           <ion-modal id="leave-modal" trigger="leave_game_button" #leaveModal>
             <ng-template>
