@@ -278,9 +278,9 @@ def game(request, game_id, **kwargs):
                     )
                     break
 
-    stats = calc_stats(game)
-    stats["summary"] = summary
-    payload["stats"] = stats
+        stats = calc_stats(game)
+        stats["summary"] = summary
+        payload["stats"] = stats
     return JsonResponse(payload)
 
 

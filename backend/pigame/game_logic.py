@@ -458,7 +458,7 @@ def calc_stats(game):
         "damage_taken": {pid: {other_pid: 0 for other_pid, _ in ids} for pid, _ in ids},
         "repair_count": {pid: 0 for pid, _ in ids},
         "powerdown_count": {pid: 0 for pid, _ in ids},
-        "checkpoints": {pid: cp for pid, cp in ids},
+        "checkpoints": {pid: cp - 1 for pid, cp in ids},  # in frontend we count checkpoints reached
         "kills": {pid: {other_pid: 0 for other_pid, _ in ids} for pid, _ in ids},
     }
     for actiongrp in actionstack:
