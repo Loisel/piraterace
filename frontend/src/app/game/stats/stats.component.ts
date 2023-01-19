@@ -34,7 +34,7 @@ export class StatsComponent implements OnInit {
   }
 
   createEmptyTable() {
-    this.stats = structuredClone(this.gameinfo.stats);
+    this.stats = JSON.parse(JSON.stringify(this.gameinfo.stats));
     for (const [k, v] of Object.entries(this.stats)) {
       if (v && v.constructor === Array) {
         this.stats[k].map((stat) => (stat[1] = null));
