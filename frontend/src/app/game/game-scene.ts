@@ -280,7 +280,7 @@ export class GameScene extends Phaser.Scene {
       if (action.type === 'void') {
         timeline.add({
           targets: boatGroup,
-          scale: '-=1',
+          scale: '-=.5',
           angle: '+=360',
           offset: offset,
           duration: animation_time_ms,
@@ -288,14 +288,14 @@ export class GameScene extends Phaser.Scene {
       } else if (action.type === 'collision') {
         timeline.add({
           targets: boatGroup,
-          scale: '-=1',
+          scale: '-=.5',
           offset: offset,
           duration: animation_time_ms,
         });
       } else if (action.type === 'cannon') {
         timeline.add({
           targets: boatGroup,
-          scale: '-=1',
+          scale: '-=.5',
           offset: offset,
           duration: animation_time_ms,
         });
@@ -315,7 +315,7 @@ export class GameScene extends Phaser.Scene {
       } else {
         timeline.add({
           targets: boatGroup.getChildren(),
-          scale: '+=1',
+          scale: '+=.5',
           offset: offset,
           duration: animation_time_ms,
           onStart: function () {
