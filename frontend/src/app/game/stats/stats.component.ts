@@ -35,10 +35,9 @@ export class StatsComponent implements OnInit {
 
   createEmptyTable() {
     this.stats = JSON.parse(JSON.stringify(this.gameinfo.stats));
-    for (const [k, v] of Object.entries(this.stats)) {
-      if (v && v.constructor === Array) {
-        this.stats[k].map((stat) => (stat[1] = null));
-      }
+
+    for (let fname of this.statsfields) {
+      this.stats[fname] = this.stats[fname].map((stat) => (stat = null));
     }
   }
 
@@ -49,12 +48,12 @@ export class StatsComponent implements OnInit {
       let minmax = this.getMinMaxStat(fieldname);
       let delta = minmax.max / NCOUNTS + 1e-6;
       for (let i = 0; i < this.stats[fieldname].length; i++) {
-        let current = this.stats[fieldname][i][1];
-        let target = this.gameinfo.stats[fieldname][i][1];
+        let current = this.stats[fieldname][i];
+        let target = this.gameinfo.stats[fieldname][i];
 
         if (current < target || current == null) {
           allReady = false;
-          this.stats[fieldname][i][1] = Math.min(target, Math.ceil(current + delta));
+          this.stats[fieldname][i] = Math.min(target, Math.ceil(current + delta));
         }
       }
       if (allReady) {
@@ -64,7 +63,7 @@ export class StatsComponent implements OnInit {
   }
 
   getMinMaxStat(fieldname: string) {
-    let arr = this.gameinfo.stats[fieldname].map((el) => +el[1]);
+    let arr = this.gameinfo.stats[fieldname].map((el) => +el);
     return { min: Math.min.apply(Math, arr), max: Math.max.apply(Math, arr) };
   }
 }

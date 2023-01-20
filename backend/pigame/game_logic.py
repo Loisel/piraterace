@@ -488,12 +488,14 @@ def calc_stats(game):
 
     liststats = {}
     for field in stats:
-        liststats[field] = [(pid, stats[field][pid]) for pid, _ in ids]
+        liststats[field] = [stats[field][pid] for pid, _ in ids]
         for n in range(len(liststats[field])):
-            pid, val = liststats[field][n]
+            val = liststats[field][n]
             if type(val) == dict:
-                liststats[field][n] = (pid, [(other_pid, val[other_pid]) for other_pid, _ in ids])
+                liststats[field][n] = [val[other_pid] for other_pid, _ in ids]
 
+    liststats["names"] = [players[pid].name for pid, _ in ids[:-1]]
+    liststats["names"].append("Board Cannons")
     return liststats
 
 

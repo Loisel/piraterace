@@ -18,3 +18,26 @@
   font-weight: bold;
   font-size: large;
 }
+
+.verticalTableHeader {
+  text-align: center;
+  white-space: nowrap;
+  transform: rotate(90deg);
+}
+.verticalTableHeader p {
+  margin: 0 -999px; /* virtually reduce space needed on width to very little */
+  display: inline-block;
+}
+.verticalTableHeader p:before {
+  content: "";
+  width: 0;
+  padding-top: 110%;
+  /* takes width as reference, + 10% for faking some extra padding */
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.matrixCells {
+  min-width: 4em;
+  height: 2em;
+}

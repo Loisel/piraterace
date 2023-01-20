@@ -1,5 +1,5 @@
 <ion-title> {{ gameinfo.stats.summary?.winner }} is quite a Seadog and finished first! </ion-title>
-<div style="overflow: scroll">
+<div style="margin: 0.5em; overflow: scroll">
   <table class="stats-table">
     <tr>
       <th>Player</th>
@@ -14,12 +14,28 @@
     </tr>
     <tr *ngFor="let cpinfo of stats.checkpoints.slice(0, -1); let i = index">
       <td>
-        {{ gameinfo.players[cpinfo[0]].name }}
+        {{ stats.names[i] }}
       </td>
       <td *ngFor="let fieldname of statsfields">
-        <span [ngClass]="{ max: stats[fieldname][i][1] === getMinMaxStat(fieldname).max }">
-          {{ stats[fieldname][i][1] }}
+        <span [ngClass]="{ max: stats[fieldname][i] === getMinMaxStat(fieldname).max }">
+          {{ stats[fieldname][i] }}
         </span>
+      </td>
+    </tr>
+  </table>
+  <br />
+  <b>Kills/Damage</b>
+  <table class="stats-table">
+    <tr>
+      <th></th>
+      <th class="verticalTableHeader" *ngFor="let name of stats.names.slice(0, -1); let i = index">
+        <p>{{ name }}</p>
+      </th>
+    </tr>
+    <tr *ngFor="let name of stats.names; let i = index">
+      <th>{{ name }}</th>
+      <td class="matrixCells" *ngFor="let colname of stats.names.slice(0, -1); let j = index">
+        <span *ngIf="i != j"> {{ stats.kills[i][j] }}/{{ stats.damage_dealt[i][j] }} </span>
       </td>
     </tr>
   </table>
