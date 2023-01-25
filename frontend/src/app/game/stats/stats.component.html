@@ -32,7 +32,7 @@
         <p>{{ name }}</p>
       </th>
     </tr>
-    <tr [ngClass]="{ cannonrow: i == stats.names.length-1 }" *ngFor="let name of stats.names; let i = index">
+    <tr [ngClass]="{ cannonrow: i == stats.names.length - 1 }" *ngFor="let name of stats.names; let i = index">
       <th>{{ name }}</th>
       <td class="matrixCells" *ngFor="let colname of stats.names.slice(0, -1); let j = index">
         <span *ngIf="i != j"> {{ stats.kills[i][j] }}/{{ stats.damage_dealt[i][j] }} </span>

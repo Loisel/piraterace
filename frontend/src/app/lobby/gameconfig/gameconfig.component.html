@@ -30,11 +30,21 @@
                   <ion-col>{{ gameConfig?.player_names[i] }}</ion-col>
                   <ion-col [ngStyle]="{ 'background-color': gameConfig?.player_colors[i] }"></ion-col>
                   <ion-col>
-                    <span *ngIf="gameConfig?.player_ready[i]; then ready_icon; else not_ready_icon" class="ion-text-center"></span>
-                    <ng-template #ready_icon
-                      ><ion-icon color="success" size="large" name="checkmark-circle"></ion-icon
-                    ></ng-template>
-                    <ng-template #not_ready_icon><ion-icon color="danger" size="large" name="close-circle"></ion-icon></ng-template>
+                    <span *ngIf="gameConfig?.creator_userid === p" class="ion-text-center">
+                      <ion-icon size="large" name="sparkles"></ion-icon>
+                    </span>
+                    <span *ngIf="gameConfig?.creator_userid !== p">
+                      <span
+                        *ngIf="gameConfig?.player_ready[i]; then ready_icon; else not_ready_icon"
+                        class="ion-text-center"
+                      ></span>
+                      <ng-template #ready_icon
+                        ><ion-icon color="success" size="large" name="checkmark-circle"></ion-icon
+                      ></ng-template>
+                      <ng-template #not_ready_icon
+                        ><ion-icon color="danger" size="large" name="close-circle"></ion-icon
+                      ></ng-template>
+                    </span>
                   </ion-col>
                 </ion-row>
               </ng-template>
@@ -64,6 +74,7 @@
                   </ion-col>
                   <ion-col>
                     <ion-checkbox
+                      *ngIf="gameConfig?.creator_userid !== gameConfig?.caller_id"
                       checked="{{ gameConfig?.player_ready[gameConfig?.caller_idx] }}"
                       id="ready_check"
                       (ionChange)="onPlayerInfoChange($event)"

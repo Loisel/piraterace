@@ -355,6 +355,9 @@ def create_game(request, gameconfig_id, **kwargs):
     if request.user.account.pk != config.creator_userid:
         return JsonResponse(f"Only the user who opened the game may start it", status=404, safe=False)
 
+    creator_index = config.player_ids.index(config.creator_userid)
+    config.player_ready[creator_index] = True
+
     if not all(config.player_ready):
         return JsonResponse(f"Not all players ready yet", status=404, safe=False)
 
@@ -405,7 +408,9 @@ def view_gameconfig(request, gameconfig_id):
 
     cfg = model_to_dict(game_config)
     cfg["player_names"] = [Account.objects.get(pk=pid).user.username for pid in cfg["player_ids"]]
-    cfg["all_ready"] = all(game_config.player_ready)
+    creator_index = game_config.player_ids.index(game_config.creator_userid)
+    cfg["player_ready"][creator_index] = True
+    cfg["all_ready"] = all(cfg["player_ready"])
 
     ## colors_to_pick = [c for c in COLORS.keys() if c not in cfg["player_colors"]]
     ## the callers color can also be chosen
