@@ -20,6 +20,7 @@ urlpatterns = [
     path("api/admin/", admin.site.urls),
     path("api/pigame/", include("pigame.urls")),
     path("api/piplayer/", include("piplayer.urls")),
+    path("api/pichat/", include("pichat.urls")),
     path("api/auth/", include("djoser.urls")),
     path("api/auth/", include("djoser.urls.jwt")),
 ]

@@ -6,11 +6,12 @@ import { PhaserPreviewComponent } from './phaserpreview/phaserpreview.component'
 import { NewGameConfigComponent } from './newgameconfig/newgameconfig.component';
 import { IonicModule } from '@ionic/angular';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ChatboxComponent } from '../chatbox/chatbox.component';
 
 import { LobbyRoutingModule } from './lobby-routing.module';
 
 @NgModule({
-  declarations: [GamelistComponent, GameConfigComponent, NewGameConfigComponent, PhaserPreviewComponent],
+  declarations: [GamelistComponent, GameConfigComponent, NewGameConfigComponent, PhaserPreviewComponent, ChatboxComponent],
   imports: [CommonModule, IonicModule, LobbyRoutingModule, FormsModule, ReactiveFormsModule],
   exports: [PhaserPreviewComponent],
 })

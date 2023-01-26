@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "django_extensions",
     "pigame",
     "piplayer",
+    "pichat",
 ]
 
 MIDDLEWARE = [
