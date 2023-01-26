@@ -17,7 +17,6 @@ export class ChatboxComponent implements OnInit, OnDestroy {
   @Input() chatslug = null;
 
   ngOnInit() {
-    console.log('enter chatbox component');
     this.updateChat();
     this.updateTimer = setInterval(() => {
       this.updateChat();
@@ -71,7 +70,6 @@ export class ChatboxComponent implements OnInit, OnDestroy {
       if (this.chatslug === 'global_chat') {
         this.httpService.get_globalChat().subscribe(
           (ret) => {
-            console.log('update chat: ', ret);
             this.chat = ret.chat;
           },
           (error) => {
