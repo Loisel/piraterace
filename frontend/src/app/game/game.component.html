@@ -6,16 +6,25 @@
         <ion-card-content>
           <ion-label>Round {{ Ngameround | async }}</ion-label>
           <ion-button id="power_down_button" [disabled]="poweredDown || submittedCards">
-            <ion-icon name="construct-outline"></ion-icon>
+            <ion-icon name="construct"></ion-icon>
             <ion-label id="power_down_label">Re-Rig</ion-label>
           </ion-button>
           <ion-button id="cannon-direction-button">
             <ion-img style="width: 40px" src="../../assets/img/cannon.png"></ion-img>
             <ion-label id="cannon_mount_label">Cannon Mount</ion-label>
           </ion-button>
-          <!-- <ion-button id="open-stats-button" (click)="presentSummary()"> -->
-          <!--   <ion-label id="cannon_mount_label">Open Stats</ion-label> -->
-          <!-- </ion-button> -->
+          <ion-button id="open-chat-button">
+            <ion-icon name="chatbubbles"></ion-icon>
+            <ion-label id="chatbox_label">Chat</ion-label>
+          </ion-button>
+          <ion-modal id="chat-modal" trigger="open-chat-button">
+            <ng-template>
+              <ion-header>
+                <ion-title>Chat</ion-title>
+              </ion-header>
+              <app-chatbox chatslug="game_chat"></app-chatbox>
+            </ng-template>
+          </ion-modal>
           <ion-modal id="rerig-modal" trigger="power_down_button" #rerigModal>
             <ng-template>
               <ion-header>
@@ -30,7 +39,7 @@
                     <b>you will not take any turns</b>.
                   </p>
                   <ion-button id="power_down_button_action" (click)="powerDown()" [disabled]="poweredDown || submittedCards">
-                    <ion-icon name="construct-outline"></ion-icon>
+                    <ion-icon name="construct"></ion-icon>
                     <ion-label id="power_down_label">Re-Rig</ion-label>
                   </ion-button>
                   <ion-button (click)="rerigModal.dismiss()">Cancel</ion-button>
@@ -121,11 +130,11 @@
                   </p>
                   <ion-list>
                     <ion-button color="primary" (click)="leaveModal.dismiss()">
-                      <ion-icon slot="start" name="send-outline"></ion-icon>
+                      <ion-icon slot="start" name="send"></ion-icon>
                       One more turn!
                     </ion-button>
                     <ion-button color="danger" (click)="leaveGame()">
-                      <ion-icon slot="start" name="log-out-outline"></ion-icon>
+                      <ion-icon slot="start" name="log-out"></ion-icon>
                       Ay, leave them!
                     </ion-button>
                   </ion-list>
@@ -137,13 +146,13 @@
           <ion-progress-bar id="time-progress-bar" [value]="countDownTimer | async" color="danger"></ion-progress-bar>
 
           <ion-button id="submit_cards_button" (click)="submitCards()" [disabled]="submittedCards">
-            <ion-icon name="send-outline"></ion-icon>
+            <ion-icon name="send"></ion-icon>
             <ion-label id="submit_cards_label">Set Sails</ion-label>
           </ion-button>
           <ion-item-divider></ion-item-divider>
 
           <ion-button color="primary" id="leave_game_button">
-            <ion-icon name="log-out-outline"></ion-icon>
+            <ion-icon name="log-out"></ion-icon>
             <ion-label id="leave_game_label">Leave Game</ion-label>
           </ion-button>
         </ion-card-content>

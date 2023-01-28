@@ -1,12 +1,13 @@
-<p>chatbox works: {{ chatslug }}</p>
-
-<div class="chat-window" style="height: 10em; overflow-y: scroll">
-  <ul *ngIf="chat">
-    <li *ngFor="let message of chat">{{ message.name }}: {{ message.message }}</li>
+<div class="chat-window" style="height: 20em; overflow-y: scroll">
+  <ul *ngIf="chat" style="list-style: none">
+    <li *ngFor="let message of chat">
+      <b>{{ message.name }}</b
+      >: {{ message.message }}
+    </li>
   </ul>
 </div>
 
 <ion-item>
-  <ion-label>Message</ion-label>
+  <ion-label><b>></b></ion-label>
   <ion-input (keydown.enter)="sendMessage($event.target.value)" [(ngModel)]="message"></ion-input>
 </ion-item>
