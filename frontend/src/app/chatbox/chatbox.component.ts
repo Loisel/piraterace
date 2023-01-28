@@ -36,7 +36,8 @@ export class ChatboxComponent implements OnInit, OnDestroy {
     toast.present();
   }
 
-  sendMessage(text: string) {
+  sendMessage(event) {
+    let text = (event.target as HTMLInputElement).value;
     console.log('Messge: ', this.message);
     if (this.chatslug !== null) {
       if (this.chatslug === 'global_chat') {

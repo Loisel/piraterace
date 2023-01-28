@@ -9,5 +9,5 @@
 
 <ion-item>
   <ion-label><b>></b></ion-label>
-  <ion-input (keydown.enter)="sendMessage($event.target.value)" [(ngModel)]="message"></ion-input>
+  <ion-input (keydown.enter)="sendMessage($event)" [(ngModel)]="message"></ion-input>
 </ion-item>
