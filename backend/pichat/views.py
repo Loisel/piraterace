@@ -7,8 +7,11 @@ from django.core.cache import cache
 import datetime
 
 GLOBAL_CHATSLUG = "global_chat"
+ACTIVE_USERSLUG = "active_users"
+LAST_CHECKEDSLUG = "last_checked"
 CHAT_SIZELIMIT = 1000
 TIMEDELTA_MESSAGE_DELETE = datetime.timedelta(seconds=3600)
+TIMEDELTA_USER_ACTIVE = datetime.timedelta(seconds=30)
 
 
 def chatslug(game):
@@ -44,6 +47,17 @@ def get_gamechat(request, **kwargs):
 
 @api_view(["GET"])
 def get_globalchat(request, **kwargs):
+
+    users = cache.get(ACTIVE_USERSLUG, {})
+    users[request.user.username] = datetime.datetime.now()
+
+    last_checked = cache.get(LAST_CHECKEDSLUG, datetime.datetime.now())
+    if datetime.datetime.now() - last_checked > TIMEDELTA_USER_ACTIVE:
+        users = {uname: t for uname, t in users.items() if datetime.datetime.now() - t < TIMEDELTA_USER_ACTIVE}
+        cache.set(LAST_CHECKEDSLUG, datetime.datetime.now())
+    cache.set(ACTIVE_USERSLUG, users)
+    active_users = list(users)
+
     chat = get_chat(GLOBAL_CHATSLUG)
     for i in range(len(chat) - 1, 0, -1):
         td = datetime.datetime.now() - chat[i]["timestamp"]
@@ -52,7 +66,7 @@ def get_globalchat(request, **kwargs):
         else:
             cache.set(GLOBAL_CHATSLUG, chat, None)
             break
-    return JsonResponse({"prefix": "global", "chatslug": GLOBAL_CHATSLUG, "chat": chat})
+    return JsonResponse({"prefix": "global", "chatslug": GLOBAL_CHATSLUG, "chat": chat, "active_users": active_users})
 
 
 @api_view(["POST"])

@@ -13,6 +13,7 @@ export class ChatboxComponent implements OnInit, AfterViewInit, OnDestroy {
 
   updateTimer: ReturnType<typeof setInterval>;
   chat: ChatMessage[] = null;
+  activeUsers: any[] = null;
   message: string = '';
   @Input() chatslug = null;
   @ViewChild('chatWindow') chatWindow: ElementRef;
@@ -86,6 +87,7 @@ export class ChatboxComponent implements OnInit, AfterViewInit, OnDestroy {
         this.httpService.get_globalChat().subscribe(
           (ret) => {
             let chat = ret.chat.reverse();
+            this.activeUsers = ret.active_users;
             if (this.chat === null || chat[chat.length - 1].message != this.chat[this.chat.length - 1].message) {
               this.chat = chat;
             }

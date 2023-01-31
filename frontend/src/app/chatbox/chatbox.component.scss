@@ -1,0 +1,10 @@
+div.chat-window {
+  height: 20em;
+  overflow-y: scroll;
+}
+
+p.username {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}

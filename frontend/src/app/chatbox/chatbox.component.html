@@ -1,13 +1,25 @@
-<div #chatWindow class="chat-window" style="height: 20em; overflow-y: scroll">
-  <div *ngIf="chat">
-    <div #messages *ngFor="let message of chat">
-      {{ message.timestamp | date : "hh:mm" }}<b> {{ message.name }}</b
-      >: {{ message.message }}
+<ion-row>
+  <ion-col>
+    <div #chatWindow class="chat-window">
+      <div *ngIf="chat">
+        <div #messages *ngFor="let message of chat">
+          {{ message.timestamp | date : "hh:mm" }}<b> {{ message.name }}</b
+          >: {{ message.message }}
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
-<ion-item>
-  <ion-label><b>></b></ion-label>
-  <ion-input (keydown.enter)="sendMessage($event)" [(ngModel)]="message"></ion-input>
-</ion-item>
+    <ion-item>
+      <ion-label><b>></b></ion-label>
+      <ion-input (keydown.enter)="sendMessage($event)" [(ngModel)]="message"></ion-input>
+    </ion-item>
+  </ion-col>
+  <ion-col size="2" *ngIf="activeUsers">
+    <div class="chat-window" style="height: 20em; overflow-y: scroll">
+      <div><ion-icon name="people"></ion-icon></div>
+      <div *ngFor="let user of activeUsers">
+        <p class="username">{{ user }}</p>
+      </div>
+    </div>
+  </ion-col>
+</ion-row>
