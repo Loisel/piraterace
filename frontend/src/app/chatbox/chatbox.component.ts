@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input, ViewChild, ElementRef, ViewChildren, QueryList, AfterViewInit } from '@angular/core';
 import { ToastController } from '@ionic/angular';
 import { HttpService } from '../services/http.service';
 import { ChatMessage } from '../model/chatmessage';
@@ -8,13 +8,15 @@ import { ChatMessage } from '../model/chatmessage';
   templateUrl: './chatbox.component.html',
   styleUrls: ['./chatbox.component.scss'],
 })
-export class ChatboxComponent implements OnInit, OnDestroy {
+export class ChatboxComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(private httpService: HttpService, private toastController: ToastController) {}
 
   updateTimer: ReturnType<typeof setInterval>;
   chat: ChatMessage[] = null;
   message: string = '';
   @Input() chatslug = null;
+  @ViewChild('chatWindow') chatWindow: ElementRef;
+  @ViewChildren('messages') messages: QueryList<any>;
 
   ngOnInit() {
     this.updateChat();
@@ -25,6 +27,11 @@ export class ChatboxComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     clearInterval(this.updateTimer);
+  }
+
+  ngAfterViewInit() {
+    this.scrollToBottom();
+    this.messages.changes.subscribe(this.scrollToBottom);
   }
 
   async presentToast(msg, color = 'primary') {
@@ -38,13 +45,12 @@ export class ChatboxComponent implements OnInit, OnDestroy {
 
   sendMessage(event) {
     let text = (event.target as HTMLInputElement).value;
-    console.log('Messge: ', this.message);
     if (this.chatslug !== null) {
       if (this.chatslug === 'global_chat') {
         this.httpService.post_globalChat(this.message).subscribe(
           (ret) => {
             this.message = '';
-            this.chat = ret.chat;
+            this.chat = ret.chat.reverse();
           },
           (error) => {
             console.log('failed post chat: ', error);
@@ -66,12 +72,23 @@ export class ChatboxComponent implements OnInit, OnDestroy {
     }
   }
 
+  scrollToBottom = () => {
+    try {
+      this.chatWindow.nativeElement.scrollTop = this.chatWindow.nativeElement.scrollHeight;
+    } catch (err) {
+      console.log('Scroll error:', err);
+    }
+  };
+
   updateChat() {
     if (this.chatslug !== null) {
       if (this.chatslug === 'global_chat') {
         this.httpService.get_globalChat().subscribe(
           (ret) => {
-            this.chat = ret.chat;
+            let chat = ret.chat.reverse();
+            if (this.chat === null || chat[chat.length - 1].message != this.chat[this.chat.length - 1].message) {
+              this.chat = chat;
+            }
           },
           (error) => {
             console.log('failed update chat: ', error);
@@ -80,7 +97,10 @@ export class ChatboxComponent implements OnInit, OnDestroy {
         );
       } else {
         this.httpService.get_gameChat().subscribe((ret) => {
-          this.chat = ret.chat;
+          let chat = ret.chat.reverse();
+          if (this.chat === null || chat[chat.length - 1].message != this.chat[this.chat.length - 1].message) {
+            this.chat = chat;
+          }
         });
       }
     }

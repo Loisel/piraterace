@@ -4,10 +4,11 @@ from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.core.cache import cache
-
+import datetime
 
 GLOBAL_CHATSLUG = "global_chat"
 CHAT_SIZELIMIT = 1000
+TIMEDELTA_MESSAGE_DELETE = datetime.timedelta(seconds=3600)
 
 
 def chatslug(game):
@@ -18,14 +19,16 @@ def get_chat(chat_slug):
     return cache.get(chat_slug)
 
 
-def add_message(chat_slug, user, message):
+def add_message(chat_slug, user, message, lifetime):
     chat = get_chat(chat_slug)
     if not chat:
         chat = []
-    chat.insert(0, {"pk": user.pk, "name": user.username, "message": message})
+    if len(chat) and chat[0]["pk"] == user.pk and chat[0]["message"] == message:
+        return chat
+    chat.insert(0, {"pk": user.pk, "name": user.username, "message": message, "timestamp": datetime.datetime.now()})
 
     chat = chat[:CHAT_SIZELIMIT]
-    cache.set(chat_slug, chat)
+    cache.set(chat_slug, chat, lifetime)
     return chat
 
 
@@ -41,8 +44,15 @@ def get_gamechat(request, **kwargs):
 
 @api_view(["GET"])
 def get_globalchat(request, **kwargs):
-    # add_message(GLOBAL_CHATSLUG, request.user, f"{datetime.datetime.now()}")
-    return JsonResponse({"prefix": "global", "chatslug": GLOBAL_CHATSLUG, "chat": get_chat(GLOBAL_CHATSLUG)})
+    chat = get_chat(GLOBAL_CHATSLUG)
+    for i in range(len(chat) - 1, 0, -1):
+        td = datetime.datetime.now() - chat[i]["timestamp"]
+        if td > TIMEDELTA_MESSAGE_DELETE:
+            chat.pop()
+        else:
+            cache.set(GLOBAL_CHATSLUG, chat, None)
+            break
+    return JsonResponse({"prefix": "global", "chatslug": GLOBAL_CHATSLUG, "chat": chat})
 
 
 @api_view(["POST"])
@@ -55,7 +65,7 @@ def post_gamechat(request, **kwargs):
     message = request.data.get("message")
     if not message or len(message.strip()) == 0:
         return JsonResponse(f"Unable to send chat message. Message is empty.", status=404, safe=False)
-    add_message(chatslug(game), user, message)
+    add_message(chatslug(game), user, message, 3600)
 
     return redirect(reverse("pichat:get_gamechat"))
 
@@ -68,6 +78,6 @@ def post_globalchat(request, **kwargs):
 
     if not message or len(message.strip()) == 0:
         return JsonResponse(f"Unable to send chat message. Message is empty.", status=404, safe=False)
-    add_message(GLOBAL_CHATSLUG, user, message)
+    add_message(GLOBAL_CHATSLUG, user, message, None)
 
     return redirect(reverse("pichat:get_globalchat"))
