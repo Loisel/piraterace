@@ -111,16 +111,18 @@ CANNON_DIRECTION_DIRID2CARDID = {val["direction"]: key for key, val in CANNON_DI
 
 def gen_default_deck():
     c = []
-    for rank in range(10, NRANKINGS - 1, 10):
+    for rank in range(20, NRANKINGS, 10):
         c.append(1 * NRANKINGS + rank)
         c.append(10 * NRANKINGS + rank)
+
+    for rank in range(10, NRANKINGS - NRANKINGS // 6, 10):
         c.append(20 * NRANKINGS + rank)
         c.append(30 * NRANKINGS + rank)
         c.append(40 * NRANKINGS + rank)
 
-    for rank in range(10, NRANKINGS // 2, 10):
+    for rank in range(50, NRANKINGS, 10):
         c.append(2 * NRANKINGS + rank)
-    for rank in range(10, NRANKINGS // 4, 10):
+    for rank in range(70, NRANKINGS, 10):
         c.append(3 * NRANKINGS + rank)
 
     return c
