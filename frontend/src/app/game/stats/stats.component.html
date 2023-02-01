@@ -24,7 +24,7 @@
     </tr>
   </table>
   <br />
-  <b>Kills/Damage</b>
+  <b>Damage (Kills)</b>
   <table class="stats-table">
     <tr>
       <th></th>
@@ -35,7 +35,9 @@
     <tr [ngClass]="{ cannonrow: i == stats.names.length - 1 }" *ngFor="let name of stats.names; let i = index">
       <th>{{ name }}</th>
       <td class="matrixCells" *ngFor="let colname of stats.names.slice(0, -1); let j = index">
-        <span *ngIf="i != j"> {{ stats.kills[i][j] }}/{{ stats.damage_dealt[i][j] }} </span>
+        <span *ngIf="i == j"><ion-icon style="font-size: xx-small" name="ellipse"></ion-icon></span>
+        <span *ngIf="i != j">{{ stats.damage_dealt[i][j] }}</span>
+        <span *ngIf="stats.kills[i][j] > 0">({{ stats.kills[i][j] }})</span>
       </td>
     </tr>
   </table>
