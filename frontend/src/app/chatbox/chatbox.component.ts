@@ -88,8 +88,16 @@ export class ChatboxComponent implements OnInit, AfterViewInit, OnDestroy {
           (ret) => {
             let chat = ret.chat.reverse();
             this.activeUsers = ret.active_users;
-            if (this.chat === null || chat[chat.length - 1].message != this.chat[this.chat.length - 1].message) {
-              this.chat = chat;
+            if (chat.length > 0) {
+              if (this.chat) {
+                let lastmsg_incoming = chat[chat.length - 1].message;
+                let lastmsg_current = this.chat[this.chat.length - 1].message;
+                if (lastmsg_incoming != lastmsg_current) {
+                  this.chat = chat;
+                }
+              } else {
+                this.chat = chat;
+              }
             }
           },
           (error) => {
@@ -100,8 +108,16 @@ export class ChatboxComponent implements OnInit, AfterViewInit, OnDestroy {
       } else {
         this.httpService.get_gameChat().subscribe((ret) => {
           let chat = ret.chat.reverse();
-          if (this.chat === null || chat[chat.length - 1].message != this.chat[this.chat.length - 1].message) {
-            this.chat = chat;
+          if (chat.length > 0) {
+            if (this.chat) {
+              let lastmsg_incoming = chat[chat.length - 1].message;
+              let lastmsg_current = this.chat[this.chat.length - 1].message;
+              if (lastmsg_incoming != lastmsg_current) {
+                this.chat = chat;
+              }
+            } else {
+              this.chat = chat;
+            }
           }
         });
       }

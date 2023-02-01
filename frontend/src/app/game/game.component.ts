@@ -134,9 +134,13 @@ export class GameComponent {
   }
 
   ionViewWillLeave() {
-    console.log("Leaving Game");
+    console.log('Leaving Game', this.appGameContent);
     this.phaserGame.destroy(true, false);
-    this.appGameContent.clear();
+    try {
+      this.appGameContent.clear();
+    } catch {
+      console.log('Leaving Game would have hoped to clear the game component but is maybe not here?', this.appGameContent);
+    }
     // this.defaultScene.updateTimer.paused = true;
   }
 

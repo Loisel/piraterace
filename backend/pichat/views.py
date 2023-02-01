@@ -19,7 +19,7 @@ def chatslug(game):
 
 
 def get_chat(chat_slug):
-    return cache.get(chat_slug)
+    return cache.get(chat_slug, [])
 
 
 def add_message(chat_slug, user, message, lifetime):
@@ -58,14 +58,13 @@ def get_globalchat(request, **kwargs):
     active_users = list(users)
 
     chat = get_chat(GLOBAL_CHATSLUG)
-    if chat:
-        for i in range(len(chat) - 1, 0, -1):
-            td = datetime.datetime.now() - chat[i]["timestamp"]
-            if td > TIMEDELTA_MESSAGE_DELETE:
-                chat.pop()
-            else:
-                cache.set(GLOBAL_CHATSLUG, chat, None)
-                break
+    for i in range(len(chat) - 1, 0, -1):
+        td = datetime.datetime.now() - chat[i]["timestamp"]
+        if td > TIMEDELTA_MESSAGE_DELETE:
+            chat.pop()
+        else:
+            cache.set(GLOBAL_CHATSLUG, chat, None)
+            break
     return JsonResponse({"prefix": "global", "chatslug": GLOBAL_CHATSLUG, "chat": chat, "active_users": active_users})
 
 
