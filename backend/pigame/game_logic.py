@@ -353,7 +353,7 @@ def board_moves(game, gmap, players, fast_current=True):
         if p.health <= 0:
             break
         tile_prop = get_tile_properties(gmap, p.xpos, p.ypos)
-        if tile_prop["vortex"] != 0:
+        if (tile_prop["vortex"] != 0) and (tile_prop["current_x"] == 0) and (tile_prop["current_y"] == 0):
             actions.append({"key": "rotate", "target": pid, "from": p.direction, "to": (p.direction + tile_prop["vortex"]) % 4})
             p.direction = (p.direction + tile_prop["vortex"]) % 4
 
@@ -368,11 +368,34 @@ def board_moves(game, gmap, players, fast_current=True):
                     actions.extend(move_player_x(game, gmap, players, p, tile_prop["current_x"], push_players=False))
                     if p.xpos != old_xpos:
                         player_moved[pid] = True
+                        next_tile_prop = get_tile_properties(gmap, p.xpos, p.ypos)
+                        if next_tile_prop["vortex"] != 0:
+                            actions.append(
+                                {
+                                    "key": "rotate",
+                                    "target": pid,
+                                    "from": p.direction,
+                                    "to": (p.direction + next_tile_prop["vortex"]) % 4,
+                                }
+                            )
+                            p.direction = (p.direction + next_tile_prop["vortex"]) % 4
+
                 if tile_prop["current_y"] != 0:
                     old_ypos = p.ypos
                     actions.extend(move_player_y(game, gmap, players, p, tile_prop["current_y"], push_players=False))
                     if p.ypos != old_ypos:
                         player_moved[pid] = True
+                        next_tile_prop = get_tile_properties(gmap, p.xpos, p.ypos)
+                        if next_tile_prop["vortex"] != 0:
+                            actions.append(
+                                {
+                                    "key": "rotate",
+                                    "target": pid,
+                                    "from": p.direction,
+                                    "to": (p.direction + next_tile_prop["vortex"]) % 4,
+                                }
+                            )
+                            p.direction = (p.direction + next_tile_prop["vortex"]) % 4
     if fast_current:
         fb_players = {}
         # call board moves again for players on fast belt
