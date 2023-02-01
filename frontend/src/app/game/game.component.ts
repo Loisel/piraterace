@@ -3,7 +3,7 @@ import { IonModal } from '@ionic/angular';
 import { ToastController } from '@ionic/angular';
 import { AlertController } from '@ionic/angular';
 import { Platform } from '@ionic/angular';
-import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef, ViewContainerRef } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { interval, BehaviorSubject } from 'rxjs';
 import { filter, pairwise } from 'rxjs/operators';
@@ -48,6 +48,7 @@ export class GameComponent {
   @ViewChild('rerigModal') rerigModal: IonModal;
   @ViewChild('leaveModal') leaveModal: IonModal;
   @ViewChild('statsModal') statsModal: IonModal;
+  @ViewChild('appgamecontent') appGameContent: ViewContainerRef;
 
   constructor(
     private httpService: HttpService,
@@ -134,6 +135,7 @@ export class GameComponent {
 
   ionViewWillLeave() {
     this.phaserGame.destroy(true, false);
+    this.appGameContent.clear();
     // this.defaultScene.updateTimer.paused = true;
   }
 

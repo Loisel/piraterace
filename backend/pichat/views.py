@@ -47,7 +47,6 @@ def get_gamechat(request, **kwargs):
 
 @api_view(["GET"])
 def get_globalchat(request, **kwargs):
-
     users = cache.get(ACTIVE_USERSLUG, {})
     users[request.user.username] = datetime.datetime.now()
 

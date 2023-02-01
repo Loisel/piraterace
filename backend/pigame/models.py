@@ -219,7 +219,6 @@ class GameConfig(models.Model):
 
 
 class BaseGame(PolymorphicModel):
-
     round = models.PositiveIntegerField(default=1)
 
     time_started = models.DateTimeField(auto_now_add=True)

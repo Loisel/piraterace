@@ -5,7 +5,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("pigame", "0001_initial"),
         ("piplayer", "0001_initial"),

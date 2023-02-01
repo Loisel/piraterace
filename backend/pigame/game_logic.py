@@ -191,7 +191,6 @@ def play_stack(game):
     powerdowncards = []
     activeCardSlot = 0  # denotes current card slot that is to be played by each player, i.e. 0 if players are to play first card, 1 if players are playing second card
     for playerid, card in cardstack:
-
         if card == ROUNDEND_CARDID:
             activeCardSlot = 0
             for player in players.values():
@@ -500,7 +499,6 @@ def calc_stats(game):
 
 
 def get_actions_for_card(game, gmap, players, player, card):
-
     actions = []
     if player.powered_down or player.health <= 0:
         return actions
