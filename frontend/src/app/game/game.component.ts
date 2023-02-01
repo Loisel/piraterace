@@ -134,6 +134,7 @@ export class GameComponent {
   }
 
   ionViewWillLeave() {
+    console.log("Leaving Game");
     this.phaserGame.destroy(true, false);
     this.appGameContent.clear();
     // this.defaultScene.updateTimer.paused = true;
