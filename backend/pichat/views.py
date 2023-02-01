@@ -59,13 +59,14 @@ def get_globalchat(request, **kwargs):
     active_users = list(users)
 
     chat = get_chat(GLOBAL_CHATSLUG)
-    for i in range(len(chat) - 1, 0, -1):
-        td = datetime.datetime.now() - chat[i]["timestamp"]
-        if td > TIMEDELTA_MESSAGE_DELETE:
-            chat.pop()
-        else:
-            cache.set(GLOBAL_CHATSLUG, chat, None)
-            break
+    if chat:
+        for i in range(len(chat) - 1, 0, -1):
+            td = datetime.datetime.now() - chat[i]["timestamp"]
+            if td > TIMEDELTA_MESSAGE_DELETE:
+                chat.pop()
+            else:
+                cache.set(GLOBAL_CHATSLUG, chat, None)
+                break
     return JsonResponse({"prefix": "global", "chatslug": GLOBAL_CHATSLUG, "chat": chat, "active_users": active_users})
 
 
