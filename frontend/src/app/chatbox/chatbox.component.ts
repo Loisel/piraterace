@@ -62,7 +62,7 @@ export class ChatboxComponent implements OnInit, AfterViewInit, OnDestroy {
         this.httpService.post_gameChat(this.message).subscribe(
           (ret) => {
             this.message = '';
-            this.chat = ret.chat;
+            this.chat = ret.chat.reverse();
           },
           (error) => {
             console.log('failed post chat: ', error);
