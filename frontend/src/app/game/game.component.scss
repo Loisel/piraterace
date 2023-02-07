@@ -37,7 +37,9 @@ ion-card-content {
   top: 2vh;
   z-index: 9;
   ion-card {
-    margin: 0px !important;
+    margin-top: 0px !important;
+    margin-left: 0px !important;
+    margin-right: 0px !important;
   }
 }
 
@@ -78,6 +80,21 @@ ion-card-content {
     #chatbox_label {
       display: none;
     }
+  }
+  @media (min-width: 500px) and (min-height: 500px) {
+    #open-chat-button {
+      display: none;
+    }
+  }
+}
+
+#chatbox-card {
+  ::ng-deep .chat-window {
+    height: 20vh;
+  }
+
+  @media (max-width: 500px), (max-height: 500px) {
+    display: none;
   }
 }
 
