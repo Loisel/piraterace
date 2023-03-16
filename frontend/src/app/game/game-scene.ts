@@ -557,6 +557,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     var boat = this.add.sprite(this.getTileX(player['start_pos_x']), this.getTileY(player['start_pos_y']), 'boat');
+
     boat.setFrame(0);
 
     //set the width of the sprite
@@ -594,6 +595,11 @@ export class GameScene extends Phaser.Scene {
     group.add(backdrop);
     group.add(hList[0]);
     group.add(hList[1]);
+
+    if (playerid == GI.me) {
+      group.setDepth(1);
+    }
+
     return group;
   }
 
