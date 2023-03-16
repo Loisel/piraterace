@@ -15,7 +15,7 @@
           <ng-template>
             <ion-content>
               <ion-list *ngIf="authService.isAuthenticated | async">
-                <ion-item [button]="true" routerLink="/auth/userdetail">
+                <ion-item [button]="true" routerLink="auth/userdetail">
                   <ion-icon name="settings-outline" slot="end"></ion-icon>
                   Settings
                 </ion-item>
@@ -26,7 +26,7 @@
               </ion-list>
 
               <ion-list *ngIf="!(authService.isAuthenticated | async)">
-                <ion-item [button]="true" routerLink="/auth/login">
+                <ion-item [button]="true" routerLink="auth/login">
                   <ion-icon name="log-in-outline" slot="end"></ion-icon>
                   Login
                 </ion-item>
@@ -63,6 +63,9 @@
         </ion-menu-toggle>
         <ion-menu-toggle *ngIf="(authService.userDetail | async)?.game" auto-hide="true">
           <ion-item [button]="true" (click)="leaveGame()">Leave Game</ion-item>
+        </ion-menu-toggle>
+        <ion-menu-toggle auto-hide="true" routerLink="home/about">
+          <ion-item [button]="true" routerLink="home/about">Imprint</ion-item>
         </ion-menu-toggle>
       </ion-list>
     </ion-content>
