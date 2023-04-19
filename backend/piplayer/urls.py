@@ -6,4 +6,5 @@ app_name = "piplayer"
 
 urlpatterns = [
     path("userDetail", views.userDetail, name="userDetail"),
+    path("randomName", views.randomName, name="randomName"),
 ]

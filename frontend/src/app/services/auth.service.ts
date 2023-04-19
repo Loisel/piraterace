@@ -16,6 +16,7 @@ export class AuthService {
   refreshUserURL = `${environment.API_URL}/auth/jwt/refresh`;
   userDetailAuthURL = `${environment.API_URL}/auth/users/me`;
   userDetailURL = `${environment.API_URL}/piplayer/userDetail`;
+  randomNameURL = `${environment.API_URL}/piplayer/randomName`;
 
   public userDetail: BehaviorSubject<UserDetail> = new BehaviorSubject<UserDetail>(null);
 
@@ -121,5 +122,9 @@ export class AuthService {
 
   getRefresh() {
     return this.refresh;
+  }
+
+  getRandomName() {
+    return this.httpClient.get<string>(this.randomNameURL);
   }
 }

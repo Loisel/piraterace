@@ -13,3 +13,4 @@ uwsgi
 Werkzeug
 redis
 hiredis
+names
