@@ -13,10 +13,21 @@
               <ion-label>Select Map</ion-label>
               <ion-select placeholder="Select map" interface="popover" cancelText="Cancel" (ionChange)="selectMapChange($event)">
                 <ion-select-option *ngFor="let map of data?.available_maps" [value]="map">
-                  {{ map }}
+                  {{ getMapProperty(map, "mapname") }}
                 </ion-select-option>
               </ion-select>
             </ion-item>
+            <hr *ngIf="data?.selected_map" />
+            <ion-item color="none" lines="none" *ngIf="data?.map_info">
+              <h4>{{ getMapProperty(data.map_info, "mapname") }}</h4>
+            </ion-item>
+            <ion-item
+              color="none"
+              lines="none"
+              *ngIf="getMapProperty(data?.map_info, 'mapdescription')"
+              style="white-space: pre-wrap; font-style: italic"
+              >{{ getMapProperty(data.map_info, "mapdescription") }}</ion-item
+            >
             <ion-item color="none" lines="none" *ngIf="data?.Nmaxplayers"> Number of players: {{ data.Nmaxplayers }} </ion-item>
             <ion-item color="none" lines="none" *ngIf="data?.selected_map">
               <ion-button (click)="createGameConfig($event)">Create Game</ion-button>

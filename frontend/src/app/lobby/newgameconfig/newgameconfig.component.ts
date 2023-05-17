@@ -34,7 +34,7 @@ export class NewGameConfigComponent {
   selectMapChange(e) {
     // monitoring changes in the maps dropdown
     console.log('selectMapChange', e);
-    this.data.selected_map = e.target.value;
+    this.data.selected_map = e.target.value.filename;
 
     this.httpService.post_create_new_gameConfig(this.data).subscribe((response) => {
       console.log('post post_create_new_gameConfig', response);
@@ -57,6 +57,21 @@ export class NewGameConfigComponent {
         this.presentToast(err.error, 'danger');
       }
     );
+  }
+
+  getMapProperty(mapinfo, key) {
+    if (mapinfo === null) return '';
+    if (mapinfo.properties !== undefined) {
+      for (let p of mapinfo.properties) {
+        if (p['name'] == key) {
+          return p['value'];
+        }
+      }
+    }
+    if (key == 'mapname') {
+      return mapinfo.filename.replace('.json', '');
+    }
+    return null;
   }
 
   async presentToast(msg, color = 'primary') {

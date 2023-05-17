@@ -34,7 +34,7 @@ from pigame.game_logic import (
     determine_checkpoint_locations,
     get_cards_on_hand,
     flatten_list_of_tuples,
-    load_inital_map,
+    load_map,
     play_stack,
     verify_map,
     BACKEND_USERID,
@@ -151,7 +151,7 @@ def game(request, game_id, **kwargs):
     player = request.user.account
 
     player_accounts = game.account_set.all()
-    initmap = load_inital_map(game.config.mapfile)
+    initmap = load_map(game.config.mapfile)
     checkpoints = determine_checkpoint_locations(initmap)
 
     payload = dict(
@@ -365,7 +365,7 @@ def create_game(request, gameconfig_id, **kwargs):
         return JsonResponse(f"The game is about to start, go grab some grok! {config.game}", status=404, safe=False)
 
     players = Account.objects.filter(pk__in=config.player_ids)
-    initmap = load_inital_map(config.mapfile)
+    initmap = load_map(config.mapfile)
     xpos, ypos, dirs = determine_starting_locations(initmap)
     config.player_start_x = xpos[: len(players)]
     config.player_start_y = ypos[: len(players)]
@@ -577,7 +577,7 @@ def create_gameconfig(request, **kwargs):
     mapfile = data["selected_map"]
     gamename = data.get("gamename", "")
 
-    initmap = load_inital_map(mapfile)
+    initmap = load_map(mapfile)
     errs = verify_map(initmap)
     if errs:
         return JsonResponse(errs, status=404, safe=False)
@@ -601,7 +601,7 @@ def create_new_gameconfig(request, **kwargs):
     if request.user.account.game:
         return JsonResponse(f"You are already in game {request.user.account.game}", status=404, safe=False)
 
-    available_maps = [os.path.basename(f) for f in glob.glob(os.path.join(MAPSDIR, "*.json"))]
+    available_maps = [load_map(f) for f in glob.glob(os.path.join(MAPSDIR, "*.json"))]
 
     ret = dict(
         available_maps=available_maps,
@@ -615,7 +615,8 @@ def create_new_gameconfig(request, **kwargs):
         ret.update(**request.data)
 
     if ret["selected_map"]:
-        ret["Nmaxplayers"] = len(startinglocs_pixels(load_inital_map(ret["selected_map"])))
+        ret["map_info"] = load_map(ret["selected_map"])
+        ret["Nmaxplayers"] = len(startinglocs_pixels(ret["map_info"]))
 
     return JsonResponse(ret, safe=False)
 
@@ -623,7 +624,7 @@ def create_new_gameconfig(request, **kwargs):
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
 def get_mapinfo(request, mapfile):
-    mapinfo = load_inital_map(os.path.join(MAPSDIR, mapfile))
+    mapinfo = load_map(os.path.join(MAPSDIR, mapfile))
     payload = dict(
         mapfile=mapfile,
         startinglocs=startinglocs_pixels(mapinfo),

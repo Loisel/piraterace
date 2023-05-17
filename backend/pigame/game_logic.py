@@ -150,7 +150,7 @@ def determine_checkpoint_locations(initmap):
 
 
 def play_stack(game):
-    initial_map = load_inital_map(game.config.mapfile)
+    initial_map = load_map(game.config.mapfile)
     stack = game.cards_played
 
     players = {}
@@ -711,7 +711,7 @@ def get_tile_properties(gmap, x, y):
     raise ValueError(f"could not find tile_id {tile_id} in map")
 
 
-def load_inital_map(fname):
+def load_map(fname):
     cachename = f"map_{fname}"
 
     gmap = cache.get(cachename)
@@ -730,6 +730,7 @@ def load_inital_map(fname):
                 if v:
                     property_locations.setdefault(p, []).append((x, y))
     gmap["property_locations"] = property_locations
+    gmap["filename"] = os.path.basename(fname)
 
     cache.set(cachename, gmap, None)
     return gmap

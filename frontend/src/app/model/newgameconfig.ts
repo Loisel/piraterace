@@ -3,4 +3,5 @@ export interface NewGameConfig {
   selected_map: string;
   Nmaxplayers: number;
   gamename: string;
+  map_info: any;
 }
