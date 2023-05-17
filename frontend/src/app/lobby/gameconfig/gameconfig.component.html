@@ -12,206 +12,216 @@
         </div>
       </ion-col>
       <ion-col pull-md="4">
-        <ion-card color="light" class="foreground">
-          <ion-card-header>
-            <ion-card-title>Players</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <ion-row>
-              <ion-col>Player</ion-col>
-              <ion-col>Color</ion-col>
-              <ion-col>Ready?</ion-col>
-            </ion-row>
-            <div *ngFor="let p of gameConfig?.player_ids; let i = index" [attr.data-index]="p">
-              <div *ngIf="p === gameConfig?.caller_id; then my_player_info; else other_player_info"></div>
-
-              <ng-template #other_player_info>
+        <ion-row>
+          <ion-col>
+            <ion-card color="light" class="foreground">
+              <ion-card-header>
+                <ion-card-title>Players</ion-card-title>
+              </ion-card-header>
+              <ion-card-content>
                 <ion-row>
-                  <ion-col>{{ gameConfig?.player_names[i] }}</ion-col>
-                  <ion-col [ngStyle]="{ 'background-color': gameConfig?.player_colors[i] }"></ion-col>
-                  <ion-col>
-                    <span *ngIf="gameConfig?.creator_userid === p" class="ion-text-center">
-                      <ion-icon size="large" name="sparkles"></ion-icon>
-                    </span>
-                    <span *ngIf="gameConfig?.creator_userid !== p">
-                      <span
-                        *ngIf="gameConfig?.player_ready[i]; then ready_icon; else not_ready_icon"
-                        class="ion-text-center"
-                      ></span>
-                      <ng-template #ready_icon
-                        ><ion-icon color="success" size="large" name="checkmark-circle"></ion-icon
-                      ></ng-template>
-                      <ng-template #not_ready_icon
-                        ><ion-icon color="danger" size="large" name="close-circle"></ion-icon
-                      ></ng-template>
-                    </span>
-                  </ion-col>
+                  <ion-col>Player</ion-col>
+                  <ion-col>Color</ion-col>
+                  <ion-col>Ready?</ion-col>
                 </ion-row>
-              </ng-template>
+                <div *ngFor="let p of gameConfig?.player_ids; let i = index" [attr.data-index]="p">
+                  <div *ngIf="p === gameConfig?.caller_id; then my_player_info; else other_player_info"></div>
 
-              <ng-template #my_player_info>
-                <ion-row>
-                  <ion-col
-                    ><ion-input>{{ gameConfig?.player_names[i] }}</ion-input></ion-col
-                  >
-                  <ion-col>
-                    <ion-select
-                      value="{{ gameConfig?.player_colors[gameConfig?.caller_idx] }}"
-                      [ngStyle]="{
-                        'background-color': gameConfig?.player_colors[gameConfig?.caller_idx]
-                      }"
-                      id="color_select"
-                      (ionChange)="onPlayerInfoChange($event)"
-                      [(ngModel)]="gameConfig?.player_colors[gameConfig?.caller_idx]"
-                    >
-                      <ion-select-option
-                        *ngFor="let color of gameConfig?.player_color_choices | keyvalue"
-                        [attr.value]="color.value"
-                        [ngStyle]="{ 'background-color': color.value }"
-                        >{{ color.key }}</ion-select-option
+                  <ng-template #other_player_info>
+                    <ion-row>
+                      <ion-col>{{ gameConfig?.player_names[i] }}</ion-col>
+                      <ion-col [ngStyle]="{ 'background-color': gameConfig?.player_colors[i] }"></ion-col>
+                      <ion-col>
+                        <span *ngIf="gameConfig?.creator_userid === p" class="ion-text-center">
+                          <ion-icon size="large" name="sparkles"></ion-icon>
+                        </span>
+                        <span *ngIf="gameConfig?.creator_userid !== p">
+                          <span
+                            *ngIf="gameConfig?.player_ready[i]; then ready_icon; else not_ready_icon"
+                            class="ion-text-center"
+                          ></span>
+                          <ng-template #ready_icon
+                            ><ion-icon color="success" size="large" name="checkmark-circle"></ion-icon
+                          ></ng-template>
+                          <ng-template #not_ready_icon
+                            ><ion-icon color="danger" size="large" name="close-circle"></ion-icon
+                          ></ng-template>
+                        </span>
+                      </ion-col>
+                    </ion-row>
+                  </ng-template>
+
+                  <ng-template #my_player_info>
+                    <ion-row>
+                      <ion-col
+                        ><ion-input>{{ gameConfig?.player_names[i] }}</ion-input></ion-col
                       >
-                    </ion-select>
-                  </ion-col>
-                  <ion-col>
-                    <ion-checkbox
-                      *ngIf="gameConfig?.creator_userid !== gameConfig?.caller_id"
-                      checked="{{ gameConfig?.player_ready[gameConfig?.caller_idx] }}"
-                      id="ready_check"
-                      (ionChange)="onPlayerInfoChange($event)"
-                      [(ngModel)]="gameConfig?.player_ready[gameConfig?.caller_idx]"
-                    >
-                    </ion-checkbox>
+                      <ion-col>
+                        <ion-select
+                          value="{{ gameConfig?.player_colors[gameConfig?.caller_idx] }}"
+                          [ngStyle]="{
+                            'background-color': gameConfig?.player_colors[gameConfig?.caller_idx]
+                          }"
+                          id="color_select"
+                          (ionChange)="onPlayerInfoChange($event)"
+                          [(ngModel)]="gameConfig?.player_colors[gameConfig?.caller_idx]"
+                        >
+                          <ion-select-option
+                            *ngFor="let color of gameConfig?.player_color_choices | keyvalue"
+                            [attr.value]="color.value"
+                            [ngStyle]="{ 'background-color': color.value }"
+                            >{{ color.key }}</ion-select-option
+                          >
+                        </ion-select>
+                      </ion-col>
+                      <ion-col>
+                        <ion-checkbox
+                          *ngIf="gameConfig?.creator_userid !== gameConfig?.caller_id"
+                          checked="{{ gameConfig?.player_ready[gameConfig?.caller_idx] }}"
+                          id="ready_check"
+                          (ionChange)="onPlayerInfoChange($event)"
+                          [(ngModel)]="gameConfig?.player_ready[gameConfig?.caller_idx]"
+                        >
+                        </ion-checkbox>
+                      </ion-col>
+                    </ion-row>
+                  </ng-template>
+                </div>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col>
+            <ion-card color="light" class="foreground">
+              <ion-card-content>
+                <div *ngIf="gameConfig?.creator_userid !== gameConfig?.caller_id">
+                  <ion-row>
+                    <ion-col sizeMd="3">{{ cfgOptionsLabels["ncardslots"] }}</ion-col>
+                    <ion-col sizeMd="2">{{ gameConfig?.ncardslots }}</ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col sizeMd="3">{{ cfgOptionsLabels["ncardsavail"] }}</ion-col>
+                    <ion-col sizeMd="2">{{ gameConfig?.ncardsavail }}</ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col sizeMd="3">{{ cfgOptionsLabels["countdown"] }}</ion-col>
+                    <ion-col sizeMd="2">{{ gameConfig?.countdown }}</ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col sizeMd="3">{{ cfgOptionsLabels["percentage_repaircards"] }}</ion-col>
+                    <ion-col sizeMd="2">{{ gameConfig?.percentage_repaircards }}</ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col sizeMd="3">{{ cfgOptionsLabels["path_highlighting"] }}</ion-col>
+                    <ion-col sizeMd="2">
+                      <ion-icon name="checkmark" *ngIf="gameConfig?.path_highlighting"></ion-icon>
+                      <ion-icon name="close" *ngIf="!gameConfig?.path_highlighting"></ion-icon>
+                    </ion-col>
+                  </ion-row>
+                </div>
+                <form class="form div-item" *ngIf="cfgOptionsForm" [formGroup]="cfgOptionsForm">
+                  <ion-row>
+                    <ion-col size-lg="3" sizeMd="4" class="ion-padding">
+                      <ion-icon name="layers"></ion-icon> {{ cfgOptionsLabels["ncardslots"] }}
+                    </ion-col>
+                    <ion-col size-lg="1" size-md="2" size-xs="3">
+                      <ion-input type="number" formControlName="ncardslots"></ion-input>
+                    </ion-col>
+                    <ion-col class="ion-padding">
+                      <ion-text color="danger" *ngIf="cfgOptionsForm && cfgOptionsForm.errors?.['slotsLTavail']">
+                        <ion-icon name="warning"></ion-icon> {{ cfgOptionsLabels["ncardslots"] }} has to be less than
+                        {{ cfgOptionsLabels["ncardsavail"] }}.
+                      </ion-text>
+                      <ion-text color="danger" *ngIf="cfgOptionsForm && !cfgOptionsForm?.controls.ncardslots.valid">
+                        <ion-icon name="warning"></ion-icon> {{ cfgOptionsLabels["ncardslots"] }} has to be a positive number.
+                      </ion-text>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col size-lg="3" sizeMd="4" class="ion-padding">
+                      <ion-icon name="layers"></ion-icon> {{ cfgOptionsLabels["ncardsavail"] }}
+                    </ion-col>
+                    <ion-col size-lg="1" size-md="2" size-xs="3">
+                      <ion-input type="number" formControlName="ncardsavail"></ion-input>
+                    </ion-col>
+                    <ion-col class="ion-padding">
+                      <ion-text color="danger" *ngIf="cfgOptionsForm && cfgOptionsForm.errors?.['slotsLTavail']">
+                        <ion-icon name="warning"></ion-icon> {{ cfgOptionsLabels["ncardslots"] }} has to be less than
+                        {{ cfgOptionsLabels["ncardsavail"] }}.
+                      </ion-text>
+                      <ion-text color="danger" *ngIf="cfgOptionsForm && !cfgOptionsForm?.controls.ncardsavail.valid">
+                        <ion-icon name="warning"></ion-icon> {{ cfgOptionsLabels["ncardsavail"] }} has to be a positive number.
+                      </ion-text>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col size-lg="3" sizeMd="4" class="ion-padding">
+                      <ion-icon name="hourglass"></ion-icon> {{ cfgOptionsLabels["countdown"] }}
+                    </ion-col>
+                    <ion-col size-lg="1" size-md="2" size-xs="3">
+                      <ion-input type="number" formControlName="countdown"></ion-input>
+                    </ion-col>
+                    <ion-col class="ion-padding">
+                      <ion-text color="danger" *ngIf="cfgOptionsForm && !cfgOptionsForm?.controls.countdown.valid">
+                        <ion-icon name="warning"></ion-icon> {{ cfgOptionsLabels["countdown"] }} has to be a positive number.
+                      </ion-text>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col size-lg="3" sizeMd="4" class="ion-padding">
+                      <ion-icon name="medkit"></ion-icon> {{ cfgOptionsLabels["percentage_repaircards"] }}
+                    </ion-col>
+                    <ion-col size-lg="1" size-md="2" size-xs="3">
+                      <ion-input type="number" formControlName="percentage_repaircards"></ion-input>
+                    </ion-col>
+                    <ion-col class="ion-padding">
+                      <ion-text color="danger" *ngIf="cfgOptionsForm && !cfgOptionsForm?.controls.percentage_repaircards.valid">
+                        <ion-icon name="warning"></ion-icon> {{ cfgOptionsLabels["percentage_repaircards"] }} has to be a positive
+                        number below 100.
+                      </ion-text>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col size-lg="3" sizeMd="4" class="ion-padding">
+                      <ion-icon name="git-compare"></ion-icon> {{ cfgOptionsLabels["path_highlighting"] }}
+                    </ion-col>
+                    <ion-col size-lg="1" size-md="2" size-xs="3">
+                      <ion-checkbox
+                        style="margin-top: 0.7em"
+                        checked="{{ gameConfig?.path_highlighting }}"
+                        formControlName="path_highlighting"
+                      ></ion-checkbox>
+                    </ion-col>
+                    <ion-col class="ion-padding"></ion-col>
+                  </ion-row>
+                </form>
+                <ion-row>
+                  <ion-col *ngIf="gameConfig?.creator_userid === gameConfig?.caller_id">
+                    <ion-button [disabled]="!startButtonActive || !gameConfig?.all_ready" (click)="createGame()">
+                      <span>Start</span>
+                    </ion-button>
                   </ion-col>
                 </ion-row>
-              </ng-template>
-            </div>
-          </ion-card-content>
-        </ion-card>
-
-        <ion-card color="light" class="foreground">
-          <ion-card-content>
-            <div *ngIf="gameConfig?.creator_userid !== gameConfig?.caller_id">
-              <ion-row>
-                <ion-col sizeMd="3">{{ cfgOptionsLabels["ncardslots"] }}</ion-col>
-                <ion-col sizeMd="2">{{ gameConfig?.ncardslots }}</ion-col>
-              </ion-row>
-              <ion-row>
-                <ion-col sizeMd="3">{{ cfgOptionsLabels["ncardsavail"] }}</ion-col>
-                <ion-col sizeMd="2">{{ gameConfig?.ncardsavail }}</ion-col>
-              </ion-row>
-              <ion-row>
-                <ion-col sizeMd="3">{{ cfgOptionsLabels["countdown"] }}</ion-col>
-                <ion-col sizeMd="2">{{ gameConfig?.countdown }}</ion-col>
-              </ion-row>
-              <ion-row>
-                <ion-col sizeMd="3">{{ cfgOptionsLabels["percentage_repaircards"] }}</ion-col>
-                <ion-col sizeMd="2">{{ gameConfig?.percentage_repaircards }}</ion-col>
-              </ion-row>
-              <ion-row>
-                <ion-col sizeMd="3">{{ cfgOptionsLabels["path_highlighting"] }}</ion-col>
-                <ion-col sizeMd="2">
-                  <ion-icon name="checkmark" *ngIf="gameConfig?.path_highlighting"></ion-icon>
-                  <ion-icon name="close" *ngIf="!gameConfig?.path_highlighting"></ion-icon>
-                </ion-col>
-              </ion-row>
-            </div>
-            <form class="form div-item" *ngIf="cfgOptionsForm" [formGroup]="cfgOptionsForm">
-              <ion-row>
-                <ion-col size-lg="3" sizeMd="4" class="ion-padding">
-                  <ion-icon name="layers"></ion-icon> {{ cfgOptionsLabels["ncardslots"] }}
-                </ion-col>
-                <ion-col size-lg="1" size-md="2" size-xs="3">
-                  <ion-input type="number" formControlName="ncardslots"></ion-input>
-                </ion-col>
-                <ion-col class="ion-padding">
-                  <ion-text color="danger" *ngIf="cfgOptionsForm && cfgOptionsForm.errors?.['slotsLTavail']">
-                    <ion-icon name="warning"></ion-icon> {{ cfgOptionsLabels["ncardslots"] }} has to be less than
-                    {{ cfgOptionsLabels["ncardsavail"] }}.
-                  </ion-text>
-                  <ion-text color="danger" *ngIf="cfgOptionsForm && !cfgOptionsForm?.controls.ncardslots.valid">
-                    <ion-icon name="warning"></ion-icon> {{ cfgOptionsLabels["ncardslots"] }} has to be a positive number.
-                  </ion-text>
-                </ion-col>
-              </ion-row>
-              <ion-row>
-                <ion-col size-lg="3" sizeMd="4" class="ion-padding">
-                  <ion-icon name="layers"></ion-icon> {{ cfgOptionsLabels["ncardsavail"] }}
-                </ion-col>
-                <ion-col size-lg="1" size-md="2" size-xs="3">
-                  <ion-input type="number" formControlName="ncardsavail"></ion-input>
-                </ion-col>
-                <ion-col class="ion-padding">
-                  <ion-text color="danger" *ngIf="cfgOptionsForm && cfgOptionsForm.errors?.['slotsLTavail']">
-                    <ion-icon name="warning"></ion-icon> {{ cfgOptionsLabels["ncardslots"] }} has to be less than
-                    {{ cfgOptionsLabels["ncardsavail"] }}.
-                  </ion-text>
-                  <ion-text color="danger" *ngIf="cfgOptionsForm && !cfgOptionsForm?.controls.ncardsavail.valid">
-                    <ion-icon name="warning"></ion-icon> {{ cfgOptionsLabels["ncardsavail"] }} has to be a positive number.
-                  </ion-text>
-                </ion-col>
-              </ion-row>
-              <ion-row>
-                <ion-col size-lg="3" sizeMd="4" class="ion-padding">
-                  <ion-icon name="hourglass"></ion-icon> {{ cfgOptionsLabels["countdown"] }}
-                </ion-col>
-                <ion-col size-lg="1" size-md="2" size-xs="3">
-                  <ion-input type="number" formControlName="countdown"></ion-input>
-                </ion-col>
-                <ion-col class="ion-padding">
-                  <ion-text color="danger" *ngIf="cfgOptionsForm && !cfgOptionsForm?.controls.countdown.valid">
-                    <ion-icon name="warning"></ion-icon> {{ cfgOptionsLabels["countdown"] }} has to be a positive number.
-                  </ion-text>
-                </ion-col>
-              </ion-row>
-              <ion-row>
-                <ion-col size-lg="3" sizeMd="4" class="ion-padding">
-                  <ion-icon name="medkit"></ion-icon> {{ cfgOptionsLabels["percentage_repaircards"] }}
-                </ion-col>
-                <ion-col size-lg="1" size-md="2" size-xs="3">
-                  <ion-input type="number" formControlName="percentage_repaircards"></ion-input>
-                </ion-col>
-                <ion-col class="ion-padding">
-                  <ion-text color="danger" *ngIf="cfgOptionsForm && !cfgOptionsForm?.controls.percentage_repaircards.valid">
-                    <ion-icon name="warning"></ion-icon> {{ cfgOptionsLabels["percentage_repaircards"] }} has to be a positive
-                    number below 100.
-                  </ion-text>
-                </ion-col>
-              </ion-row>
-              <ion-row>
-                <ion-col size-lg="3" sizeMd="4" class="ion-padding">
-                  <ion-icon name="git-compare"></ion-icon> {{ cfgOptionsLabels["path_highlighting"] }}
-                </ion-col>
-                <ion-col size-lg="1" size-md="2" size-xs="3">
-                  <ion-checkbox
-                    style="margin-top: 0.7em"
-                    checked="{{ gameConfig?.path_highlighting }}"
-                    formControlName="path_highlighting"
-                  ></ion-checkbox>
-                </ion-col>
-                <ion-col class="ion-padding"></ion-col>
-              </ion-row>
-            </form>
-            <ion-row>
-              <ion-col *ngIf="gameConfig?.creator_userid === gameConfig?.caller_id">
-                <ion-button [disabled]="!startButtonActive || !gameConfig?.all_ready" (click)="createGame()">
-                  <span>Start</span>
-                </ion-button>
-              </ion-col>
-            </ion-row>
-            <ion-row>
-              <ion-col>
-                <ion-button color="secondary">
-                  <a target="_blank" rel="noopener noreferrer" href="https://meet.jit.si/piraterace_{{ gameConfig?.id }}"
-                    ><ion-icon name="videocam-outline" size="large"></ion-icon
-                  ></a>
-                </ion-button>
-                <ion-button color="warning" routerLink="/lobby">
-                  <span>Exit</span>
-                </ion-button>
-              </ion-col>
-            </ion-row>
-          </ion-card-content>
-        </ion-card>
+                <ion-row>
+                  <ion-col>
+                    <ion-button color="secondary">
+                      <a target="_blank" rel="noopener noreferrer" href="https://meet.jit.si/piraterace_{{ gameConfig?.id }}"
+                        ><ion-icon name="videocam-outline" size="large"></ion-icon
+                      ></a>
+                    </ion-button>
+                    <ion-button color="warning" routerLink="/lobby">
+                      <span>Exit</span>
+                    </ion-button>
+                  </ion-col>
+                </ion-row>
+              </ion-card-content>
+            </ion-card>
+          </ion-col>
+          <ion-col>
+            <app-chatbox *ngIf="gameConfig" chatslug="game_config_chat"></app-chatbox>
+          </ion-col>
+        </ion-row>
       </ion-col>
     </ion-row>
 
