@@ -117,6 +117,7 @@ export class PhaserPreviewComponent {
 
     this.phaserGame = new Phaser.Game(config);
     this.phaserGame.scene.pause('default');
+    document.querySelector('canvas').style.borderRadius = '15px';
   }
 
   removePhaserSnapshot() {
