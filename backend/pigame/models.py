@@ -158,7 +158,7 @@ CHOICE_MODES = [
     ("s", "Count from second to last finished"),
 ]
 
-COLORS = mcolors.TABLEAU_COLORS
+COLORS = {k.replace("tab:", ""): v for k, v in mcolors.TABLEAU_COLORS.items()}
 FREE_HEALTH_OFFSET = 3
 
 
