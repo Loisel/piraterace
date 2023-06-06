@@ -14,8 +14,12 @@ TIMEDELTA_MESSAGE_DELETE = datetime.timedelta(seconds=3600)
 TIMEDELTA_USER_ACTIVE = datetime.timedelta(seconds=30)
 
 
-def chatslug(game):
+def gen_gamechatslug(game):
     return f"game_{game.pk}"
+
+
+def gen_gameconfigchatslug(gameconfig_id):
+    return f"gameconfig_chat.{gameconfig_id}"
 
 
 def get_chat(chat_slug):
@@ -42,13 +46,13 @@ def get_gamechat(request, **kwargs):
     game = player.game
     if not game:
         return JsonResponse(f"Unable to retrieve chat messages. You are not in a game.", status=404, safe=False)
-    return JsonResponse({"prefix": "game", "chatslug": chatslug(game), "chat": get_chat(chatslug(game))})
+    return JsonResponse({"prefix": "game", "chatslug": gen_gamechatslug(game), "chat": get_chat(gen_gamechatslug(game))})
 
 
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
 def get_gameconfigchat(request, gameconfig_id, **kwargs):
-    slug = f"gameconfig_chat.{gameconfig_id}"
+    slug = gen_gameconfigchatslug(gameconfig_id)
     return JsonResponse({"prefix": "game_config", "chatslug": slug, "chat": get_chat(slug)})
 
 
@@ -85,7 +89,7 @@ def post_gamechat(request, **kwargs):
     message = request.data.get("message")
     if not message or len(message.strip()) == 0:
         return JsonResponse(f"Unable to send chat message. Message is empty.", status=404, safe=False)
-    add_message(chatslug(game), user, message, 3600)
+    add_message(gen_gamechatslug(game), user, message, 3600)
 
     return redirect(reverse("pichat:get_gamechat"))
 
@@ -112,7 +116,7 @@ def post_gameconfigchat(request, gameconfig_id, **kwargs):
     if not message or len(message.strip()) == 0:
         return JsonResponse(f"Unable to send chat message. Message is empty.", status=404, safe=False)
 
-    slug = f"gameconfig_chat.{gameconfig_id}"
+    slug = gen_gameconfigchatslug(gameconfig_id)
     add_message(slug, user, message, None)
 
     return redirect(reverse("pichat:get_gameconfigchat", kwargs={"gameconfig_id": gameconfig_id}))

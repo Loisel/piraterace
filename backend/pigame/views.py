@@ -45,6 +45,8 @@ from pigame.game_logic import (
     calc_stats,
 )
 
+from pichat.views import gen_gameconfigchatslug, gen_gamechatslug
+
 TIME_PER_ACTION = 0.6
 COUNTDOWN_GRACE_TIME = 2
 
@@ -380,6 +382,11 @@ def create_game(request, gameconfig_id, **kwargs):
 
     config.game = game
     config.request_id = 2**14
+
+    cfgchatslug = gen_gameconfigchatslug(config.pk)
+    gamechatslug = gen_gamechatslug(config.game)
+    cache.set(gamechatslug, cache.get(cfgchatslug))
+
     config.save()
 
     for n, p in enumerate(players):
