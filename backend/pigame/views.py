@@ -646,8 +646,12 @@ def list_gameconfigs(request):
         clean_up_configs(request.user.account)
 
     games = GameConfig.objects.filter(game=None)
+    games_info = []
+    for game in games.values():
+        game["mapinfo"] = load_map(game["mapfile"])
+        games_info.append(game)
     ret = dict(
-        gameconfigs=list(games.values()),
+        gameconfigs=games_info,
         reconnect_game=None,
     )
     try:

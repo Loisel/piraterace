@@ -731,6 +731,11 @@ def load_map(fname):
                     property_locations.setdefault(p, []).append((x, y))
     gmap["property_locations"] = property_locations
     gmap["filename"] = os.path.basename(fname)
+    gmap["mapname"] = fname.replace(".json", "")
+    properties = gmap.get("properties", {})
+    for prop in properties:
+        if prop["name"] == "mapname":
+            gmap["mapname"] = prop["value"]
 
     cache.set(cachename, gmap, None)
     return gmap
