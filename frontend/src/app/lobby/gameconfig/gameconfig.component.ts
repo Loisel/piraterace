@@ -208,6 +208,10 @@ export class GameConfigComponent implements OnInit {
     });
     toast.present();
   }
+
+  getChatSlug() {
+    return 'game_config/' + this.gameConfig.id;
+  }
 }
 
 export const cardsSlotsLECardsAvailValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {

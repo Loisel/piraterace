@@ -27,10 +27,8 @@ export class HttpService {
   get_leaveGameURL = `${environment.API_URL}/pigame/leave_game`;
   get_mapinfoURL = `${environment.API_URL}/pigame/mapinfo`;
   predictPathURL = `${environment.API_URL}/pigame/predict_path`;
-  get_globalChatURL = `${environment.API_URL}/pichat/get_globalchat`;
-  get_gameChatURL = `${environment.API_URL}/pichat/get_gamechat`;
-  post_globalChatURL = `${environment.API_URL}/pichat/post_globalchat`;
-  post_gameChatURL = `${environment.API_URL}/pichat/post_gamechat`;
+  get_chatURL = `${environment.API_URL}/pichat/get_chat`;
+  post_chatURL = `${environment.API_URL}/pichat/post_chat`;
 
   constructor(private httpClient: HttpClient) {}
   getGamesList() {
@@ -92,16 +90,10 @@ export class HttpService {
   get_leaveGame() {
     return this.httpClient.get(`${this.get_leaveGameURL}`);
   }
-  get_gameChat() {
-    return this.httpClient.get<any>(this.get_gameChatURL);
+  get_chat(slug: string) {
+    return this.httpClient.get<any>(`${this.get_chatURL}/${slug}`);
   }
-  get_globalChat() {
-    return this.httpClient.get<any>(this.get_globalChatURL);
-  }
-  post_gameChat(message: string) {
-    return this.httpClient.post<any>(this.post_gameChatURL, { message: message });
-  }
-  post_globalChat(message: string) {
-    return this.httpClient.post<any>(this.post_globalChatURL, { message: message });
+  post_chat(slug: string, message: string) {
+    return this.httpClient.post<any>(`${this.post_chatURL}/${slug}`, { message: message });
   }
 }

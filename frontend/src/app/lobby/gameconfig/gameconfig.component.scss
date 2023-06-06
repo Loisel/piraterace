@@ -2,3 +2,9 @@
   margin: 0.7em;
   transform: scale(2);
 }
+
+#chatbox-card {
+  ::ng-deep .chat-window {
+    height: 20vh;
+  }
+}

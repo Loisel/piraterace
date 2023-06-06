@@ -92,7 +92,7 @@
           </ion-col>
         </ion-row>
         <ion-row>
-          <ion-col>
+          <ion-col size-lg="6" size-sm="6" size-xs="12">
             <ion-card color="light" class="foreground">
               <ion-card-content>
                 <div *ngIf="gameConfig?.creator_userid !== gameConfig?.caller_id">
@@ -122,10 +122,10 @@
                 </div>
                 <form class="form div-item" *ngIf="cfgOptionsForm" [formGroup]="cfgOptionsForm">
                   <ion-row>
-                    <ion-col size-lg="3" sizeMd="4" class="ion-padding">
+                    <ion-col size-xs="9" class="ion-padding">
                       <ion-icon name="layers"></ion-icon> {{ cfgOptionsLabels["ncardslots"] }}
                     </ion-col>
-                    <ion-col size-lg="1" size-md="2" size-xs="3">
+                    <ion-col size-xs="3">
                       <ion-input type="number" formControlName="ncardslots"></ion-input>
                     </ion-col>
                     <ion-col class="ion-padding">
@@ -139,10 +139,10 @@
                     </ion-col>
                   </ion-row>
                   <ion-row>
-                    <ion-col size-lg="3" sizeMd="4" class="ion-padding">
+                    <ion-col size-xs="9" class="ion-padding">
                       <ion-icon name="layers"></ion-icon> {{ cfgOptionsLabels["ncardsavail"] }}
                     </ion-col>
-                    <ion-col size-lg="1" size-md="2" size-xs="3">
+                    <ion-col size-xs="3">
                       <ion-input type="number" formControlName="ncardsavail"></ion-input>
                     </ion-col>
                     <ion-col class="ion-padding">
@@ -156,10 +156,10 @@
                     </ion-col>
                   </ion-row>
                   <ion-row>
-                    <ion-col size-lg="3" sizeMd="4" class="ion-padding">
+                    <ion-col size-xs="9" class="ion-padding">
                       <ion-icon name="hourglass"></ion-icon> {{ cfgOptionsLabels["countdown"] }}
                     </ion-col>
-                    <ion-col size-lg="1" size-md="2" size-xs="3">
+                    <ion-col size-xs="3">
                       <ion-input type="number" formControlName="countdown"></ion-input>
                     </ion-col>
                     <ion-col class="ion-padding">
@@ -169,10 +169,10 @@
                     </ion-col>
                   </ion-row>
                   <ion-row>
-                    <ion-col size-lg="3" sizeMd="4" class="ion-padding">
+                    <ion-col size-xs="9" class="ion-padding">
                       <ion-icon name="medkit"></ion-icon> {{ cfgOptionsLabels["percentage_repaircards"] }}
                     </ion-col>
-                    <ion-col size-lg="1" size-md="2" size-xs="3">
+                    <ion-col size-xs="3">
                       <ion-input type="number" formControlName="percentage_repaircards"></ion-input>
                     </ion-col>
                     <ion-col class="ion-padding">
@@ -183,10 +183,10 @@
                     </ion-col>
                   </ion-row>
                   <ion-row>
-                    <ion-col size-lg="3" sizeMd="4" class="ion-padding">
+                    <ion-col size-xs="9" class="ion-padding">
                       <ion-icon name="git-compare"></ion-icon> {{ cfgOptionsLabels["path_highlighting"] }}
                     </ion-col>
-                    <ion-col size-lg="1" size-md="2" size-xs="3">
+                    <ion-col size-xs="3">
                       <ion-checkbox
                         style="margin-top: 0.7em"
                         checked="{{ gameConfig?.path_highlighting }}"
@@ -219,7 +219,11 @@
             </ion-card>
           </ion-col>
           <ion-col>
-            <app-chatbox *ngIf="gameConfig" chatslug="game_config_chat"></app-chatbox>
+            <ion-card id="chatbox-card">
+              <ion-card-content>
+                <app-chatbox *ngIf="gameConfig" [chatslug]="getChatSlug()"></app-chatbox>
+              </ion-card-content>
+            </ion-card>
           </ion-col>
         </ion-row>
       </ion-col>

@@ -47,29 +47,16 @@ export class ChatboxComponent implements OnInit, AfterViewInit, OnDestroy {
   sendMessage(event) {
     let text = (event.target as HTMLInputElement).value;
     if (this.chatslug !== null) {
-      if (this.chatslug === 'global_chat') {
-        this.httpService.post_globalChat(this.message).subscribe(
-          (ret) => {
-            this.message = '';
-            this.chat = ret.chat.reverse();
-          },
-          (error) => {
-            console.log('failed post chat: ', error);
-            this.presentToast(error.error, 'danger');
-          }
-        );
-      } else {
-        this.httpService.post_gameChat(this.message).subscribe(
-          (ret) => {
-            this.message = '';
-            this.chat = ret.chat.reverse();
-          },
-          (error) => {
-            console.log('failed post chat: ', error);
-            this.presentToast(error.error, 'danger');
-          }
-        );
-      }
+      this.httpService.post_chat(this.chatslug, this.message).subscribe(
+        (ret) => {
+          this.message = '';
+          this.chat = ret.chat.reverse();
+        },
+        (error) => {
+          console.log('failed post chat: ', error);
+          this.presentToast(error.error, 'danger');
+        }
+      );
     }
   }
 
@@ -83,31 +70,10 @@ export class ChatboxComponent implements OnInit, AfterViewInit, OnDestroy {
 
   updateChat() {
     if (this.chatslug !== null) {
-      if (this.chatslug === 'global_chat') {
-        this.httpService.get_globalChat().subscribe(
-          (ret) => {
-            let chat = ret.chat.reverse();
-            this.activeUsers = ret.active_users;
-            if (chat.length > 0) {
-              if (this.chat) {
-                let lastmsg_incoming = chat[chat.length - 1].message;
-                let lastmsg_current = this.chat[this.chat.length - 1].message;
-                if (lastmsg_incoming != lastmsg_current) {
-                  this.chat = chat;
-                }
-              } else {
-                this.chat = chat;
-              }
-            }
-          },
-          (error) => {
-            console.log('failed update chat: ', error);
-            this.presentToast(error.error, 'danger');
-          }
-        );
-      } else {
-        this.httpService.get_gameChat().subscribe((ret) => {
+      this.httpService.get_chat(this.chatslug).subscribe(
+        (ret) => {
           let chat = ret.chat.reverse();
+          this.activeUsers = ret.active_users;
           if (chat.length > 0) {
             if (this.chat) {
               let lastmsg_incoming = chat[chat.length - 1].message;
@@ -119,8 +85,12 @@ export class ChatboxComponent implements OnInit, AfterViewInit, OnDestroy {
               this.chat = chat;
             }
           }
-        });
-      }
+        },
+        (error) => {
+          console.log('failed update chat: ', error);
+          this.presentToast(error.error, 'danger');
+        }
+      );
     }
   }
 }

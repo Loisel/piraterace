@@ -46,6 +46,13 @@ def get_gamechat(request, **kwargs):
 
 
 @api_view(["GET"])
+@permission_classes((IsAuthenticated,))
+def get_gameconfigchat(request, gameconfig_id, **kwargs):
+    slug = f"gameconfig_chat.{gameconfig_id}"
+    return JsonResponse({"prefix": "game_config", "chatslug": slug, "chat": get_chat(slug)})
+
+
+@api_view(["GET"])
 def get_globalchat(request, **kwargs):
     users = cache.get(ACTIVE_USERSLUG, {})
     users[request.user.username] = datetime.datetime.now()
@@ -94,3 +101,18 @@ def post_globalchat(request, **kwargs):
     add_message(GLOBAL_CHATSLUG, user, message, None)
 
     return redirect(reverse("pichat:get_globalchat"))
+
+
+@api_view(["POST"])
+@permission_classes((IsAuthenticated,))
+def post_gameconfigchat(request, gameconfig_id, **kwargs):
+    user = request.user
+    message = request.data.get("message")
+
+    if not message or len(message.strip()) == 0:
+        return JsonResponse(f"Unable to send chat message. Message is empty.", status=404, safe=False)
+
+    slug = f"gameconfig_chat.{gameconfig_id}"
+    add_message(slug, user, message, None)
+
+    return redirect(reverse("pichat:get_gameconfigchat", kwargs={"gameconfig_id": gameconfig_id}))
