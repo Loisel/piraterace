@@ -1,22 +1,23 @@
 export interface GameConfig {
-  id: number;
-  mode: string;
-  mapfile: string;
-  player_ids: number[];
-  player_names: string[];
-  player_colors: string[];
-  player_ready: boolean[];
-  creator_userid: number;
-  caller_idx: number;
-  caller_id: number;
-  player_color_choices: string[];
   all_ready: boolean;
+  caller_id: number;
+  caller_idx: number;
+  CANNON_DIRECTION_DESCR2ID: any;
+  countdown: number;
+  creator_userid: number;
   gamename: string;
-  request_id: number;
+  id: number;
+  mapfile: string;
+  mapinfo: any;
+  mode: string;
   ncardsavail: number;
   ncardslots: number;
-  countdown: number;
-  percentage_repaircards: number;
-  CANNON_DIRECTION_DESCR2ID: any;
   path_highlighting: boolean;
+  percentage_repaircards: number;
+  player_color_choices: string[];
+  player_colors: string[];
+  player_ids: number[];
+  player_names: string[];
+  player_ready: boolean[];
+  request_id: number;
 }
