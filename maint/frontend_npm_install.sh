@@ -1,2 +1,2 @@
 #!/bin/bash
-docker-compose run --rm frontend npm install --verbose --save-dev
+docker-compose -f docker-compose.yml run --rm frontend npm install --verbose --save-dev
