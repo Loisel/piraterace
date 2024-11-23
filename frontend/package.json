@@ -25,7 +25,7 @@
     "@capacitor/haptics": "4.0.1",
     "@capacitor/keyboard": "4.0.1",
     "@capacitor/status-bar": "4.0.1",
-    "@ionic/angular": "^6.1.9",
+    "@ionic/angular": "^6.5.2",
     "@ionic/cli": "^6.20.1",
     "@ionic/lab": "^3.2.13",
     "@ionic/storage-angular": "^3.0.6",
