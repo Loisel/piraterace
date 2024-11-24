@@ -166,6 +166,17 @@
  "nextlayerid":4,
  "nextobjectid":15,
  "orientation":"orthogonal",
+ "properties":[
+        {
+         "name":"mapdescription",
+         "type":"string",
+         "value":"Travel the open seas along the precipiteous north atlantic warm conveyor belt."
+        },
+        {
+         "name":"mapname",
+         "type":"string",
+         "value":"WarmConveyorBelt"
+        }],
  "renderorder":"right-down",
  "tiledversion":"1.9.2",
  "tileheight":48,
