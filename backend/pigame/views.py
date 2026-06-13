@@ -206,7 +206,30 @@ def game(request, game_id, **kwargs):
             num_trigger_powerdown = num_players_powerdown
             num_trigger_total = player_accounts.count()
 
-        if num_trigger_submitted >= num_trigger_total - num_trigger_powerdown:
+        required = num_trigger_total - num_trigger_powerdown
+        # Everyone set sails (required == 0) needs special treatment: we must NOT fire
+        # animate immediately (0 >= 0 is trivially true), but instead show a full
+        # countdown first and only animate once the timer has elapsed.
+        timer_expired = game.timestamp is not None and datetime.datetime.now(pytz.utc) > game.timestamp
+        ready_to_animate = (num_trigger_submitted >= required) and (required > 0 or timer_expired)
+
+        if game.state == "countdown" and not timer_expired and game.timestamp is not None:
+            # Still counting down — show timer and wait.
+            dt = game.timestamp - datetime.datetime.now(pytz.utc) - datetime.timedelta(seconds=COUNTDOWN_GRACE_TIME)
+            payload["countdown"] = dt.total_seconds()
+
+        elif game.state == "countdown" and not ready_to_animate:
+            # Timer just expired but not all required have submitted yet — force-submit.
+            for p in player_accounts.filter(time_submitted__isnull=True):
+                p.time_submitted = datetime.datetime.now(pytz.utc)
+                p.save(update_fields=["time_submitted"])
+
+        elif ready_to_animate:
+            # Force-submit any stragglers (covers countdown-expired path).
+            for p in player_accounts.filter(time_submitted__isnull=True):
+                p.time_submitted = datetime.datetime.now(pytz.utc)
+                p.save(update_fields=["time_submitted"])
+
             game.state = "animate"
             game.save(update_fields=["state"])
 
@@ -221,36 +244,21 @@ def game(request, game_id, **kwargs):
             actionstack = prune_actionstack(actionstack)
 
             animation_time = (len(actionstack) - len(old_actionstack)) * TIME_PER_ACTION
-            # print(f"Animation time is {animation_time}, old stacksize {len(old_actionstack)}, new stacksize {len(actionstack)}")
             game.timestamp = datetime.datetime.now(pytz.utc) + datetime.timedelta(seconds=animation_time)
             game.save(update_fields=["timestamp"])
 
-        elif game.state == "select" and num_trigger_submitted > 0:
-            # check if players submitted their cards an hence countdown should start:
+        elif game.state == "select" and (num_trigger_submitted > 0 or required == 0):
+            # First human submitted (or everyone set sails) — start the countdown.
             game.state = "countdown"
-
-            if game.config.countdown_mode == "d":
-                game.timestamp = datetime.datetime.now(pytz.utc) + datetime.timedelta(
-                    seconds=game.config.countdown + COUNTDOWN_GRACE_TIME
-                )
-            elif game.config.countdown_mode == "s":
-                if num_trigger_submitted >= num_trigger_total - 1:
-                    game.timestamp = datetime.datetime.now(pytz.utc) + datetime.timedelta(
-                        seconds=game.config.countdown + COUNTDOWN_GRACE_TIME
-                    )
-            else:
+            game.timestamp = datetime.datetime.now(pytz.utc) + datetime.timedelta(
+                seconds=game.config.countdown + COUNTDOWN_GRACE_TIME
+            )
+            if game.config.countdown_mode == "s" and required > 0 and num_trigger_submitted < num_trigger_total - 1:
+                # mode "s": don't set timestamp yet (wait for penultimate human)
+                game.timestamp = None
+            elif game.config.countdown_mode not in ("d", "s"):
                 raise ValueError(f"game.config.countdown_mode {game.config.countdown_mode} not implemented here")
             game.save(update_fields=["state", "timestamp"])
-
-        elif game.state == "countdown":
-            if datetime.datetime.now(pytz.utc) <= game.timestamp:
-                dt = game.timestamp - datetime.datetime.now(pytz.utc) - datetime.timedelta(seconds=COUNTDOWN_GRACE_TIME)
-                payload["countdown"] = dt.total_seconds()
-                # print(f"Countdown is {dt.total_seconds()}")
-            else:
-                for p in player_accounts.filter(time_submitted__isnull=True):
-                    p.time_submitted = datetime.datetime.now(pytz.utc)
-                    p.save(update_fields=["time_submitted"])
 
     if (game.state == "animate") and (datetime.datetime.now(pytz.utc) > game.timestamp):
         game.state = "select"
