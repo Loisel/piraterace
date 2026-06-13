@@ -60,6 +60,26 @@ interface OctopusSprite {
   frame: number;
 }
 
+interface Explosion {
+  x: number;
+  y: number;
+  startMs: number;
+  durationMs: number;
+  alive: boolean;
+}
+
+interface FireParticle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  size: number;
+  color: string;
+  startMs: number;
+  durationMs: number;
+  alive: boolean;
+}
+
 interface AnimStep {
   startMs: number;
   durationMs: number;
@@ -82,6 +102,8 @@ export class GameRenderer {
   private tilesetImg: HTMLImageElement;
   private boatImg: HTMLImageElement;
   private octopusImg: HTMLImageElement;
+  private explosionImg: HTMLImageElement;
+  private emberImg: HTMLImageElement;
   private cardImgs = new Map<string, HTMLImageElement>();
 
   // Camera
@@ -102,6 +124,8 @@ export class GameRenderer {
   // Visual effects
   private cannonballs: Cannonball[] = [];
   private starBursts: StarBurst[] = [];
+  private explosions: Explosion[] = [];
+  private fireParticles: FireParticle[] = [];
   private cardOverlays: CardOverlay[] = [];
   private boatTooltips: BoatTooltip[] = [];
 
@@ -150,6 +174,12 @@ export class GameRenderer {
         this.octopusImg = img;
         this.octopusFrameCount = Math.max(1, Math.floor(img.naturalWidth / 48));
       }).catch(() => {}), // octopus is optional
+      loadImage(`${S}/sprites/explosion.png`).then((img) => {
+        this.explosionImg = img;
+      }).catch(() => {}),
+      loadImage(`${S}/sprites/ember.png`).then((img) => {
+        this.emberImg = img;
+      }).catch(() => {}),
     ];
 
     Object.entries(GI.CARDS).forEach(([, card]: [string, any]) => {
@@ -311,6 +341,8 @@ export class GameRenderer {
       this.timeline.length > 0 ||
       this.cannonballs.some((c) => c.alive) ||
       this.starBursts.length > 0 ||
+      this.explosions.length > 0 ||
+      this.fireParticles.length > 0 ||
       this.cardOverlays.length > 0 ||
       this.boatTooltips.length > 0;
 
@@ -600,6 +632,48 @@ export class GameRenderer {
       ctx.restore();
     }
 
+    // Explosions (sprite sheet animation on cannon hits)
+    if (this.explosionImg) {
+      const NFRAMES = 8;
+      const FRAME_W = this.explosionImg.naturalWidth / NFRAMES;
+      const FRAME_H = this.explosionImg.naturalHeight;
+      for (let i = this.explosions.length - 1; i >= 0; i--) {
+        const ex = this.explosions[i];
+        const t = (now - ex.startMs) / ex.durationMs;
+        if (t < 0) continue;
+        if (t >= 1) { ex.alive = false; this.explosions.splice(i, 1); continue; }
+        const frame = Math.min(NFRAMES - 1, Math.floor(t * NFRAMES));
+        const drawW = tileW * 2.2;
+        const drawH = tileH * 2.2;
+        ctx.save();
+        ctx.globalAlpha = Math.min(1, (1 - t) * 3);
+        ctx.drawImage(this.explosionImg, frame * FRAME_W, 0, FRAME_W, FRAME_H,
+          ex.x - drawW / 2, ex.y - drawH / 2, drawW, drawH);
+        ctx.restore();
+      }
+    }
+
+    // Fire particles (embers shooting outward from explosion)
+    for (let i = this.fireParticles.length - 1; i >= 0; i--) {
+      const p = this.fireParticles[i];
+      const t = (now - p.startMs) / p.durationMs;
+      if (t < 0) continue;
+      if (t >= 1) { p.alive = false; this.fireParticles.splice(i, 1); continue; }
+      const x = p.x + p.vx * t;
+      const y = p.y + p.vy * t + 40 * t * t; // gravity droop
+      const alpha = t < 0.2 ? t / 0.2 : 1 - (t - 0.2) / 0.8;
+      const size = p.size * (1 - t * 0.5);
+      ctx.save();
+      ctx.globalAlpha = alpha * 0.9;
+      ctx.fillStyle = p.color;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur = size * 2;
+      ctx.beginPath();
+      ctx.arc(x, y, size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
     // Star bursts (hits and repairs)
     for (let i = this.starBursts.length - 1; i >= 0; i--) {
       const burst = this.starBursts[i];
@@ -837,17 +911,35 @@ export class GameRenderer {
           },
           onComplete: () => {
             ball.alive = false;
-            if (action.other_player !== undefined) {
+            const impactMs = startMs + travelDur;
+            const impactDur = dur - travelDur;
+            const hitBoat = action.other_player !== undefined;
+            if (hitBoat) {
               const target = this.boatStates.get(action.other_player);
               if (target) target.health = action.other_player_health;
-              this.starBursts.push({
-                x: ball.x1,
-                baseY: ball.y1,
-                tileH,
-                color: '#ff0000',
-                type: 'damage',
-                startMs: startMs + travelDur,
-                durationMs: dur / 3,
+            }
+            // Explosion sprite
+            this.explosions.push({
+              x: ball.x1, y: ball.y1,
+              startMs: impactMs,
+              durationMs: impactDur,
+              alive: true,
+            });
+            // Fire particles — more and brighter when hitting a boat
+            const nParticles = hitBoat ? 18 : 8;
+            const fireColors = ['#ff6600', '#ff9900', '#ffcc00', '#ff3300', '#ffee44'];
+            for (let pi = 0; pi < nParticles; pi++) {
+              const angle = (pi / nParticles) * Math.PI * 2 + Math.random() * 0.4;
+              const speed = tileW * (0.3 + Math.random() * (hitBoat ? 0.9 : 0.5));
+              const delay = Math.random() * 80;
+              this.fireParticles.push({
+                x: ball.x1, y: ball.y1,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed - (hitBoat ? tileH * 0.4 : 0),
+                size: 3 + Math.random() * (hitBoat ? 7 : 4),
+                color: fireColors[Math.floor(Math.random() * fireColors.length)],
+                startMs: impactMs + delay,
+                durationMs: impactDur * (0.6 + Math.random() * 0.4),
                 alive: true,
               });
             }
