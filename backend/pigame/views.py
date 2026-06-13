@@ -213,19 +213,9 @@ def game(request, game_id, **kwargs):
         timer_expired = game.timestamp is not None and datetime.datetime.now(pytz.utc) > game.timestamp
         ready_to_animate = (num_trigger_submitted >= required) and (required > 0 or timer_expired)
 
-        if game.state == "countdown" and not timer_expired and game.timestamp is not None:
-            # Still counting down — show timer and wait.
-            dt = game.timestamp - datetime.datetime.now(pytz.utc) - datetime.timedelta(seconds=COUNTDOWN_GRACE_TIME)
-            payload["countdown"] = dt.total_seconds()
-
-        elif game.state == "countdown" and not ready_to_animate:
-            # Timer just expired but not all required have submitted yet — force-submit.
-            for p in player_accounts.filter(time_submitted__isnull=True):
-                p.time_submitted = datetime.datetime.now(pytz.utc)
-                p.save(update_fields=["time_submitted"])
-
-        elif ready_to_animate:
-            # Force-submit any stragglers (covers countdown-expired path).
+        if ready_to_animate:
+            # All required players submitted (or powered-down timer elapsed) — go animate.
+            # Force-submit any stragglers so game logic sees a complete submission set.
             for p in player_accounts.filter(time_submitted__isnull=True):
                 p.time_submitted = datetime.datetime.now(pytz.utc)
                 p.save(update_fields=["time_submitted"])
@@ -248,7 +238,7 @@ def game(request, game_id, **kwargs):
             game.save(update_fields=["timestamp"])
 
         elif game.state == "select" and (num_trigger_submitted > 0 or required == 0):
-            # First human submitted (or everyone set sails) — start the countdown.
+            # First human submitted (or everyone already powered down) — start the countdown.
             game.state = "countdown"
             game.timestamp = datetime.datetime.now(pytz.utc) + datetime.timedelta(
                 seconds=game.config.countdown + COUNTDOWN_GRACE_TIME
@@ -259,6 +249,18 @@ def game(request, game_id, **kwargs):
             elif game.config.countdown_mode not in ("d", "s"):
                 raise ValueError(f"game.config.countdown_mode {game.config.countdown_mode} not implemented here")
             game.save(update_fields=["state", "timestamp"])
+
+        elif game.state == "countdown" and not timer_expired and game.timestamp is not None:
+            # Still counting down — report remaining time to frontend.
+            dt = game.timestamp - datetime.datetime.now(pytz.utc) - datetime.timedelta(seconds=COUNTDOWN_GRACE_TIME)
+            payload["countdown"] = dt.total_seconds()
+
+        elif game.state == "countdown" and not ready_to_animate:
+            # Timer expired but not all required have submitted yet — force-submit stragglers.
+            # ready_to_animate will be True on the next poll.
+            for p in player_accounts.filter(time_submitted__isnull=True):
+                p.time_submitted = datetime.datetime.now(pytz.utc)
+                p.save(update_fields=["time_submitted"])
 
     if (game.state == "animate") and (datetime.datetime.now(pytz.utc) > game.timestamp):
         game.state = "select"
