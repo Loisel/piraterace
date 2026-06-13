@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.forms.models import model_to_dict
@@ -10,6 +11,8 @@ from django.core.cache import cache
 
 import os
 import glob
+import random
+import uuid
 from piraterace.settings import MAPSDIR
 
 from pigame.models import (
@@ -46,6 +49,7 @@ from pigame.game_logic import (
 )
 
 from pichat.views import gen_gameconfigchatslug, gen_gamechatslug
+from pigame.bots import bot_submit_cards
 
 TIME_PER_ACTION = 0.6
 COUNTDOWN_GRACE_TIME = 2
@@ -180,6 +184,12 @@ def game(request, game_id, **kwargs):
     num_players_submitted = player_accounts.filter(time_submitted__isnull=False).count()
     # print(f"Game state {game.state}, player submitted {num_players_submitted}")
     if game.state in ["countdown", "select"]:
+        for p in player_accounts.filter(time_submitted__isnull=True, is_bot=True):
+            pidx = game.config.player_ids.index(p.pk)
+            bot_submit_cards(game.config, pidx, p.bot_type)
+            p.time_submitted = datetime.datetime.now(pytz.utc)
+            p.save(update_fields=["time_submitted"])
+        num_players_submitted = player_accounts.filter(time_submitted__isnull=False).count()
         num_players_powerdown = len([p for p in player_states.values() if p.powered_down])
         if num_players_submitted >= player_accounts.count() - num_players_powerdown:
             game.state = "animate"
@@ -414,7 +424,14 @@ def view_gameconfig(request, gameconfig_id):
         return JsonResponse(f"Game config does not exist anymore", status=404, safe=False)
 
     cfg = model_to_dict(game_config)
-    cfg["player_names"] = [Account.objects.get(pk=pid).user.username for pid in cfg["player_ids"]]
+    stored_names = list(cfg["player_names"])
+    accounts = {pid: Account.objects.get(pk=pid) for pid in cfg["player_ids"]}
+    cfg["player_names"] = [
+        stored_names[i] if accounts[pid].is_bot else accounts[pid].user.username
+        for i, pid in enumerate(cfg["player_ids"])
+    ]
+    cfg["player_is_bot"] = [accounts[pid].is_bot for pid in cfg["player_ids"]]
+    cfg["player_bot_type"] = [accounts[pid].bot_type if accounts[pid].is_bot else "" for pid in cfg["player_ids"]]
     creator_index = game_config.player_ids.index(game_config.creator_userid)
     cfg["player_ready"][creator_index] = True
     cfg["all_ready"] = all(cfg["player_ready"])
@@ -569,6 +586,70 @@ def leave_gameconfig(request, **kwargs):
 
     clean_up_configs(player)
     return JsonResponse({"success": f"Detached from gameconfig."})
+
+
+@api_view(["POST"])
+@permission_classes((IsAuthenticated,))
+@transaction.atomic
+def add_bot(request, gameconfig_id):
+    config = get_object_or_404(GameConfig, pk=gameconfig_id)
+    caller = request.user.account
+    if caller.pk != config.creator_userid:
+        return JsonResponse("Only the creator can add bots", status=403, safe=False)
+    if config.nplayers >= config.nmaxplayers:
+        return JsonResponse(f"Game full ({config.nplayers}/{config.nmaxplayers})", status=400, safe=False)
+
+    bot_type = request.data.get("bot_type", "random")
+    from piplayer.models import BOT_TYPES
+
+    valid_types = [t[0] for t in BOT_TYPES]
+    if bot_type not in valid_types:
+        return JsonResponse(f"Unknown bot type: {bot_type}", status=400, safe=False)
+
+    bot_display_name = f"{bot_type.capitalize()} Bot"
+    bot_username = f"__bot__{uuid.uuid4().hex[:12]}"
+    bot_user = User.objects.create_user(username=bot_username, password=None)
+    bot_account = bot_user.account
+    bot_account.is_bot = True
+    bot_account.bot_type = bot_type
+    bot_account.save(update_fields=["is_bot", "bot_type"])
+
+    colors_to_pick = [c for c in COLORS.values() if c not in config.player_colors]
+    config.player_ids.append(bot_account.pk)
+    config.player_names.append(bot_display_name)
+    config.player_colors.append(random.choice(colors_to_pick))
+    config.player_ready.append(True)
+    config.save()
+
+    return JsonResponse({"bot_id": bot_account.pk, "bot_name": bot_display_name})
+
+
+@api_view(["DELETE"])
+@permission_classes((IsAuthenticated,))
+@transaction.atomic
+def remove_bot(request, gameconfig_id, bot_id):
+    config = get_object_or_404(GameConfig, pk=gameconfig_id)
+    caller = request.user.account
+    if caller.pk != config.creator_userid:
+        return JsonResponse("Only the creator can remove bots", status=403, safe=False)
+
+    try:
+        bot_account = Account.objects.get(pk=bot_id, is_bot=True)
+    except Account.DoesNotExist:
+        return JsonResponse("Bot not found", status=404, safe=False)
+
+    if bot_id not in config.player_ids:
+        return JsonResponse("Bot not in this game config", status=404, safe=False)
+
+    idx = config.player_ids.index(bot_id)
+    config.player_ids.pop(idx)
+    config.player_names.pop(idx)
+    config.player_colors.pop(idx)
+    config.player_ready.pop(idx)
+    config.save()
+
+    bot_account.user.delete()
+    return JsonResponse({"success": True})
 
 
 @api_view(["POST"])

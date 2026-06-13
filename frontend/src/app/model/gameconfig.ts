@@ -19,5 +19,8 @@ export interface GameConfig {
   player_ids: number[];
   player_names: string[];
   player_ready: boolean[];
+  player_is_bot: boolean[];
+  player_bot_type: string[];
+  nmaxplayers: number;
   request_id: number;
 }

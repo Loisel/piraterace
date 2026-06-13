@@ -29,13 +29,16 @@
 
                   <ng-template #other_player_info>
                     <ion-row>
-                      <ion-col>{{ gameConfig?.player_names[i] }}</ion-col>
+                      <ion-col>
+                        {{ gameConfig?.player_names[i] }}
+                        <ion-badge *ngIf="gameConfig?.player_is_bot?.[i]" color="medium">BOT</ion-badge>
+                      </ion-col>
                       <ion-col [ngStyle]="{ 'background-color': gameConfig?.player_colors[i] }"></ion-col>
                       <ion-col>
                         <span *ngIf="gameConfig?.creator_userid === p" class="ion-text-center">
                           <ion-icon size="large" name="sparkles"></ion-icon>
                         </span>
-                        <span *ngIf="gameConfig?.creator_userid !== p">
+                        <span *ngIf="gameConfig?.creator_userid !== p && !gameConfig?.player_is_bot?.[i]">
                           <span
                             *ngIf="gameConfig?.player_ready[i]; then ready_icon; else not_ready_icon"
                             class="ion-text-center"
@@ -46,6 +49,11 @@
                           <ng-template #not_ready_icon
                             ><ion-icon color="danger" size="large" name="close-circle"></ion-icon
                           ></ng-template>
+                        </span>
+                        <span *ngIf="gameConfig?.player_is_bot?.[i] && isCreator()">
+                          <ion-button fill="clear" color="danger" size="small" (click)="removeBot(p)">
+                            <ion-icon name="trash-outline"></ion-icon>
+                          </ion-button>
                         </span>
                       </ion-col>
                     </ion-row>
@@ -196,6 +204,23 @@
                     <ion-col class="ion-padding"></ion-col>
                   </ion-row>
                 </form>
+                <ion-row *ngIf="isCreator()">
+                  <ion-col size-xs="6" class="ion-padding">
+                    <ion-select [(ngModel)]="selectedBotType" interface="popover">
+                      <ion-select-option *ngFor="let bt of botTypes" [value]="bt.value">{{ bt.label }}</ion-select-option>
+                    </ion-select>
+                  </ion-col>
+                  <ion-col size-xs="6">
+                    <ion-button
+                      fill="outline"
+                      [disabled]="gameConfig?.player_ids?.length >= gameConfig?.nmaxplayers"
+                      (click)="addBot()"
+                    >
+                      <ion-icon name="hardware-chip-outline" slot="start"></ion-icon>
+                      Add Bot
+                    </ion-button>
+                  </ion-col>
+                </ion-row>
                 <ion-row>
                   <ion-col *ngIf="gameConfig?.creator_userid === gameConfig?.caller_id">
                     <ion-button [disabled]="!startButtonActive || !gameConfig?.all_ready" (click)="createGame()">

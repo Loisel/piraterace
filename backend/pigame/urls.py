@@ -35,4 +35,6 @@ urlpatterns = [
     path("predict_path", views.predict_path),
     path("cannon_direction/<negint:direction_id>", views.player_cannon_direction, name="cannon_direction"),
     path("mapinfo/<str:mapfile>", views.get_mapinfo),
+    path("add_bot/<int:gameconfig_id>", views.add_bot, name="add_bot"),
+    path("remove_bot/<int:gameconfig_id>/<int:bot_id>", views.remove_bot, name="remove_bot"),
 ]

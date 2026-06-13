@@ -25,6 +25,10 @@ export class GameConfigComponent implements OnInit {
     path_highlighting: 'Preview ship path',
   };
   startButtonActive: boolean = true;
+  botTypes = [
+    { value: 'random', label: 'Random' },
+  ];
+  selectedBotType: string = 'random';
 
   constructor(
     private httpService: HttpService,
@@ -180,6 +184,34 @@ export class GameConfigComponent implements OnInit {
         this.presentToast(error.error, 'danger');
       }
     );
+  }
+
+  addBot() {
+    this.httpService.addBot(this.gameConfig.id, this.selectedBotType).subscribe(
+      (payload) => {
+        console.log('Bot added:', payload);
+        this.updateGameConfig(this.gameConfig.id);
+      },
+      (error) => {
+        this.presentToast(error.error, 'danger');
+      }
+    );
+  }
+
+  removeBot(botId: number) {
+    this.httpService.removeBot(this.gameConfig.id, botId).subscribe(
+      (payload) => {
+        console.log('Bot removed:', payload);
+        this.updateGameConfig(this.gameConfig.id);
+      },
+      (error) => {
+        this.presentToast(error.error, 'danger');
+      }
+    );
+  }
+
+  isCreator(): boolean {
+    return this.gameConfig?.creator_userid === this.gameConfig?.caller_id;
   }
 
   onPlayerInfoChange(event) {

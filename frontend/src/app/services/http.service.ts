@@ -90,6 +90,17 @@ export class HttpService {
   get_leaveGame() {
     return this.httpClient.get(`${this.get_leaveGameURL}`);
   }
+  addBot(gameconfig_id: number, bot_type: string) {
+    return this.httpClient.post<{ bot_id: number; bot_name: string }>(
+      `${environment.API_URL}/pigame/add_bot/${gameconfig_id}`,
+      { bot_type }
+    );
+  }
+  removeBot(gameconfig_id: number, bot_id: number) {
+    return this.httpClient.delete<{ success: boolean }>(
+      `${environment.API_URL}/pigame/remove_bot/${gameconfig_id}/${bot_id}`
+    );
+  }
   get_chat(slug: string) {
     return this.httpClient.get<any>(`${this.get_chatURL}/${slug}`);
   }
