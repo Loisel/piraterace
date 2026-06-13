@@ -9,13 +9,11 @@ import { interval, BehaviorSubject } from 'rxjs';
 import { filter, pairwise } from 'rxjs/operators';
 import { timer, Subject } from 'rxjs';
 import { map, takeUntil, takeWhile, finalize } from 'rxjs/operators';
-import Phaser from 'phaser';
-
 import { HttpService } from '../services/http.service';
 import { environment } from '../../environments/environment';
 import { GameInfo } from '../model/gameinfo';
 
-import { GameScene } from './game-scene';
+import { GameRenderer } from './game-renderer';
 
 @Component({
   selector: 'app-game',
@@ -23,9 +21,8 @@ import { GameScene } from './game-scene';
   styleUrls: ['./game.component.scss'],
 })
 export class GameComponent {
-  gamedivid: string = null;
-  phaserGame: Phaser.Game;
-  config: Phaser.Types.Core.GameConfig;
+  canvasId: string = null;
+  renderer: GameRenderer;
   gameinfo: GameInfo = null;
   cardsinfo: BehaviorSubject<Array<any>> = new BehaviorSubject<Array<any>>([]);
   CARDS_URL = environment.STATIC_URL;
@@ -57,7 +54,7 @@ export class GameComponent {
     private toastController: ToastController,
     private alertController: AlertController
   ) {
-    this.gamedivid = 'piraterace-game-' + Math.random().toString(36).substring(2);
+    this.canvasId = 'piraterace-game-' + Math.random().toString(36).substring(2);
   }
 
   ionViewDidEnter() {
@@ -67,30 +64,12 @@ export class GameComponent {
         this.gameinfo = gameinfo;
         this.Ngameround.next(gameinfo['Ngameround']);
 
-        this.config = {
-          parent: this.gamedivid,
-          type: Phaser.AUTO,
-          transparent: true,
-          width: this.gameinfo.map.width * this.gameinfo.map.tilewidth,
-          height: this.gameinfo.map.height * this.gameinfo.map.tileheight,
-          scale: {
-            mode: Phaser.Scale.RESIZE,
-            autoCenter: Phaser.Scale.CENTER_BOTH,
-            autoRound: true,
-          },
-          physics: { default: 'None' },
-          fps: {
-            target: 12,
-            forceSetTimeOut: true,
-          },
-          disableContextMenu: true,
-        };
-
-        this.config.scene = new GameScene(this);
-        this.phaserGame = new Phaser.Game(this.config);
-
         this.cards_menu.nativeElement.style.borderColor = gameinfo['players'][gameinfo['me']]['color'];
         this.tools_menu.nativeElement.style.borderColor = gameinfo['players'][gameinfo['me']]['color'];
+
+        const canvas = document.getElementById(this.canvasId) as HTMLCanvasElement;
+        this.renderer = new GameRenderer(canvas, this);
+        this.renderer.preload().then(() => this.renderer.create()).catch((err) => console.error('GameRenderer preload failed:', err));
       },
       (err) => console.error(err),
       () => console.log('observable complete')
@@ -134,14 +113,14 @@ export class GameComponent {
   }
 
   ionViewWillLeave() {
-    console.log('Leaving Game', this.appGameContent);
-    this.phaserGame.destroy(true, false);
+    console.log('Leaving Game');
+    this.renderer?.destroy();
+    this.renderer = null;
     try {
       this.appGameContent.clear();
     } catch {
-      console.log('Leaving Game would have hoped to clear the game component but is maybe not here?', this.appGameContent);
+      console.log('Could not clear game content on leave');
     }
-    // this.defaultScene.updateTimer.paused = true;
   }
 
   load_gameinfo() {

@@ -3,8 +3,8 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  API_URL: 'http://localhost:1337/api',
-  STATIC_URL: 'http://localhost:1337/static/',
+  API_URL: '/api',
+  STATIC_URL: '/static/',
   production: false
 };
 

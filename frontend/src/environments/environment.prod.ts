@@ -1,5 +1,5 @@
 export const environment = {
-  API_URL: 'https://dev.piraterace.com/api',
-  STATIC_URL: 'https://dev.piraterace.com/static/',
+  API_URL: '/api',
+  STATIC_URL: '/static/',
   production: true
 };

@@ -1,6 +1,5 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import Phaser from 'phaser';
 import { ToastController } from '@ionic/angular';
 
 import { HttpService } from '../../services/http.service';
