@@ -191,7 +191,22 @@ def game(request, game_id, **kwargs):
             p.save(update_fields=["time_submitted"])
         num_players_submitted = player_accounts.filter(time_submitted__isnull=False).count()
         num_players_powerdown = len([p for p in player_states.values() if p.powered_down])
-        if num_players_submitted >= player_accounts.count() - num_players_powerdown:
+
+        # Bots never drive the countdown — only human submissions count as triggers.
+        # Exception: all-bot game proceeds immediately as normal.
+        human_accounts = player_accounts.filter(is_bot=False)
+        num_humans = human_accounts.count()
+        if num_humans > 0:
+            human_pks = set(human_accounts.values_list("pk", flat=True))
+            num_trigger_submitted = human_accounts.filter(time_submitted__isnull=False).count()
+            num_trigger_powerdown = len([p for p in player_states.values() if p.powered_down and p.id in human_pks])
+            num_trigger_total = num_humans
+        else:
+            num_trigger_submitted = num_players_submitted
+            num_trigger_powerdown = num_players_powerdown
+            num_trigger_total = player_accounts.count()
+
+        if num_trigger_submitted >= num_trigger_total - num_trigger_powerdown:
             game.state = "animate"
             game.save(update_fields=["state"])
 
@@ -210,17 +225,16 @@ def game(request, game_id, **kwargs):
             game.timestamp = datetime.datetime.now(pytz.utc) + datetime.timedelta(seconds=animation_time)
             game.save(update_fields=["timestamp"])
 
-        elif game.state == "select" and num_players_submitted > 0:
+        elif game.state == "select" and num_trigger_submitted > 0:
             # check if players submitted their cards an hence countdown should start:
             game.state = "countdown"
 
             if game.config.countdown_mode == "d":
-                if num_players_submitted > 0:
-                    game.timestamp = datetime.datetime.now(pytz.utc) + datetime.timedelta(
-                        seconds=game.config.countdown + COUNTDOWN_GRACE_TIME
-                    )
+                game.timestamp = datetime.datetime.now(pytz.utc) + datetime.timedelta(
+                    seconds=game.config.countdown + COUNTDOWN_GRACE_TIME
+                )
             elif game.config.countdown_mode == "s":
-                if num_players_submitted >= player_accounts.count() - 1:
+                if num_trigger_submitted >= num_trigger_total - 1:
                     game.timestamp = datetime.datetime.now(pytz.utc) + datetime.timedelta(
                         seconds=game.config.countdown + COUNTDOWN_GRACE_TIME
                     )
@@ -369,6 +383,10 @@ def create_game(request, gameconfig_id, **kwargs):
 
     creator_index = config.player_ids.index(config.creator_userid)
     config.player_ready[creator_index] = True
+    bot_ids = set(Account.objects.filter(pk__in=config.player_ids, is_bot=True).values_list("pk", flat=True))
+    for i, pid in enumerate(config.player_ids):
+        if pid in bot_ids:
+            config.player_ready[i] = True
 
     if not all(config.player_ready):
         return JsonResponse(f"Not all players ready yet", status=404, safe=False)
@@ -538,8 +556,9 @@ def update_gamecfg_options(request, gameconfig_id, request_id):
     gamecfg.countdown = data["countdown"]
     gamecfg.path_highlighting = data["path_highlighting"]
     gamecfg.percentage_repaircards = data["percentage_repaircards"]
-    for i, p in enumerate(gamecfg.player_ready):  # set all player ready flags to false if something in the config changed
-        gamecfg.player_ready[i] = False
+    bot_ids = set(Account.objects.filter(pk__in=gamecfg.player_ids, is_bot=True).values_list("pk", flat=True))
+    for i, pid in enumerate(gamecfg.player_ids):
+        gamecfg.player_ready[i] = pid in bot_ids
     gamecfg.save()
 
     return redirect(reverse("pigame:view_gameconfig", kwargs={"gameconfig_id": gamecfg.pk}))
