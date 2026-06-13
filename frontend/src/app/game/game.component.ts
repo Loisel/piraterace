@@ -7,7 +7,7 @@ import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef, Vie
 import { Router, ActivatedRoute } from '@angular/router';
 import { interval, BehaviorSubject } from 'rxjs';
 import { filter, pairwise } from 'rxjs/operators';
-import { timer, Subject } from 'rxjs';
+import { timer, Subject, of } from 'rxjs';
 import { map, takeUntil, takeWhile, finalize } from 'rxjs/operators';
 import { HttpService } from '../services/http.service';
 import { environment } from '../../environments/environment';
@@ -93,7 +93,7 @@ export class GameComponent {
 
   finalizeCountDown() {
     this.countDownValue = -1;
-    this.countDownTimer = 0;
+    this.countDownTimer = of(1); // hold bar at full until next round's setupCountDown overwrites it
     console.log('Finalize Countdown');
   }
 
