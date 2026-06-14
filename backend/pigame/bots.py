@@ -178,21 +178,24 @@ def _greedy_pick(playable_cards, mapfile, player_id, current_state, checkpoints,
 
 # ── RL bot ───────────────────────────────────────────────────────────────────
 
-_rl_model_cache: dict = {}    # tag → loaded SB3 model
-_rl_map_enc_cache: dict = {}  # mapfile → encoded map feature array
+_rl_session_cache: dict = {}   # tag → onnxruntime.InferenceSession
+_rl_map_enc_cache: dict = {}   # id(map_data) → encoded map feature array
 
 
 def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail,
              checkpoints=None, map_data=None):
     """
-    Use a trained PPO model to pick card play order.
+    Use a trained PPO policy (exported to ONNX) to pick card play order.
 
-    bot_type is the key used to look up the model:
-        "rl"           → rl_models/solo_map1.zip  (default)
-        "rl:solo_map1" → rl_models/solo_map1.zip
-        "rl:path/to/model" → that exact path (no .zip added)
+    bot_type routing:
+        "rl"           → rl_models/solo_map1.onnx  (default)
+        "rl:solo_map1" → rl_models/solo_map1.onnx
+        "rl:path/to/x" → that path (no .onnx added if it contains a separator)
 
-    Falls back to random on any error (missing model, import failure, etc.).
+    Action space is (N_CARD_TYPES,) type-preference scores.  The hand is
+    sorted so the card whose type has the highest score plays first.
+
+    Falls back to random on any error.
     """
     import os
     import math
@@ -203,23 +206,21 @@ def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail,
         random.shuffle(cards)
         return cards
 
-    # Resolve model path from bot_type tag
     tag = bot_type[3:] if bot_type.startswith("rl:") else "solo_map1"
-    if tag not in _rl_model_cache:
+    if tag not in _rl_session_cache:
         try:
-            from stable_baselines3 import PPO
-
+            import onnxruntime as rt
             model_dir = os.path.join(os.path.dirname(__file__), "rl_models")
             if os.sep in tag or "/" in tag:
-                model_path = tag
+                onnx_path = tag if tag.endswith(".onnx") else tag + ".onnx"
             else:
-                model_path = os.path.join(model_dir, tag)
-            _rl_model_cache[tag] = PPO.load(model_path)
+                onnx_path = os.path.join(model_dir, tag + ".onnx")
+            _rl_session_cache[tag] = rt.InferenceSession(onnx_path)
         except Exception:
-            _rl_model_cache[tag] = None   # mark as unavailable
+            _rl_session_cache[tag] = None
 
-    model = _rl_model_cache.get(tag)
-    if model is None:
+    sess = _rl_session_cache.get(tag)
+    if sess is None:
         random.shuffle(cards)
         return cards
 
@@ -259,19 +260,15 @@ def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail,
 
         card_vecs = np.concatenate([encode_card(c) for c in playable_cards])
 
-        # Map features — compute once per mapfile and cache
-        map_key = getattr(map_data, "__hash__", lambda: None)() if map_data else None
+        # Map features — encoded once per map_data object, then cached
         if map_data is not None and id(map_data) not in _rl_map_enc_cache:
             _rl_map_enc_cache[id(map_data)] = encode_map(map_data)
         map_feats = _rl_map_enc_cache.get(id(map_data), np.array([], dtype=np.float32))
 
-        obs = np.concatenate([state, card_vecs, map_feats])
+        obs = np.concatenate([state, card_vecs, map_feats]).reshape(1, -1)
 
-        # model expects obs shape matching training env — if mismatch, fall through
-        action, _ = model.predict(obs[np.newaxis], deterministic=True)
-        type_scores = np.asarray(action).flatten()  # shape (N_CARD_TYPES,)
+        type_scores = sess.run(["action_mean"], {"obs": obs})[0].flatten()
 
-        # Sort hand by type preference, then rank tiebreaker (higher rank first)
         def _sort_key(card_val):
             cid, rank = card_id_rank(card_val)
             tidx = _CARD_ID_TO_IDX.get(cid, N_CARD_TYPES - 1)
@@ -298,13 +295,15 @@ def bot_submit_cards(gamecfg, player_idx, bot_type, game=None, player_states=Non
 
     checkpoints = None
     current_state = None
-    if bot_type == "greedy" and player_states and player_id in player_states:
-        try:
-            initmap = load_map(gamecfg.mapfile)
-            checkpoints = determine_checkpoint_locations(initmap)
-            current_state = player_states[player_id]
-        except Exception:
-            pass
+    map_data = None
+    if bot_type in ("greedy", "rl") or bot_type.startswith("rl:"):
+        if player_states and player_id in player_states:
+            try:
+                map_data = load_map(gamecfg.mapfile)
+                checkpoints = determine_checkpoint_locations(map_data)
+                current_state = player_states[player_id]
+            except Exception:
+                pass
 
     best_playable = pick_cards(
         bot_type,
@@ -314,7 +313,7 @@ def bot_submit_cards(gamecfg, player_idx, bot_type, game=None, player_states=Non
         current_state=current_state,
         checkpoints=checkpoints,
         ncardsavail=ncardsavail,
-        # No map_data here — HTTP path uses Redis-cached map via play_stack
+        map_data=map_data,
     )
     deck[next_card : next_card + ncardsavail] = best_playable + remainder
     set_player_deck(gamecfg, player_id, deck)

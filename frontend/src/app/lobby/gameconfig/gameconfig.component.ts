@@ -28,6 +28,7 @@ export class GameConfigComponent implements OnInit {
   botTypes = [
     { value: 'random', label: 'Random' },
     { value: 'greedy', label: 'Greedy' },
+    { value: 'rl', label: 'RL Bot' },
   ];
   selectedBotType: string = 'random';
 
