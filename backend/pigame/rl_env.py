@@ -134,7 +134,7 @@ def ego_crop_flat(tile_arr: np.ndarray, px: int, py: int,
     row increases with +y (downward), col increases with +x (rightward).
     """
     out = np.zeros((CROP_SIZE, CROP_SIZE, N_TILE_PROPS), dtype=np.float32)
-    out[:, :, 0] = 1.0  # default: wall / collision
+    out[:, :, 1] = 1.0  # default: void (OOB = deadly zone, not wall)
 
     # Map crop rows (dy ∈ [-CROP_HALF, CROP_HALF]) to y coords
     y0_map = py - CROP_HALF
