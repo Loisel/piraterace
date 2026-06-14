@@ -1,0 +1,4 @@
+# Ignore trained model weights — they're too large for git.
+# Check in only the .gitkeep placeholder.
+*.zip
+tb_logs/

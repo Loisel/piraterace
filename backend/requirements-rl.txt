@@ -1,0 +1,7 @@
+# Optional RL training dependencies — not needed for the main game server.
+# Install inside the backend container with:
+#   pip install -r requirements-rl.txt
+gymnasium>=0.29
+stable-baselines3>=2.3
+torch>=2.0
+tensorboard

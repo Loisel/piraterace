@@ -43,6 +43,8 @@ def pick_cards(bot_type, playable_cards, *, mapfile=None, player_id=None,
     if bot_type == "greedy":
         return _greedy_pick(playable_cards, mapfile, player_id, current_state,
                             checkpoints, ncardsavail, map_data)
+    if bot_type.startswith("rl"):
+        return _rl_pick(bot_type, playable_cards, current_state, ncardsavail)
     cards = list(playable_cards)
     random.shuffle(cards)
     return cards
@@ -171,6 +173,93 @@ def _greedy_pick(playable_cards, mapfile, player_id, current_state, checkpoints,
             best_order = perm
 
     return best_order
+
+
+# ── RL bot ───────────────────────────────────────────────────────────────────
+
+_rl_model_cache: dict = {}   # bot_type → loaded SB3 model
+
+
+def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail):
+    """
+    Use a trained PPO model to score and order the playable cards.
+
+    bot_type is the key used to look up the model:
+        "rl"           → rl_models/solo_map1.zip  (default)
+        "rl:solo_map1" → rl_models/solo_map1.zip
+        "rl:path/to/model" → that exact path (no .zip added)
+
+    Falls back to random on any error (missing model, import failure, etc.).
+    """
+    import os
+    import numpy as np
+
+    cards = list(playable_cards)
+    if current_state is None:
+        random.shuffle(cards)
+        return cards
+
+    # Resolve model path from bot_type tag
+    tag = bot_type[3:] if bot_type.startswith("rl:") else "solo_map1"
+    if tag not in _rl_model_cache:
+        try:
+            from stable_baselines3 import PPO
+
+            model_dir = os.path.join(os.path.dirname(__file__), "rl_models")
+            if os.sep in tag or "/" in tag:
+                model_path = tag
+            else:
+                model_path = os.path.join(model_dir, tag)
+            _rl_model_cache[tag] = PPO.load(model_path)
+        except Exception:
+            _rl_model_cache[tag] = None   # mark as unavailable
+
+    model = _rl_model_cache.get(tag)
+    if model is None:
+        random.shuffle(cards)
+        return cards
+
+    try:
+        from pigame.rl_env import encode_card, CARD_FEATURES
+        import math
+
+        # Build the same obs vector as PirateEnv._build_obs
+        # (must match the training env; defaults ncardslots=5, max_rounds=60)
+        ncardslots = len(playable_cards)
+        max_health = ncardsavail + 3   # FREE_HEALTH_OFFSET = 3
+        p = current_state
+        # We don't have map size here, so use rough normalisers
+        map_w = getattr(p, "_map_w", 25)
+        map_h = getattr(p, "_map_h", 20)
+        map_diag = math.sqrt(map_w ** 2 + map_h ** 2)
+
+        cp_x = getattr(p, "_cp_x", p.xpos)
+        cp_y = getattr(p, "_cp_y", p.ypos)
+        angle = p.direction * math.pi / 2
+
+        n_cps = getattr(p, "_n_checkpoints", 1)
+        state = np.array([
+            p.xpos / map_w * 2.0 - 1.0,
+            p.ypos / map_h * 2.0 - 1.0,
+            math.sin(angle),
+            math.cos(angle),
+            p.health / max_health * 2.0 - 1.0,
+            (p.next_checkpoint - 1) / max(1, n_cps),
+            (cp_x - p.xpos) / map_diag,
+            (cp_y - p.ypos) / map_diag,
+            0.0,   # round fraction unknown here; use 0
+        ], dtype=np.float32)
+
+        card_vecs = np.concatenate([encode_card(c) for c in playable_cards])
+        obs = np.concatenate([state, card_vecs])
+
+        action, _ = model.predict(obs[np.newaxis], deterministic=True)
+        action = np.asarray(action).flatten()
+        order = list(np.argsort(-action))
+        return [cards[i] for i in order]
+    except Exception:
+        random.shuffle(cards)
+        return cards
 
 
 # ── Redis-backed wrapper used by the HTTP game view ──────────────────────────
