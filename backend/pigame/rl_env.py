@@ -10,17 +10,24 @@ Observation (flat float32):
                                     health_norm, cp_progress, dx_to_cp,
                                     dy_to_cp, round_norm
     per card      (ncardslots × 9)  one-hot card type (8) + rank_norm
-    map layout    (W × H × 9)       per-tile: collision, void, current_x/y,
-                                    vortex/2, damage, turret_x/y, fast_current
     per opp slot  (max_opponents×8) x_norm, y_norm, sin/cos(dir), health_norm,
                                     cp_progress, dx_to_their_cp, dy_to_their_cp
                                     (zero-padded when no opponent in that slot)
+    ego-centric crop  (CROP_SIZE × CROP_SIZE × N_TILE_PROPS)
+                                    CROP_SIZE×CROP_SIZE tile window centred on
+                                    the agent, encoded as N_TILE_PROPS floats
+                                    per tile.  Out-of-bounds tiles filled with
+                                    collision=1.  Layout is (row, col, channel)
+                                    i.e. spatial → CNN-friendly.
+
+The scalar prefix (state + cards + opp) is followed by the spatial suffix
+(crop) so the features extractor can split at index n_scalar.
+
+obs_dim is map-independent — the same trained model works on any map.
 
 Action (float32, shape = (N_CARD_TYPES,) = (8,)):
     Preference score per card type.  The hand is sorted so the card whose
     type has the highest preference score plays first; ties broken by rank.
-    Using type preferences means the policy learns a consistent strategy
-    across different hand compositions.
 
 Install deps before use:
     pip install gymnasium stable-baselines3
@@ -80,41 +87,77 @@ def encode_card(card_val: int) -> np.ndarray:
 
 # ── map tile encoding ─────────────────────────────────────────────────────────
 
-_TILE_PROP_ORDER = [
-    "collision",    # 0/1
-    "void",         # 0/1
-    "current_x",    # -1/0/1
-    "current_y",    # -1/0/1
-    "vortex",       # -2..2 (scaled ×0.5 below)
-    "damage",       # 0/1 or negative for repair
-    "turret_x",     # -1/0/1
-    "turret_y",     # -1/0/1
-    "fast_current", # 0/1
-]
-N_TILE_PROPS = len(_TILE_PROP_ORDER)  # 9
+N_TILE_PROPS = 9  # number of floats per tile in the encoded representation
+
+# Ego-centric crop window size (odd so agent is exactly at centre).
+# 21×21 covers 10 tiles in every direction — enough for 5×fwd3 look-ahead.
+CROP_SIZE = 21
+CROP_HALF = CROP_SIZE // 2  # 10
+N_CROP_FEATS = CROP_SIZE * CROP_SIZE * N_TILE_PROPS  # 3969
 
 
-def encode_map(gmap) -> np.ndarray:
+def _encode_tile(prop) -> np.ndarray:
+    """9-float feature vector for one tile property dict."""
+    return np.array([
+        float(prop["collision"]),
+        float(prop["void"]),
+        float(prop["current_x"]),
+        float(prop["current_y"]),
+        float(prop["vortex"]) * 0.5,
+        float(prop["damage"]),
+        float(prop["turret_x"]),
+        float(prop["turret_y"]),
+        float(prop.get("fast_current", False)),
+    ], dtype=np.float32)
+
+
+def build_tile_feature_array(gmap) -> np.ndarray:
     """
-    Flat float32 array of shape (W * H * N_TILE_PROPS,) encoding the full map.
-    Precomputed once at env init; the array is reused for every observation.
+    Precompute an (W, H, N_TILE_PROPS) float32 array for O(1) crop extraction.
+    Indexed as [x, y, channel] — same convention as get_tile_properties(gmap, x, y).
     """
     w, h = gmap["width"], gmap["height"]
-    out = np.zeros(w * h * N_TILE_PROPS, dtype=np.float32)
+    arr = np.zeros((w, h, N_TILE_PROPS), dtype=np.float32)
     for xi in range(w):
         for yi in range(h):
-            prop = get_tile_properties(gmap, xi, yi)
-            base = (xi * h + yi) * N_TILE_PROPS
-            out[base + 0] = float(prop["collision"])
-            out[base + 1] = float(prop["void"])
-            out[base + 2] = float(prop["current_x"])
-            out[base + 3] = float(prop["current_y"])
-            out[base + 4] = float(prop["vortex"]) * 0.5
-            out[base + 5] = float(prop["damage"])
-            out[base + 6] = float(prop["turret_x"])
-            out[base + 7] = float(prop["turret_y"])
-            out[base + 8] = float(prop.get("fast_current", False))
-    return out
+            arr[xi, yi] = _encode_tile(get_tile_properties(gmap, xi, yi))
+    return arr
+
+
+def ego_crop_flat(tile_arr: np.ndarray, px: int, py: int,
+                  map_w: int, map_h: int) -> np.ndarray:
+    """
+    Return a flat float32 array of shape (N_CROP_FEATS,) — the CROP_SIZE×CROP_SIZE
+    tile window centred on (px, py).  Out-of-bounds tiles have collision=1.
+
+    Layout: crop[row, col, channel] → flattened row-major.
+    row increases with +y (downward), col increases with +x (rightward).
+    """
+    out = np.zeros((CROP_SIZE, CROP_SIZE, N_TILE_PROPS), dtype=np.float32)
+    out[:, :, 0] = 1.0  # default: wall / collision
+
+    # Map crop rows (dy ∈ [-CROP_HALF, CROP_HALF]) to y coords
+    y0_map = py - CROP_HALF
+    x0_map = px - CROP_HALF
+
+    # Clamp to valid map range
+    xi_lo = max(0, x0_map)
+    xi_hi = min(map_w, x0_map + CROP_SIZE)
+    yi_lo = max(0, y0_map)
+    yi_hi = min(map_h, y0_map + CROP_SIZE)
+
+    if xi_lo < xi_hi and yi_lo < yi_hi:
+        # Crop output indices
+        col_lo = xi_lo - x0_map
+        col_hi = col_lo + (xi_hi - xi_lo)
+        row_lo = yi_lo - y0_map
+        row_hi = row_lo + (yi_hi - yi_lo)
+        # tile_arr[xi, yi] → crop[row=yi-y0_map, col=xi-x0_map]
+        # Use transpose: tile_arr[xi_lo:xi_hi, yi_lo:yi_hi] has shape (Dx, Dy, C)
+        # We need (Dy, Dx, C) = (row, col, C), so transpose axes 0 and 1.
+        out[row_lo:row_hi, col_lo:col_hi] = tile_arr[xi_lo:xi_hi, yi_lo:yi_hi].transpose(1, 0, 2)
+
+    return out.flatten()
 
 
 # ── reward weights ─────────────────────────────────────────────────────────────
@@ -230,12 +273,15 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         ][0]
         self._tile_w = self._map_data["tilewidth"]
         self._tile_h = self._map_data["tileheight"]
-        self._map_features: np.ndarray = encode_map(self._map_data)
 
-        # obs = agent_state(9) + cards(ncardslots×9) + map(W×H×9) + opp_slots(max_opponents×8)
-        obs_dim = (9 + ncardslots * CARD_FEATURES
-                   + len(self._map_features)
-                   + self.max_opponents * 8)
+        # Precompute (W, H, N_TILE_PROPS) array for O(1) crop extraction
+        self._tile_arr: np.ndarray = build_tile_feature_array(self._map_data)
+
+        # obs layout: [scalar prefix] + [ego crop suffix]
+        # scalar = state(9) + cards(ncardslots×CARD_FEATURES) + opp(max_opponents×8)
+        # crop  = CROP_SIZE×CROP_SIZE×N_TILE_PROPS  (map-independent size)
+        self.n_scalar = 9 + ncardslots * CARD_FEATURES + self.max_opponents * 8
+        obs_dim = self.n_scalar + N_CROP_FEATS
         self.observation_space = spaces.Box(
             low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32
         )
@@ -302,8 +348,10 @@ class PirateEnv(gym.Env if HAS_GYM else object):
 
         hand = self._deck[self._next_card : self._next_card + self.ncardslots]
         cards = np.concatenate([encode_card(c) for c in hand])
+        crop = ego_crop_flat(self._tile_arr, p.xpos, p.ypos, self._map_w, self._map_h)
 
-        return np.concatenate([state, cards, self._map_features, self._opp_obs_block()])
+        # layout: scalar prefix then spatial suffix (CNN extractor splits here)
+        return np.concatenate([state, cards, self._opp_obs_block(), crop])
 
     def _make_player(self, pid, sx, sy, sd, color, name):
         max_health = self.ncardsavail + FREE_HEALTH_OFFSET

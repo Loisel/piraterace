@@ -226,7 +226,9 @@ def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail,
         return cards
 
     try:
-        from pigame.rl_env import encode_card, encode_map, _CARD_ID_TO_IDX, N_CARD_TYPES
+        from pigame.rl_env import (encode_card, build_tile_feature_array,
+                                    ego_crop_flat, _CARD_ID_TO_IDX,
+                                    N_CARD_TYPES, N_CROP_FEATS, CARD_FEATURES)
         from pigame.models import card_id_rank
 
         p = current_state
@@ -261,21 +263,28 @@ def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail,
 
         card_vecs = np.concatenate([encode_card(c) for c in playable_cards])
 
-        # Map features — encoded once per map_data object, then cached
+        # Tile feature array — cached per map_data object
         if map_data is not None and id(map_data) not in _rl_map_enc_cache:
-            _rl_map_enc_cache[id(map_data)] = encode_map(map_data)
-        map_feats = _rl_map_enc_cache.get(id(map_data), np.array([], dtype=np.float32))
+            _rl_map_enc_cache[id(map_data)] = build_tile_feature_array(map_data)
+        tile_arr = _rl_map_enc_cache.get(id(map_data))
 
-        # Opponent features — infer how many slots the model expects from obs dim
-        base_dim = 9 + len(playable_cards) * (N_CARD_TYPES + 1) + len(map_feats)
-        model_obs_dim = sess.get_inputs()[0].shape[1] if sess.get_inputs()[0].shape[1] else base_dim
-        n_opp_slots = max(0, (model_obs_dim - base_dim) // 8)
+        crop = (ego_crop_flat(tile_arr, p.xpos, p.ypos, map_w, map_h)
+                if tile_arr is not None
+                else np.zeros(N_CROP_FEATS, dtype=np.float32))
+
+        # Infer how many opponent slots the model expects:
+        # obs_dim = n_scalar + N_CROP_FEATS
+        # n_scalar = 9 + ncardslots*CARD_FEATURES + n_opp_slots*8
+        model_obs_dim = sess.get_inputs()[0].shape[1] or (9 + len(playable_cards) * CARD_FEATURES + N_CROP_FEATS)
+        n_base = 9 + len(playable_cards) * CARD_FEATURES
+        n_opp_slots = max(0, (model_obs_dim - N_CROP_FEATS - n_base) // 8)
 
         opp_block = np.zeros(n_opp_slots * 8, dtype=np.float32)
         if n_opp_slots > 0 and opponent_states:
             for i, opp in enumerate(opponent_states[:n_opp_slots]):
                 ocp_idx = min(opp.next_checkpoint, n_cps)
-                ocx, ocy = checkpoints.get(ocp_idx, (opp.xpos, opp.ypos)) if checkpoints else (opp.xpos, opp.ypos)
+                ocx, ocy = (checkpoints.get(ocp_idx, (opp.xpos, opp.ypos))
+                            if checkpoints else (opp.xpos, opp.ypos))
                 oang = opp.direction * math.pi / 2
                 b = i * 8
                 opp_block[b+0] = opp.xpos / map_w * 2.0 - 1.0
@@ -287,7 +296,8 @@ def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail,
                 opp_block[b+6] = (ocx - opp.xpos) / map_diag
                 opp_block[b+7] = (ocy - opp.ypos) / map_diag
 
-        obs = np.concatenate([state, card_vecs, map_feats, opp_block]).reshape(1, -1)
+        # layout matches PirateEnv._build_obs: [scalar prefix | crop suffix]
+        obs = np.concatenate([state, card_vecs, opp_block, crop]).reshape(1, -1)
 
         type_scores = sess.run(["action_mean"], {"obs": obs})[0].flatten()
 

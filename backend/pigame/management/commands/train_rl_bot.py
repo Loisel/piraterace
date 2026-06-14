@@ -89,6 +89,7 @@ class Command(BaseCommand):
             )
 
         from pigame.rl_env import PirateEnv, SOLO_WEIGHTS, RACE_WEIGHTS
+        from pigame.rl_policy import PirateCNNExtractor
 
         mapfile = options["mapfile"]
         total_steps = options["steps"]
@@ -145,6 +146,12 @@ class Command(BaseCommand):
                 self.stdout.write(f"  Loaded VecNormalize stats from {stats_path}")
             model = PPO.load(options["resume"], env=vec_env)
         else:
+            # Compute n_scalar to pass to the CNN extractor so it knows
+            # where the scalar prefix ends and the spatial crop begins.
+            _tmp_env = make_env()
+            n_scalar = _tmp_env.n_scalar
+            del _tmp_env
+
             model = PPO(
                 "MlpPolicy",
                 vec_env,
@@ -157,7 +164,14 @@ class Command(BaseCommand):
                 gae_lambda=0.95,
                 clip_range=0.2,
                 ent_coef=0.01,
-                policy_kwargs=dict(net_arch=[256, 256, 128]),
+                policy_kwargs=dict(
+                    features_extractor_class=PirateCNNExtractor,
+                    features_extractor_kwargs=dict(
+                        n_scalar=n_scalar,
+                        features_dim=256,
+                    ),
+                    net_arch=[128, 128],   # smaller head — CNN does heavy lifting
+                ),
                 tensorboard_log=os.path.join(base_dir, "tb_logs"),
             )
 
