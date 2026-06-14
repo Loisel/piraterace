@@ -280,6 +280,89 @@ def play_stack(game):
     return players, actionstack
 
 
+def play_one_round(players, initial_map, round_cards, ncardsavail):
+    """
+    Process one round for an already-initialised players dict.
+
+    This is the O(1)-per-round path used by the bot evaluator. Unlike
+    play_stack (which replays the full card history from scratch each call),
+    this function starts from whatever state is already in `players` and
+    applies exactly one round of cards, mutating `players` in place.
+
+    Args:
+        players:      {pid: SimpleNamespace} — mutated in place.
+                      Required fields: id, xpos, ypos, direction, health,
+                      next_checkpoint, last_cp_x, last_cp_y,
+                      cannon_direction, powered_down.
+        initial_map:  pre-loaded map data dict (caller caches this — no Redis hit).
+        round_cards:  flat list [pid, card, pid, card, …, BACKEND_USERID, ROUNDEND_CARDID]
+        ncardsavail:  hand size; used for max-health calculations.
+
+    Returns:
+        game_over (bool): True if any player reached their final checkpoint.
+    """
+    checkpoints = determine_checkpoint_locations(initial_map)
+    cardstack = list(zip(round_cards[::2], round_cards[1::2]))
+
+    # Inner functions only need game.config.ncardsavail — nothing else.
+    _game = types.SimpleNamespace(config=types.SimpleNamespace(ncardsavail=ncardsavail))
+
+    game_over = False
+    n_players = len(players)
+    Nplayercardsplayedthisround = 0
+    powerdowncards = []
+
+    for playerid, card in cardstack:
+        if card == ROUNDEND_CARDID:
+            for player in players.values():
+                if (
+                    player.health > 0
+                    and player.xpos == checkpoints[player.next_checkpoint][0]
+                    and player.ypos == checkpoints[player.next_checkpoint][1]
+                ):
+                    if player.next_checkpoint == len(checkpoints):
+                        game_over = True
+                    player.next_checkpoint += 1
+                    player.last_cp_x = player.xpos
+                    player.last_cp_y = player.ypos
+
+            for player in players.values():
+                player.powered_down = False
+            for pid in powerdowncards:
+                if players[pid].health <= 0:
+                    continue
+                players[pid].health = ncardsavail + FREE_HEALTH_OFFSET
+                players[pid].powered_down = True
+            powerdowncards = []
+
+            for p in players.values():
+                if p.health <= 0:
+                    p.health = ncardsavail
+                    p.xpos = p.last_cp_x
+                    p.ypos = p.last_cp_y
+
+        elif card == POWER_DOWN_CARDID:
+            powerdowncards.append(playerid)
+
+        elif card in CANNON_DIRECTION_CARDS:
+            players[playerid].cannon_direction = CANNON_DIRECTION_CARDS[card]["direction"]
+
+        else:
+            Nplayercardsplayedthisround += 1
+            get_actions_for_card(_game, initial_map, players, players[playerid], card)
+
+            if Nplayercardsplayedthisround == n_players:
+                Nplayercardsplayedthisround = 0
+                board_moves(_game, initial_map, players)
+                board_turrets(_game, initial_map, players)
+                board_repair(_game, initial_map, players)
+                for p in players.values():
+                    if p.health > 0 and not p.powered_down:
+                        shoot_player_cannon(_game, initial_map, players, p)
+
+    return game_over
+
+
 def kill_player(p):
     p.health = 0
     p.xpos = p.ypos = -99

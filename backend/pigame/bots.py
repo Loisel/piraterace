@@ -3,8 +3,9 @@ Bot card-picking logic.
 
 Public surface:
     pick_cards(bot_type, playable_cards, *, mapfile, player_id, current_state,
-               checkpoints, ncardsavail)  →  List[int]
+               checkpoints, ncardsavail, map_data=None)  →  List[int]
         Pure function — no DB or Redis access.  Safe to call from the evaluator.
+        Pass map_data to skip Redis and use play_one_round (fast path).
 
     bot_submit_cards(gamecfg, player_idx, bot_type, *, game, player_states)
         Redis-backed wrapper used by the HTTP game view.
@@ -13,6 +14,7 @@ Public surface:
 import itertools
 import math
 import random
+import types
 
 from pigame.game_logic import (
     BACKEND_USERID,
@@ -20,30 +22,27 @@ from pigame.game_logic import (
     determine_checkpoint_locations,
     get_player_deck,
     load_map,
+    play_one_round,
     play_stack,
     set_player_deck,
 )
+from pigame.models import CANNON_DIRECTION, FREE_HEALTH_OFFSET
 
 
 # ── pure picking API (no Redis) ──────────────────────────────────────────────
 
 def pick_cards(bot_type, playable_cards, *, mapfile=None, player_id=None,
-               current_state=None, checkpoints=None, ncardsavail=None):
+               current_state=None, checkpoints=None, ncardsavail=None,
+               map_data=None):
     """
     Reorder `playable_cards` (length == ncardslots) and return the best ordering.
 
-    Args:
-        bot_type:       "random" | "greedy"
-        playable_cards: list of card values that will be played this round
-        mapfile:        map filename (needed by greedy for simulation)
-        player_id:      fake or real player id (needed by greedy)
-        current_state:  SimpleNamespace with .xpos/.ypos/.direction (from play_stack)
-        checkpoints:    dict {cp_num: (x, y)} (pre-computed to avoid re-loading map)
-        ncardsavail:    hand size (needed by greedy simulation health init)
+    When map_data is provided, the greedy simulation uses play_one_round (fast,
+    no Redis). When only mapfile is given, it falls back to play_stack + Redis.
     """
     if bot_type == "greedy":
-        return _greedy_pick(playable_cards, mapfile, player_id, current_state, checkpoints, ncardsavail)
-    # default: random
+        return _greedy_pick(playable_cards, mapfile, player_id, current_state,
+                            checkpoints, ncardsavail, map_data)
     cards = list(playable_cards)
     random.shuffle(cards)
     return cards
@@ -52,13 +51,13 @@ def pick_cards(bot_type, playable_cards, *, mapfile=None, player_id=None,
 # ── greedy implementation ────────────────────────────────────────────────────
 
 class _SimObj:
-    """Fake game/config whose save() is a no-op so simulations skip DB writes."""
+    """Fake game/config whose save() is a no-op so play_stack skips DB writes."""
     def save(self, **kwargs):
         pass
 
 
 def _simulate_end_pos(mapfile, player_id, current_state, card_list, ncardsavail):
-    """Single-player play_stack simulation; returns (xpos, ypos) after one round."""
+    """Slow path: single-player play_stack simulation via Redis map load."""
     cfg = _SimObj()
     cfg.mapfile = mapfile
     cfg.player_ids = [player_id]
@@ -87,9 +86,40 @@ def _simulate_end_pos(mapfile, player_id, current_state, card_list, ncardsavail)
         return current_state.xpos, current_state.ypos
 
 
-def _greedy_pick(playable_cards, mapfile, player_id, current_state, checkpoints, ncardsavail):
-    """Try up to 100 permutations of playable_cards; return the one ending closest to next checkpoint."""
-    if current_state is None or checkpoints is None or mapfile is None:
+def _simulate_end_pos_fast(map_data, player_id, current_state, card_list, ncardsavail):
+    """Fast path: uses play_one_round with pre-loaded map data — no Redis hit."""
+    player = types.SimpleNamespace(
+        id=player_id,
+        xpos=current_state.xpos,
+        ypos=current_state.ypos,
+        direction=current_state.direction,
+        health=ncardsavail + FREE_HEALTH_OFFSET,
+        next_checkpoint=getattr(current_state, "next_checkpoint", 1),
+        last_cp_x=getattr(current_state, "last_cp_x", current_state.xpos),
+        last_cp_y=getattr(current_state, "last_cp_y", current_state.ypos),
+        cannon_direction=CANNON_DIRECTION.FORWARD,
+        powered_down=False,
+        color=getattr(current_state, "color", "#888888"),
+        name=getattr(current_state, "name", "bot"),
+    )
+    players = {player_id: player}
+
+    sim_cards = []
+    for card in card_list:
+        sim_cards.extend([player_id, card])
+    sim_cards.extend([BACKEND_USERID, ROUNDEND_CARDID])
+
+    try:
+        play_one_round(players, map_data, sim_cards, ncardsavail)
+        return player.xpos, player.ypos
+    except Exception:
+        return current_state.xpos, current_state.ypos
+
+
+def _greedy_pick(playable_cards, mapfile, player_id, current_state, checkpoints,
+                 ncardsavail, map_data=None):
+    """Try up to 100 permutations; return the ordering ending closest to next checkpoint."""
+    if current_state is None or checkpoints is None:
         cards = list(playable_cards)
         random.shuffle(cards)
         return cards
@@ -102,6 +132,16 @@ def _greedy_pick(playable_cards, mapfile, player_id, current_state, checkpoints,
     ncardslots = len(playable_cards)
     N_PERMS = 100
     n_total = math.factorial(ncardslots)
+
+    # Choose simulation backend
+    if map_data is not None:
+        simulate = lambda perm: _simulate_end_pos_fast(map_data, player_id, current_state, perm, ncardsavail)
+    elif mapfile is not None:
+        simulate = lambda perm: _simulate_end_pos(mapfile, player_id, current_state, perm, ncardsavail)
+    else:
+        cards = list(playable_cards)
+        random.shuffle(cards)
+        return cards
 
     best_dist = float("inf")
     best_order = list(playable_cards)
@@ -124,7 +164,7 @@ def _greedy_pick(playable_cards, mapfile, player_id, current_state, checkpoints,
             continue
         seen.add(key)
 
-        ex, ey = _simulate_end_pos(mapfile, player_id, current_state, perm, ncardsavail)
+        ex, ey = simulate(perm)
         dist = (ex - cp_x) ** 2 + (ey - cp_y) ** 2
         if dist < best_dist:
             best_dist = dist
@@ -164,6 +204,7 @@ def bot_submit_cards(gamecfg, player_idx, bot_type, game=None, player_states=Non
         current_state=current_state,
         checkpoints=checkpoints,
         ncardsavail=ncardsavail,
+        # No map_data here — HTTP path uses Redis-cached map via play_stack
     )
     deck[next_card : next_card + ncardsavail] = best_playable + remainder
     set_player_deck(gamecfg, player_id, deck)
