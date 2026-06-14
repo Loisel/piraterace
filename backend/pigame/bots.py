@@ -33,7 +33,7 @@ from pigame.models import CANNON_DIRECTION, FREE_HEALTH_OFFSET
 
 def pick_cards(bot_type, playable_cards, *, mapfile=None, player_id=None,
                current_state=None, checkpoints=None, ncardsavail=None,
-               map_data=None):
+               map_data=None, **kwargs):
     """
     Reorder `playable_cards` (length == ncardslots) and return the best ordering.
 
@@ -45,7 +45,8 @@ def pick_cards(bot_type, playable_cards, *, mapfile=None, player_id=None,
                             checkpoints, ncardsavail, map_data)
     if bot_type.startswith("rl"):
         return _rl_pick(bot_type, playable_cards, current_state, ncardsavail,
-                        checkpoints=checkpoints, map_data=map_data)
+                        checkpoints=checkpoints, map_data=map_data,
+                        opponent_states=kwargs.get("opponent_states"))
     cards = list(playable_cards)
     random.shuffle(cards)
     return cards
@@ -183,7 +184,7 @@ _rl_map_enc_cache: dict = {}   # id(map_data) → encoded map feature array
 
 
 def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail,
-             checkpoints=None, map_data=None):
+             checkpoints=None, map_data=None, opponent_states=None):
     """
     Use a trained PPO policy (exported to ONNX) to pick card play order.
 
@@ -265,7 +266,28 @@ def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail,
             _rl_map_enc_cache[id(map_data)] = encode_map(map_data)
         map_feats = _rl_map_enc_cache.get(id(map_data), np.array([], dtype=np.float32))
 
-        obs = np.concatenate([state, card_vecs, map_feats]).reshape(1, -1)
+        # Opponent features — infer how many slots the model expects from obs dim
+        base_dim = 9 + len(playable_cards) * (N_CARD_TYPES + 1) + len(map_feats)
+        model_obs_dim = sess.get_inputs()[0].shape[1] if sess.get_inputs()[0].shape[1] else base_dim
+        n_opp_slots = max(0, (model_obs_dim - base_dim) // 8)
+
+        opp_block = np.zeros(n_opp_slots * 8, dtype=np.float32)
+        if n_opp_slots > 0 and opponent_states:
+            for i, opp in enumerate(opponent_states[:n_opp_slots]):
+                ocp_idx = min(opp.next_checkpoint, n_cps)
+                ocx, ocy = checkpoints.get(ocp_idx, (opp.xpos, opp.ypos)) if checkpoints else (opp.xpos, opp.ypos)
+                oang = opp.direction * math.pi / 2
+                b = i * 8
+                opp_block[b+0] = opp.xpos / map_w * 2.0 - 1.0
+                opp_block[b+1] = opp.ypos / map_h * 2.0 - 1.0
+                opp_block[b+2] = math.sin(oang)
+                opp_block[b+3] = math.cos(oang)
+                opp_block[b+4] = opp.health / max_health * 2.0 - 1.0
+                opp_block[b+5] = (opp.next_checkpoint - 1) / max(1, n_cps)
+                opp_block[b+6] = (ocx - opp.xpos) / map_diag
+                opp_block[b+7] = (ocy - opp.ypos) / map_diag
+
+        obs = np.concatenate([state, card_vecs, map_feats, opp_block]).reshape(1, -1)
 
         type_scores = sess.run(["action_mean"], {"obs": obs})[0].flatten()
 
@@ -296,12 +318,16 @@ def bot_submit_cards(gamecfg, player_idx, bot_type, game=None, player_states=Non
     checkpoints = None
     current_state = None
     map_data = None
+    opponent_states = None
     if bot_type in ("greedy", "rl") or bot_type.startswith("rl:"):
         if player_states and player_id in player_states:
             try:
                 map_data = load_map(gamecfg.mapfile)
                 checkpoints = determine_checkpoint_locations(map_data)
                 current_state = player_states[player_id]
+                opponent_states = [
+                    st for pid, st in player_states.items() if pid != player_id
+                ]
             except Exception:
                 pass
 
@@ -314,6 +340,7 @@ def bot_submit_cards(gamecfg, player_idx, bot_type, game=None, player_states=Non
         checkpoints=checkpoints,
         ncardsavail=ncardsavail,
         map_data=map_data,
+        opponent_states=opponent_states,
     )
     deck[next_card : next_card + ncardsavail] = best_playable + remainder
     set_player_deck(gamecfg, player_id, deck)

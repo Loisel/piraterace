@@ -1,21 +1,46 @@
 """
 Train a PPO reinforcement-learning bot for PirateRace.
 
-Requirements (not in main requirements.txt — install separately):
-    pip install gymnasium stable-baselines3
+Requirements (install separately — not in main requirements.txt):
+    pip install gymnasium stable-baselines3 onnxruntime
 
-Examples:
-    # Solo agent on map1, 500k steps, save to pigame/rl_models/
+────────────────────────────────────────────────────────────────
+QUICK START — solo bot on map1 (500k steps)
+────────────────────────────────────────────────────────────────
     python manage.py train_rl_bot
 
-    # Longer run on the_hammer
-    python manage.py train_rl_bot --map the_hammer.json --steps 2000000
+CURRICULUM TRAINING (recommended — 3-stage pipeline)
+────────────────────────────────────────────────────────────────
+Stage 1 — teach navigation (solo):
+    python manage.py train_rl_bot \\
+        --steps 2000000 --out pigame/rl_models/stage1_solo
 
-    # Resume from checkpoint
-    python manage.py train_rl_bot --resume pigame/rl_models/solo_map1
+Stage 2 — introduce competition (vs random):
+    python manage.py train_rl_bot \\
+        --steps 1000000 --opponents random \\
+        --resume pigame/rl_models/stage1_solo \\
+        --out pigame/rl_models/stage2_vs_random
 
-    # Evaluate an existing model (no training)
-    python manage.py train_rl_bot --eval-only pigame/rl_models/solo_map1 --games 50
+Stage 3 — harden against greedy:
+    python manage.py train_rl_bot \\
+        --steps 1000000 --opponents greedy \\
+        --resume pigame/rl_models/stage2_vs_random \\
+        --out pigame/rl_models/stage3_vs_greedy
+
+After stage 3, deploy the ONNX model:
+    cp pigame/rl_models/stage3_vs_greedy.onnx pigame/rl_models/solo_map1.onnx
+    cp pigame/rl_models/stage3_vs_greedy.onnx.data pigame/rl_models/solo_map1.onnx.data
+
+EVALUATION ONLY
+────────────────────────────────────────────────────────────────
+    python manage.py train_rl_bot \\
+        --eval-only pigame/rl_models/solo_map1 --games 100
+
+OTHER OPTIONS
+────────────────────────────────────────────────────────────────
+    --map the_hammer.json   Train on a different map
+    --envs 8                Parallel rollout environments
+    --max-rounds 60         Episode length cap
 """
 
 import os
@@ -30,21 +55,27 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("--map", default="map1.json", dest="mapfile",
-                            help="Map to train on. Default: map1.json")
+                            help="Map file to train on (default: map1.json)")
         parser.add_argument("--steps", type=int, default=500_000,
-                            help="Total env steps for training. Default: 500000")
+                            help="Total environment steps (default: 500000)")
         parser.add_argument("--envs", type=int, default=8,
-                            help="Parallel env copies for rollout. Default: 8")
+                            help="Parallel rollout environments (default: 8)")
         parser.add_argument("--out", default=None, dest="out_path",
-                            help="Model save path (no .zip). Default: pigame/rl_models/solo_<map>")
+                            help="Model save path without extension (default: rl_models/solo_<map>)")
         parser.add_argument("--resume", default=None,
-                            help="Path to existing model to resume training.")
+                            help="Existing model path to resume from")
         parser.add_argument("--eval-only", default=None, dest="eval_only",
-                            help="Skip training; evaluate model at this path.")
+                            help="Skip training; evaluate model at this path")
         parser.add_argument("--games", type=int, default=100,
-                            help="Evaluation games after training. Default: 100")
+                            help="Number of evaluation games (default: 100)")
         parser.add_argument("--max-rounds", type=int, default=60, dest="max_rounds",
-                            help="Max rounds per episode. Default: 60")
+                            help="Max rounds per episode (default: 60)")
+        parser.add_argument("--opponents", nargs="*", default=[],
+                            help="Bot types to play against, e.g. --opponents random greedy")
+        parser.add_argument("--max-opponents", type=int, default=1, dest="max_opponents",
+                            help="Observation slots reserved for opponents (default: 1). "
+                                 "Keep this constant across curriculum stages so obs shape "
+                                 "stays fixed and --resume works.")
 
     def handle(self, *args, **options):
         try:
@@ -57,45 +88,51 @@ class Command(BaseCommand):
                 "Install with: pip install gymnasium stable-baselines3"
             )
 
-        from pigame.rl_env import PirateEnv, SOLO_WEIGHTS
+        from pigame.rl_env import PirateEnv, SOLO_WEIGHTS, RACE_WEIGHTS
 
         mapfile = options["mapfile"]
         total_steps = options["steps"]
         n_envs = options["envs"]
         max_rounds = options["max_rounds"]
         n_eval_games = options["games"]
+        opponent_types = options["opponents"]
+        max_opponents = options["max_opponents"]
 
-        # Resolve output path
+        weights = RACE_WEIGHTS if opponent_types else SOLO_WEIGHTS
+
         base_dir = os.path.join(os.path.dirname(__file__), "..", "..", "rl_models")
         os.makedirs(base_dir, exist_ok=True)
         map_stem = mapfile.replace(".json", "")
         default_out = os.path.join(base_dir, f"solo_{map_stem}")
         out_path = options["out_path"] or default_out
 
-        # ── eval-only mode ────────────────────────────────────────────────────
+        # ── eval-only mode ─────────────────────────────────────────────────────
         if options["eval_only"]:
             model_path = options["eval_only"]
             self.stdout.write(f"Loading model from {model_path} ...")
-            env = PirateEnv(mapfile=mapfile, max_rounds=max_rounds, weights=SOLO_WEIGHTS)
+            env = PirateEnv(mapfile=mapfile, max_rounds=max_rounds,
+                            weights=weights, opponent_types=opponent_types,
+                            max_opponents=max_opponents)
             model = PPO.load(model_path)
-            self._evaluate(model, env, n_eval_games, self.stdout.write)
+            self._evaluate(model, env, n_eval_games, opponent_types, self.stdout.write)
             return
 
-        # ── build vectorised env ──────────────────────────────────────────────
+        # ── build vectorised env ───────────────────────────────────────────────
+        opp_desc = f"vs [{', '.join(opponent_types)}]" if opponent_types else "solo"
         self.stdout.write(
-            f"Training PPO · map={mapfile} · steps={total_steps:,} · {n_envs} envs"
+            f"Training PPO · map={mapfile} · {opp_desc} · "
+            f"steps={total_steps:,} · {n_envs} envs · max_opponents={max_opponents}"
         )
 
         def make_env():
-            return PirateEnv(mapfile=mapfile, max_rounds=max_rounds, weights=SOLO_WEIGHTS)
+            return PirateEnv(
+                mapfile=mapfile, max_rounds=max_rounds,
+                weights=weights, opponent_types=opponent_types,
+                max_opponents=max_opponents,
+            )
 
-        # DummyVecEnv runs envs in-process (safe when Django is already configured).
-        # SubprocVecEnv is faster for CPU-heavy envs but requires each subprocess
-        # to re-initialise Django — set n_envs=1 or use DummyVecEnv if it hangs.
         vec_cls = SubprocVecEnv if n_envs > 1 else DummyVecEnv
         vec_env = make_vec_env(make_env, n_envs=n_envs, vec_env_cls=vec_cls)
-        # Normalise rewards only (not obs) so trained model can be used for
-        # inference in bots.py without needing normalisation stats at runtime.
         vec_env = VecNormalize(vec_env, norm_obs=False, norm_reward=True, gamma=0.99)
 
         # ── create or resume model ─────────────────────────────────────────────
@@ -119,7 +156,8 @@ class Command(BaseCommand):
                 gamma=0.99,
                 gae_lambda=0.95,
                 clip_range=0.2,
-                ent_coef=0.01,       # entropy bonus encourages exploration
+                ent_coef=0.01,
+                policy_kwargs=dict(net_arch=[256, 256, 128]),
                 tensorboard_log=os.path.join(base_dir, "tb_logs"),
             )
 
@@ -131,20 +169,59 @@ class Command(BaseCommand):
 
         # ── save ──────────────────────────────────────────────────────────────
         model.save(out_path)
-        self.stdout.write(f"Model saved to {out_path}.zip")
-        # Save VecNormalize stats so training can be resumed later.
         vec_env.save(out_path + "_vecnorm.pkl")
+        self.stdout.write(f"Model saved → {out_path}.zip")
 
         vec_env.close()
 
-        # ── quick eval after training ──────────────────────────────────────────
-        eval_env = PirateEnv(mapfile=mapfile, max_rounds=max_rounds, weights=SOLO_WEIGHTS)
-        self._evaluate(model, eval_env, n_eval_games, self.stdout.write)
+        # ── export ONNX ────────────────────────────────────────────────────────
+        self.stdout.write("Exporting to ONNX ...")
+        try:
+            self._export_onnx(model, out_path)
+        except Exception as e:
+            self.stdout.write(f"  ONNX export failed: {e}")
+
+        # ── eval ───────────────────────────────────────────────────────────────
+        eval_env = PirateEnv(mapfile=mapfile, max_rounds=max_rounds,
+                             weights=weights, opponent_types=opponent_types,
+                             max_opponents=max_opponents)
+        self._evaluate(model, eval_env, n_eval_games, opponent_types, self.stdout.write)
+
+    # ── ONNX export ───────────────────────────────────────────────────────────
+
+    @staticmethod
+    def _export_onnx(model, out_path: str):
+        import torch
+
+        policy = model.policy
+        policy.eval()
+        obs_dim = model.observation_space.shape[0]
+
+        class DetActionNet(torch.nn.Module):
+            def __init__(self, p):
+                super().__init__()
+                self.policy = p
+            def forward(self, obs):
+                features = self.policy.extract_features(obs, self.policy.features_extractor)
+                latent_pi, _ = self.policy.mlp_extractor(features)
+                return self.policy.action_net(latent_pi)
+
+        net = DetActionNet(policy)
+        dummy = torch.zeros(1, obs_dim)
+        onnx_path = out_path + ".onnx"
+        torch.onnx.export(
+            net, dummy, onnx_path,
+            input_names=["obs"], output_names=["action_mean"],
+            dynamic_axes={"obs": {0: "batch"}},
+            opset_version=17,
+        )
+        size_kb = os.path.getsize(onnx_path) / 1024
+        print(f"  ONNX exported → {onnx_path}  ({size_kb:.0f} KB)")
 
     # ── evaluation helper ─────────────────────────────────────────────────────
 
     @staticmethod
-    def _evaluate(model, env, n_games: int, write):
+    def _evaluate(model, env, n_games: int, opponent_types: list, write):
         import numpy as np
 
         wins = 0
@@ -161,11 +238,12 @@ class Command(BaseCommand):
             total_rounds += info["round"]
             cps = info["checkpoints"]
             total_cps.append(cps)
-            if terminated:
+            if info.get("won", terminated):
                 wins += 1
 
+        opp_desc = f" vs {opponent_types}" if opponent_types else " (solo)"
         write("")
-        write(f"  Eval over {n_games} games:")
+        write(f"  Eval over {n_games} games{opp_desc}:")
         write(f"    Win rate       : {wins}/{n_games}  ({wins/n_games*100:.1f}%)")
         write(f"    Avg rounds     : {total_rounds/n_games:.1f}")
         write(f"    Avg checkpoints: {sum(total_cps)/n_games:.2f}")

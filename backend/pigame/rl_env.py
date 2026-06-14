@@ -1,23 +1,26 @@
 """
 PirateRace gymnasium environment for RL training.
 
-Single-player (solo) mode: one agent navigates all checkpoints.
-Multiplayer will reuse the same class with n_opponents > 0.
+Supports solo and multiplayer (with bot opponents) via the `opponent_types`
+parameter.  Use `max_opponents` to fix the observation size across curriculum
+stages so weights can be transferred between solo and multi-player training.
 
 Observation (flat float32):
-    player_state  (9)   x_norm, y_norm, sin(dir), cos(dir), health_norm,
-                        cp_progress, dx_to_cp, dy_to_cp, round_norm
+    player_state  (9)               x_norm, y_norm, sin(dir), cos(dir),
+                                    health_norm, cp_progress, dx_to_cp,
+                                    dy_to_cp, round_norm
     per card      (ncardslots × 9)  one-hot card type (8) + rank_norm
-    map layout    (W × H × 9)  per-tile: collision, void, current_x/y,
-                                vortex/2, damage, turret_x/y, fast_current
+    map layout    (W × H × 9)       per-tile: collision, void, current_x/y,
+                                    vortex/2, damage, turret_x/y, fast_current
+    per opp slot  (max_opponents×8) x_norm, y_norm, sin/cos(dir), health_norm,
+                                    cp_progress, dx_to_their_cp, dy_to_their_cp
+                                    (zero-padded when no opponent in that slot)
 
 Action (float32, shape = (N_CARD_TYPES,) = (8,)):
     Preference score per card type.  The hand is sorted so the card whose
-    type has the highest preference score plays first; ties are broken by
-    card rank (higher rank first).  Using type preferences instead of per-slot
-    logits means the policy learns a strategy that transfers across different
-    hands — e.g. "in this situation prefer fwd3 > fwd2 > rotL" — rather than
-    memorising which slot to prioritise for each unique hand configuration.
+    type has the highest preference score plays first; ties broken by rank.
+    Using type preferences means the policy learns a consistent strategy
+    across different hand compositions.
 
 Install deps before use:
     pip install gymnasium stable-baselines3
@@ -27,7 +30,7 @@ import copy
 import math
 import random
 import types
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
@@ -43,6 +46,8 @@ from pigame.bot_eval import _advance_deck, _make_deck
 from pigame.game_logic import (
     BACKEND_USERID,
     ROUNDEND_CARDID,
+    argsort,
+    card_id_rank,
     determine_checkpoint_locations,
     determine_starting_locations,
     get_tile_properties,
@@ -59,8 +64,6 @@ from pigame.models import (
 
 # ── card feature encoding ─────────────────────────────────────────────────────
 
-# Fixed mapping from card_id to one-hot index.
-# Covers all card types in DEFAULT_DECK: fwd1/2/3, back1, rotL/R/180, repair.
 _CARD_ID_TO_IDX: Dict[int, int] = {1: 0, 2: 1, 3: 2, 10: 3, 20: 4, 30: 5, 40: 6, 100: 7}
 N_CARD_TYPES = 8
 CARD_FEATURES = N_CARD_TYPES + 1   # one-hot type + normalised rank
@@ -77,10 +80,6 @@ def encode_card(card_val: int) -> np.ndarray:
 
 # ── map tile encoding ─────────────────────────────────────────────────────────
 
-# One float per property, in TILE_DEFAULTS key order.
-# Range notes: current_x/y and turret_x/y are in {-1,0,1};
-#              vortex is in {-2..2} → scaled by 0.5 to fit [-1,1];
-#              damage and fast_current rarely exceed ±1.
 _TILE_PROP_ORDER = [
     "collision",    # 0/1
     "void",         # 0/1
@@ -98,7 +97,6 @@ N_TILE_PROPS = len(_TILE_PROP_ORDER)  # 9
 def encode_map(gmap) -> np.ndarray:
     """
     Flat float32 array of shape (W * H * N_TILE_PROPS,) encoding the full map.
-    Tiles are ordered x-outer, y-inner (same as property_locations iteration).
     Precomputed once at env init; the array is reused for every observation.
     """
     w, h = gmap["width"], gmap["height"]
@@ -126,23 +124,36 @@ class RewardWeights:
     """
     Swap these to shape bot personality without touching the env code.
 
-    Solo-racing weights (default) → bot focuses purely on winning fast.
-
-    Impulsive/aggressive weights → bot values causing damage to opponents
-    (push/shoot) almost as much as advancing toward checkpoints, producing
-    a riskier, more entertaining playstyle even when it doesn't win.
+    Solo weights   → pure racing, no opponent awareness.
+    Race weights   → competitive racing; rewards beating opponents.
+    Impulsive      → values damage/push over winning (fun to play against).
     """
     distance: float = 1.0      # reward per tile moved closer to next CP
     checkpoint: float = 5.0    # flat reward per checkpoint reached
     win: float = 20.0          # flat reward for clearing all checkpoints
     damage_taken: float = -0.5 # per health-point lost (self-damage)
     time: float = -0.01        # per round (encourages speed)
-    # Multiplayer only — ignored in solo:
+    # Multiplayer competitive:
+    win_race: float = 0.0      # extra bonus for finishing before all opponents
+    lose_race: float = 0.0     # penalty when an opponent finishes first
+    lead_bonus: float = 0.0    # per checkpoint the agent is ahead of each opponent
+    # Impulsive / aggressive:
     damage_dealt: float = 0.0  # per health-point dealt to any opponent
     push_opp: float = 0.0      # per tile an opponent was pushed off-course
 
 
 SOLO_WEIGHTS = RewardWeights()
+
+RACE_WEIGHTS = RewardWeights(
+    distance=1.0,
+    checkpoint=5.0,
+    win=20.0,
+    damage_taken=-0.5,
+    time=-0.01,
+    win_race=10.0,
+    lose_race=-5.0,
+    lead_bonus=0.3,
+)
 
 IMPULSIVE_WEIGHTS = RewardWeights(
     distance=0.4,
@@ -150,6 +161,8 @@ IMPULSIVE_WEIGHTS = RewardWeights(
     win=10.0,
     damage_taken=-0.3,
     time=-0.005,
+    win_race=5.0,
+    lose_race=-2.0,
     damage_dealt=3.0,
     push_opp=1.5,
 )
@@ -159,20 +172,19 @@ IMPULSIVE_WEIGHTS = RewardWeights(
 
 class PirateEnv(gym.Env if HAS_GYM else object):
     """
-    Gymnasium-compatible PirateRace environment (single-player for now).
+    Gymnasium-compatible PirateRace environment.
 
-    Usage:
+    Solo (default):
         env = PirateEnv("map1.json")
-        obs, info = env.reset(seed=42)
-        for _ in range(1000):
-            action = env.action_space.sample()
-            obs, reward, terminated, truncated, info = env.step(action)
-            if terminated or truncated:
-                obs, info = env.reset()
 
-    Plugs into stable-baselines3 make_vec_env:
-        from stable_baselines3.common.env_util import make_vec_env
-        vec_env = make_vec_env(lambda: PirateEnv("map1.json"), n_envs=8)
+    Multiplayer — train against a random bot:
+        env = PirateEnv("map1.json", opponent_types=["random"], max_opponents=1)
+
+    Curriculum — fix max_opponents=1 across all stages so obs shape stays
+    constant and weights can be resumed between stages:
+        stage1 = PirateEnv(..., opponent_types=[],         max_opponents=1)
+        stage2 = PirateEnv(..., opponent_types=["random"], max_opponents=1)
+        stage3 = PirateEnv(..., opponent_types=["greedy"], max_opponents=1)
     """
 
     metadata = {"render_modes": []}
@@ -185,6 +197,8 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         max_rounds: int = 60,
         pct_repair: int = 0,
         weights: Optional[RewardWeights] = None,
+        opponent_types: Optional[List[str]] = None,
+        max_opponents: int = 0,
         _map_data=None,
     ):
         if not HAS_GYM:
@@ -197,10 +211,11 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         self.max_rounds = max_rounds
         self.pct_repair = pct_repair
         self.weights = weights if weights is not None else RewardWeights()
+        self.opponent_types: List[str] = list(opponent_types or [])
+        # max_opponents fixes the obs size across curriculum stages.
+        # Must be >= len(opponent_types); defaults to len(opponent_types).
+        self.max_opponents = max(max_opponents, len(self.opponent_types))
 
-        # Load map once; reuse across all episodes (play_one_round reads, not writes).
-        # deep-copy protects Redis-cached version from determine_starting_locations
-        # which shuffles the startinglocs objects list in-place.
         raw = _map_data if _map_data is not None else load_map(mapfile)
         self._map_data = copy.deepcopy(raw)
         self._checkpoints = determine_checkpoint_locations(self._map_data)
@@ -208,8 +223,6 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         self._map_w = self._map_data["width"]
         self._map_h = self._map_data["height"]
         self._map_diag = math.sqrt(self._map_w ** 2 + self._map_h ** 2)
-        # Store starting positions separately so reset() can shuffle a copy
-        # without mutating self._map_data (which would break seed determinism).
         self._start_positions = [
             layer["objects"]
             for layer in self._map_data["layers"]
@@ -217,22 +230,24 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         ][0]
         self._tile_w = self._map_data["tilewidth"]
         self._tile_h = self._map_data["tileheight"]
-
-        # Precompute static map feature array (reused in every obs, never changes)
         self._map_features: np.ndarray = encode_map(self._map_data)
 
-        # obs: player state + card features + full map layout
-        obs_dim = 9 + ncardslots * CARD_FEATURES + len(self._map_features)
+        # obs = agent_state(9) + cards(ncardslots×9) + map(W×H×9) + opp_slots(max_opponents×8)
+        obs_dim = (9 + ncardslots * CARD_FEATURES
+                   + len(self._map_features)
+                   + self.max_opponents * 8)
         self.observation_space = spaces.Box(
             low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32
         )
-        # action: preference score per card type → hand sorted by type preference
         self.action_space = spaces.Box(
             low=-1.0, high=1.0, shape=(N_CARD_TYPES,), dtype=np.float32
         )
 
         # Runtime state — populated by reset()
         self._player: Optional[object] = None
+        self._opponents: Dict[int, object] = {}
+        self._opp_decks: List[List[int]] = []
+        self._opp_next_cards: List[int] = []
         self._deck: List[int] = []
         self._next_card: int = 0
         self._round: int = 0
@@ -240,83 +255,119 @@ class PirateEnv(gym.Env if HAS_GYM else object):
 
     # ── helpers ────────────────────────────────────────────────────────────────
 
-    def _cp_xy(self) -> Tuple[float, float]:
-        p = self._player
-        cp_idx = min(p.next_checkpoint, self._n_checkpoints)
-        return self._checkpoints.get(cp_idx, (p.xpos, p.ypos))
+    def _cp_xy(self, player) -> Tuple[float, float]:
+        cp_idx = min(player.next_checkpoint, self._n_checkpoints)
+        return self._checkpoints.get(cp_idx, (player.xpos, player.ypos))
 
-    def _dist_to_cp(self) -> float:
-        p = self._player
-        cx, cy = self._cp_xy()
-        return math.sqrt((p.xpos - cx) ** 2 + (p.ypos - cy) ** 2)
+    def _dist_to_cp(self, player) -> float:
+        cx, cy = self._cp_xy(player)
+        return math.sqrt((player.xpos - cx) ** 2 + (player.ypos - cy) ** 2)
+
+    def _opp_obs_block(self) -> np.ndarray:
+        block = np.zeros(self.max_opponents * 8, dtype=np.float32)
+        max_h = self.ncardsavail + FREE_HEALTH_OFFSET
+        for i, opp in enumerate(self._opponents.values()):
+            if i >= self.max_opponents:
+                break
+            cx, cy = self._cp_xy(opp)
+            ang = opp.direction * math.pi / 2
+            b = i * 8
+            block[b + 0] = opp.xpos / self._map_w * 2.0 - 1.0
+            block[b + 1] = opp.ypos / self._map_h * 2.0 - 1.0
+            block[b + 2] = math.sin(ang)
+            block[b + 3] = math.cos(ang)
+            block[b + 4] = opp.health / max_h * 2.0 - 1.0
+            block[b + 5] = (opp.next_checkpoint - 1) / max(1, self._n_checkpoints)
+            block[b + 6] = (cx - opp.xpos) / self._map_diag
+            block[b + 7] = (cy - opp.ypos) / self._map_diag
+        return block
 
     def _build_obs(self) -> np.ndarray:
         p = self._player
-        cx, cy = self._cp_xy()
+        cx, cy = self._cp_xy(p)
         angle = p.direction * math.pi / 2
         max_health = self.ncardsavail + FREE_HEALTH_OFFSET
 
         state = np.array([
-            p.xpos / self._map_w * 2.0 - 1.0,                   # x ∈ [-1, 1]
-            p.ypos / self._map_h * 2.0 - 1.0,                   # y
-            math.sin(angle),                                      # direction (circular)
+            p.xpos / self._map_w * 2.0 - 1.0,
+            p.ypos / self._map_h * 2.0 - 1.0,
+            math.sin(angle),
             math.cos(angle),
-            p.health / max_health * 2.0 - 1.0,                  # health
-            (p.next_checkpoint - 1) / max(1, self._n_checkpoints),  # cp progress [0,1]
-            (cx - p.xpos) / self._map_diag,                      # dx toward cp
-            (cy - p.ypos) / self._map_diag,                      # dy toward cp
-            self._round / self.max_rounds,                       # time fraction [0,1]
+            p.health / max_health * 2.0 - 1.0,
+            (p.next_checkpoint - 1) / max(1, self._n_checkpoints),
+            (cx - p.xpos) / self._map_diag,
+            (cy - p.ypos) / self._map_diag,
+            self._round / self.max_rounds,
         ], dtype=np.float32)
 
         hand = self._deck[self._next_card : self._next_card + self.ncardslots]
         cards = np.concatenate([encode_card(c) for c in hand])
 
-        return np.concatenate([state, cards, self._map_features])
+        return np.concatenate([state, cards, self._map_features, self._opp_obs_block()])
 
-    # ── gymnasium API ──────────────────────────────────────────────────────────
-
-    def reset(self, *, seed: Optional[int] = None, options=None):
-        super().reset(seed=seed)   # sets self.np_random (required by gymnasium)
-        if seed is not None:
-            random.seed(seed)
-
-        # Shuffle a copy so self._map_data is never mutated (determinism).
-        positions = list(self._start_positions)
-        random.shuffle(positions)
-        sx = int(positions[0]["x"] / self._tile_w)
-        sy = int(positions[0]["y"] / self._tile_h)
-        sd = random.randint(0, 3)  # random starting direction
-
-        pid = -1
+    def _make_player(self, pid, sx, sy, sd, color, name):
         max_health = self.ncardsavail + FREE_HEALTH_OFFSET
-        self._player = types.SimpleNamespace(
-            id=pid,
-            xpos=sx, ypos=sy,
+        return types.SimpleNamespace(
+            id=pid, xpos=sx, ypos=sy,
             last_cp_x=sx, last_cp_y=sy,
             direction=sd,
             cannon_direction=CANNON_DIRECTION.FORWARD,
             next_checkpoint=1,
             health=max_health,
             powered_down=False,
-            color="#4488CC",
-            name="rl",
+            color=color, name=name,
         )
+
+    # ── gymnasium API ──────────────────────────────────────────────────────────
+
+    def reset(self, *, seed: Optional[int] = None, options=None):
+        super().reset(seed=seed)
+        if seed is not None:
+            random.seed(seed)
+
+        # Shuffle a copy so self._map_data is never mutated.
+        positions = list(self._start_positions)
+        random.shuffle(positions)
+
+        def _pos(i):
+            p = positions[i % len(positions)]
+            return int(p["x"] / self._tile_w), int(p["y"] / self._tile_h)
+
+        sx, sy = _pos(0)
+        sd = random.randint(0, 3)
+        self._player = self._make_player(-1, sx, sy, sd, "#4488CC", "rl")
         self._deck = _make_deck(self.pct_repair)
         self._next_card = 0
         self._round = 0
-        self._prev_dist = self._dist_to_cp()
+        self._prev_dist = self._dist_to_cp(self._player)
+
+        self._opponents = {}
+        self._opp_decks = []
+        self._opp_next_cards = []
+        opp_colors = ["#CC4444", "#44CC44", "#CC44CC"]
+        for i, opp_type in enumerate(self.opponent_types):
+            osx, osy = _pos(i + 1)
+            osd = random.randint(0, 3)
+            opp_pid = -(i + 2)
+            self._opponents[opp_pid] = self._make_player(
+                opp_pid, osx, osy, osd,
+                opp_colors[i % len(opp_colors)], f"{opp_type}_{i}"
+            )
+            self._opp_decks.append(_make_deck(self.pct_repair))
+            self._opp_next_cards.append(0)
 
         return self._build_obs(), {}
 
     def step(self, action: np.ndarray):
+        from pigame.bots import pick_cards  # lazy import to avoid circular dep
+
         w = self.weights
         p = self._player
         pid = p.id
 
-        # Decode action: preference score per card type → sort hand accordingly.
-        # Cards with a higher-preferred type play first; ties broken by rank desc.
+        # Decode action: type preference scores → sort hand
         hand = self._deck[self._next_card : self._next_card + self.ncardslots]
-        type_scores = np.asarray(action, dtype=np.float32)  # shape (N_CARD_TYPES,)
+        type_scores = np.asarray(action, dtype=np.float32)
 
         def _sort_key(card_val):
             cid, rank = card_id_rank(card_val)
@@ -325,45 +376,97 @@ class PirateEnv(gym.Env if HAS_GYM else object):
 
         played = sorted(hand, key=_sort_key)
 
-        # Build flat round_cards list expected by play_one_round
+        # Opponent card selection
+        opp_played: Dict[int, List[int]] = {}
+        for i, (opp_pid, opp_type) in enumerate(zip(self._opponents.keys(), self.opponent_types)):
+            opp = self._opponents[opp_pid]
+            opp_hand = self._opp_decks[i][
+                self._opp_next_cards[i] : self._opp_next_cards[i] + self.ncardslots
+            ]
+            opp_played[opp_pid] = pick_cards(
+                opp_type, opp_hand,
+                current_state=opp,
+                checkpoints=self._checkpoints,
+                ncardsavail=self.ncardsavail,
+                map_data=self._map_data,
+            )
+
+        # Interleave by slot, highest rank plays first within each slot
+        all_pids = [pid] + list(self._opponents.keys())
+        all_played = {pid: played, **opp_played}
+
         round_cards: List[int] = []
-        for card in played:
-            round_cards.extend([pid, card])
+        for slot in range(self.ncardslots):
+            slot_entries = [(p_id, all_played[p_id][slot]) for p_id in all_pids]
+            ranks = [card_id_rank(c)[1] for _, c in slot_entries]
+            for j in argsort(ranks)[::-1]:
+                p_id, card = slot_entries[j]
+                round_cards.extend([p_id, card])
         round_cards.extend([BACKEND_USERID, ROUNDEND_CARDID])
 
         prev_cp = p.next_checkpoint
         prev_health = p.health
         prev_dist = self._prev_dist
+        opp_prev_cps = {oid: o.next_checkpoint for oid, o in self._opponents.items()}
 
-        game_over = play_one_round(
-            {pid: p}, self._map_data, round_cards, self.ncardsavail
-        )
+        all_players = {pid: p, **self._opponents}
+        game_over = play_one_round(all_players, self._map_data, round_cards, self.ncardsavail)
 
-        # Write played order back into deck slot, then advance deck pointer
+        # Write played cards back into agent deck then advance pointer
         remainder = self._deck[self._next_card + self.ncardslots : self._next_card + self.ncardsavail]
         self._deck[self._next_card : self._next_card + self.ncardsavail] = played + remainder
         self._deck, self._next_card = _advance_deck(
             self._deck, self._next_card, self.ncardslots, self.ncardsavail
         )
 
+        # Advance opponent deck pointers
+        for i, opp_pid in enumerate(self._opponents.keys()):
+            opp_hand_full = self._opp_decks[i][
+                self._opp_next_cards[i] : self._opp_next_cards[i] + self.ncardsavail
+            ]
+            opp_rem = opp_hand_full[self.ncardslots:]
+            self._opp_decks[i][
+                self._opp_next_cards[i] : self._opp_next_cards[i] + self.ncardsavail
+            ] = opp_played[opp_pid] + opp_rem
+            self._opp_decks[i], self._opp_next_cards[i] = _advance_deck(
+                self._opp_decks[i], self._opp_next_cards[i], self.ncardslots, self.ncardsavail
+            )
+
         self._round += 1
-        curr_dist = self._dist_to_cp()
+        curr_dist = self._dist_to_cp(p)
         self._prev_dist = curr_dist
 
-        # Reward
+        # ── reward ────────────────────────────────────────────────────────────
         reward = 0.0
         reward += w.distance * (prev_dist - curr_dist)
         reward += w.time
+
         cps_gained = p.next_checkpoint - prev_cp
         if cps_gained > 0:
             reward += w.checkpoint * cps_gained
+
         health_lost = prev_health - p.health
         if health_lost > 0:
             reward += w.damage_taken * health_lost
 
+        # Lead bonus: checkpoint lead over each opponent
+        if w.lead_bonus != 0.0 and self._opponents:
+            for opp in self._opponents.values():
+                lead = (p.next_checkpoint - 1) - (opp.next_checkpoint - 1)
+                reward += w.lead_bonus * lead
+
+        # Race outcome
+        agent_done = p.next_checkpoint > self._n_checkpoints
+        opp_done = any(o.next_checkpoint > self._n_checkpoints for o in self._opponents.values())
+
         terminated = False
         if game_over:
-            reward += w.win
+            if agent_done:
+                reward += w.win
+                if self._opponents:
+                    reward += w.win_race
+            elif opp_done:
+                reward += w.lose_race
             terminated = True
 
         truncated = self._round >= self.max_rounds
@@ -373,5 +476,6 @@ class PirateEnv(gym.Env if HAS_GYM else object):
             "checkpoints": p.next_checkpoint - 1,
             "health": p.health,
             "dist_to_cp": curr_dist,
+            "won": agent_done,
         }
         return self._build_obs(), float(reward), terminated, truncated, info
