@@ -370,43 +370,42 @@ def kill_player(p):
 
 def board_turrets(game, gmap, players):
     actions = []
-
-    for x in range(gmap["width"]):
-        for y in range(gmap["height"]):
-            tile_prop = get_tile_properties(gmap, x, y)
-            if tile_prop["turret_x"] != 0:
-                # print(f"turret_x at ({x},{y}) {tile_prop['turret_x']}")
-                actions.extend(
-                    shoot_cannon_ball(
-                        gmap,
-                        xstart=x,
-                        ystart=y,
-                        xinc=tile_prop["turret_x"],
-                        yinc=0,
-                        source_player=BOARD_CANNON_PLAYERID,
-                        players=players,
-                        cannon_damage=1,
-                        collide_terrain=True,
-                        collide_players=True,
-                    )
+    turret_pos = gmap.get("turret_positions")
+    tile_pairs = turret_pos if turret_pos is not None else (
+        (x, y) for x in range(gmap["width"]) for y in range(gmap["height"])
+    )
+    for x, y in tile_pairs:
+        tile_prop = get_tile_properties(gmap, x, y)
+        if tile_prop["turret_x"] != 0:
+            actions.extend(
+                shoot_cannon_ball(
+                    gmap,
+                    xstart=x,
+                    ystart=y,
+                    xinc=tile_prop["turret_x"],
+                    yinc=0,
+                    source_player=BOARD_CANNON_PLAYERID,
+                    players=players,
+                    cannon_damage=1,
+                    collide_terrain=True,
+                    collide_players=True,
                 )
-            if tile_prop["turret_y"] != 0:
-                # print(f"turret_y at ({x},{y}) {tile_prop['turret_y']}")
-                actions.extend(
-                    shoot_cannon_ball(
-                        gmap,
-                        xstart=x,
-                        ystart=y,
-                        xinc=0,
-                        yinc=tile_prop["turret_y"],
-                        source_player=BOARD_CANNON_PLAYERID,
-                        players=players,
-                        cannon_damage=1,
-                        collide_terrain=True,
-                        collide_players=True,
-                    )
+            )
+        if tile_prop["turret_y"] != 0:
+            actions.extend(
+                shoot_cannon_ball(
+                    gmap,
+                    xstart=x,
+                    ystart=y,
+                    xinc=0,
+                    yinc=tile_prop["turret_y"],
+                    source_player=BOARD_CANNON_PLAYERID,
+                    players=players,
+                    cannon_damage=1,
+                    collide_terrain=True,
+                    collide_players=True,
                 )
-
+            )
     return actions
 
 
@@ -778,9 +777,13 @@ def move_player_y(game, gmap, players, player, inc, push_players=True):
 
 
 def get_tile_properties(gmap, x, y):
+    tile_cache = gmap.get("tile_prop_cache")
+    if tile_cache is not None:
+        w, h = gmap["bg_width"], gmap["bg_height"]
+        if (x < 0) or (x >= w) or (y < 0) or (y >= h):
+            return TILE_DEFAULTS
+        return tile_cache[y * w + x]
     bg = list(filter(lambda l: l["name"] == "background", gmap["layers"]))[0]
-    # for j in range(bg["height"]):
-    #    print(f'bg', bg["data"][j * bg["width"]:(j+1)*bg["width"]])
     if (x < 0) or (x >= bg["width"]) or (y < 0) or (y >= bg["height"]):
         return TILE_DEFAULTS
     tile_id = bg["data"][y * bg["width"] + x]
@@ -789,13 +792,15 @@ def get_tile_properties(gmap, x, y):
             tileset_id = tile_id - tileset["firstgid"]
             tile_props = tileset["tiles"]
             tile_prop = next(filter(lambda p: p["id"] == tileset_id, tile_props))
-            # print("bg", x, y, tile_id, tileset_id, "prop", tile_prop)
             return {item["name"]: item["value"] for item in tile_prop["properties"]}
     raise ValueError(f"could not find tile_id {tile_id} in map")
 
 
+_LOAD_MAP_CACHE_VERSION = 2  # bump when cached structure changes
+
+
 def load_map(fname):
-    cachename = f"map_{fname}"
+    cachename = f"map_v{_LOAD_MAP_CACHE_VERSION}_{fname}"
 
     gmap = cache.get(cachename)
     if gmap is not None:
@@ -805,14 +810,24 @@ def load_map(fname):
         gmap = json.load(fh)
 
     bg = list(filter(lambda l: l["name"] == "background", gmap["layers"]))[0]
+    w, h = bg["width"], bg["height"]
+    tile_prop_cache = [None] * (w * h)
     property_locations = {}
-    for x in range(bg["width"]):
-        for y in range(bg["height"]):
+    for x in range(w):
+        for y in range(h):
             prop = get_tile_properties(gmap, x, y)
+            tile_prop_cache[y * w + x] = prop
             for p, v in prop.items():
                 if v:
                     property_locations.setdefault(p, []).append((x, y))
+    gmap["tile_prop_cache"] = tile_prop_cache
+    gmap["bg_width"] = w
+    gmap["bg_height"] = h
     gmap["property_locations"] = property_locations
+    # Pre-sorted turret positions (x-outer, y-inner order, matching original scan)
+    gmap["turret_positions"] = sorted(
+        set(property_locations.get("turret_x", [])) | set(property_locations.get("turret_y", []))
+    )
     gmap["filename"] = os.path.basename(fname)
     gmap["mapname"] = fname.replace(".json", "")
     properties = gmap.get("properties", {})
