@@ -186,7 +186,7 @@ def game(request, game_id, **kwargs):
     if game.state in ["countdown", "select"]:
         for p in player_accounts.filter(time_submitted__isnull=True, is_bot=True):
             pidx = game.config.player_ids.index(p.pk)
-            bot_submit_cards(game.config, pidx, p.bot_type)
+            bot_submit_cards(game.config, pidx, p.bot_type, game=game, player_states=player_states)
             p.time_submitted = datetime.datetime.now(pytz.utc)
             p.save(update_fields=["time_submitted"])
         num_players_submitted = player_accounts.filter(time_submitted__isnull=False).count()

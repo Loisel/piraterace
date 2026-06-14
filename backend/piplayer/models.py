@@ -9,6 +9,7 @@ from pigame.models import BaseGame, GameConfig, gen_default_deck
 
 BOT_TYPES = [
     ("random", "Random"),
+    ("greedy", "Greedy"),
 ]
 
 

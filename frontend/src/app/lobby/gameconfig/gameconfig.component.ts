@@ -27,6 +27,7 @@ export class GameConfigComponent implements OnInit {
   startButtonActive: boolean = true;
   botTypes = [
     { value: 'random', label: 'Random' },
+    { value: 'greedy', label: 'Greedy' },
   ];
   selectedBotType: string = 'random';
 
