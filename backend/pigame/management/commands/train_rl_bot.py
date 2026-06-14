@@ -48,10 +48,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         try:
-            import gymnasium as gym
             from stable_baselines3 import PPO
             from stable_baselines3.common.env_util import make_vec_env
-            from stable_baselines3.common.vec_env import SubprocVecEnv
+            from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
         except ImportError as e:
             raise CommandError(
                 f"Missing RL dependency: {e}\n"
@@ -90,7 +89,11 @@ class Command(BaseCommand):
         def make_env():
             return PirateEnv(mapfile=mapfile, max_rounds=max_rounds, weights=SOLO_WEIGHTS)
 
-        vec_env = make_vec_env(make_env, n_envs=n_envs, vec_env_cls=SubprocVecEnv)
+        # DummyVecEnv runs envs in-process (safe when Django is already configured).
+        # SubprocVecEnv is faster for CPU-heavy envs but requires each subprocess
+        # to re-initialise Django — set n_envs=1 or use DummyVecEnv if it hangs.
+        vec_cls = SubprocVecEnv if n_envs > 1 else DummyVecEnv
+        vec_env = make_vec_env(make_env, n_envs=n_envs, vec_env_cls=vec_cls)
 
         # ── create or resume model ─────────────────────────────────────────────
         if options["resume"]:

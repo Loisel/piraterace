@@ -44,7 +44,8 @@ def pick_cards(bot_type, playable_cards, *, mapfile=None, player_id=None,
         return _greedy_pick(playable_cards, mapfile, player_id, current_state,
                             checkpoints, ncardsavail, map_data)
     if bot_type.startswith("rl"):
-        return _rl_pick(bot_type, playable_cards, current_state, ncardsavail)
+        return _rl_pick(bot_type, playable_cards, current_state, ncardsavail,
+                        checkpoints=checkpoints, map_data=map_data)
     cards = list(playable_cards)
     random.shuffle(cards)
     return cards
@@ -180,7 +181,8 @@ def _greedy_pick(playable_cards, mapfile, player_id, current_state, checkpoints,
 _rl_model_cache: dict = {}   # bot_type → loaded SB3 model
 
 
-def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail):
+def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail,
+             checkpoints=None, map_data=None):
     """
     Use a trained PPO model to score and order the playable cards.
 
@@ -228,16 +230,25 @@ def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail):
         ncardslots = len(playable_cards)
         max_health = ncardsavail + 3   # FREE_HEALTH_OFFSET = 3
         p = current_state
-        # We don't have map size here, so use rough normalisers
-        map_w = getattr(p, "_map_w", 25)
-        map_h = getattr(p, "_map_h", 20)
+
+        # Map dimensions from map_data if available; fall back to rough defaults
+        if map_data is not None:
+            map_w = map_data.get("width", 25)
+            map_h = map_data.get("height", 20)
+        else:
+            map_w = getattr(p, "_map_w", 25)
+            map_h = getattr(p, "_map_h", 20)
         map_diag = math.sqrt(map_w ** 2 + map_h ** 2)
 
-        cp_x = getattr(p, "_cp_x", p.xpos)
-        cp_y = getattr(p, "_cp_y", p.ypos)
-        angle = p.direction * math.pi / 2
+        # Checkpoint position from checkpoints dict if available
+        n_cps = len(checkpoints) if checkpoints else 1
+        next_cp = min(p.next_checkpoint, n_cps)
+        if checkpoints and next_cp in checkpoints:
+            cp_x, cp_y = checkpoints[next_cp]
+        else:
+            cp_x, cp_y = p.xpos, p.ypos
 
-        n_cps = getattr(p, "_n_checkpoints", 1)
+        angle = p.direction * math.pi / 2
         state = np.array([
             p.xpos / map_w * 2.0 - 1.0,
             p.ypos / map_h * 2.0 - 1.0,
@@ -247,7 +258,7 @@ def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail):
             (p.next_checkpoint - 1) / max(1, n_cps),
             (cp_x - p.xpos) / map_diag,
             (cp_y - p.ypos) / map_diag,
-            0.0,   # round fraction unknown here; use 0
+            0.0,   # round fraction unknown at inference time; use 0
         ], dtype=np.float32)
 
         card_vecs = np.concatenate([encode_card(c) for c in playable_cards])
