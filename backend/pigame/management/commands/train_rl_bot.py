@@ -50,7 +50,7 @@ class Command(BaseCommand):
         try:
             from stable_baselines3 import PPO
             from stable_baselines3.common.env_util import make_vec_env
-            from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
+            from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv, VecNormalize
         except ImportError as e:
             raise CommandError(
                 f"Missing RL dependency: {e}\n"
@@ -94,10 +94,18 @@ class Command(BaseCommand):
         # to re-initialise Django — set n_envs=1 or use DummyVecEnv if it hangs.
         vec_cls = SubprocVecEnv if n_envs > 1 else DummyVecEnv
         vec_env = make_vec_env(make_env, n_envs=n_envs, vec_env_cls=vec_cls)
+        # Normalise rewards only (not obs) so trained model can be used for
+        # inference in bots.py without needing normalisation stats at runtime.
+        vec_env = VecNormalize(vec_env, norm_obs=False, norm_reward=True, gamma=0.99)
 
         # ── create or resume model ─────────────────────────────────────────────
         if options["resume"]:
             self.stdout.write(f"Resuming from {options['resume']}")
+            stats_path = options["resume"] + "_vecnorm.pkl"
+            if os.path.exists(stats_path):
+                vec_env = VecNormalize.load(stats_path, venv=vec_env)
+                vec_env.training = True
+                self.stdout.write(f"  Loaded VecNormalize stats from {stats_path}")
             model = PPO.load(options["resume"], env=vec_env)
         else:
             model = PPO(
@@ -124,6 +132,8 @@ class Command(BaseCommand):
         # ── save ──────────────────────────────────────────────────────────────
         model.save(out_path)
         self.stdout.write(f"Model saved to {out_path}.zip")
+        # Save VecNormalize stats so training can be resumed later.
+        vec_env.save(out_path + "_vecnorm.pkl")
 
         vec_env.close()
 

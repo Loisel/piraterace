@@ -4,15 +4,20 @@ PirateRace gymnasium environment for RL training.
 Single-player (solo) mode: one agent navigates all checkpoints.
 Multiplayer will reuse the same class with n_opponents > 0.
 
-Observation (flat float32, shape = (9 + ncardslots * 9,)):
-    player_state  [x_norm, y_norm, sin(dir), cos(dir), health_norm,
-                   cp_progress, dx_to_cp, dy_to_cp, round_norm]
-    per card      [one-hot card type (8), rank_norm]
+Observation (flat float32):
+    player_state  (9)   x_norm, y_norm, sin(dir), cos(dir), health_norm,
+                        cp_progress, dx_to_cp, dy_to_cp, round_norm
+    per card      (ncardslots × 9)  one-hot card type (8) + rank_norm
+    map layout    (W × H × 9)  per-tile: collision, void, current_x/y,
+                                vortex/2, damage, turret_x/y, fast_current
 
-Action (float32, shape = (ncardslots,)):
-    Logit per card slot. argsort(action) descending gives the play order
-    of the cards the agent was dealt. The card with the highest logit
-    is played in slot 0, lowest in slot ncardslots-1.
+Action (float32, shape = (N_CARD_TYPES,) = (8,)):
+    Preference score per card type.  The hand is sorted so the card whose
+    type has the highest preference score plays first; ties are broken by
+    card rank (higher rank first).  Using type preferences instead of per-slot
+    logits means the policy learns a strategy that transfers across different
+    hands — e.g. "in this situation prefer fwd3 > fwd2 > rotL" — rather than
+    memorising which slot to prioritise for each unique hand configuration.
 
 Install deps before use:
     pip install gymnasium stable-baselines3
@@ -40,6 +45,7 @@ from pigame.game_logic import (
     ROUNDEND_CARDID,
     determine_checkpoint_locations,
     determine_starting_locations,
+    get_tile_properties,
     load_map,
     play_one_round,
 )
@@ -67,6 +73,50 @@ def encode_card(card_val: int) -> np.ndarray:
     vec[_CARD_ID_TO_IDX.get(card_id, N_CARD_TYPES - 1)] = 1.0
     vec[N_CARD_TYPES] = rank / NRANKINGS
     return vec
+
+
+# ── map tile encoding ─────────────────────────────────────────────────────────
+
+# One float per property, in TILE_DEFAULTS key order.
+# Range notes: current_x/y and turret_x/y are in {-1,0,1};
+#              vortex is in {-2..2} → scaled by 0.5 to fit [-1,1];
+#              damage and fast_current rarely exceed ±1.
+_TILE_PROP_ORDER = [
+    "collision",    # 0/1
+    "void",         # 0/1
+    "current_x",    # -1/0/1
+    "current_y",    # -1/0/1
+    "vortex",       # -2..2 (scaled ×0.5 below)
+    "damage",       # 0/1 or negative for repair
+    "turret_x",     # -1/0/1
+    "turret_y",     # -1/0/1
+    "fast_current", # 0/1
+]
+N_TILE_PROPS = len(_TILE_PROP_ORDER)  # 9
+
+
+def encode_map(gmap) -> np.ndarray:
+    """
+    Flat float32 array of shape (W * H * N_TILE_PROPS,) encoding the full map.
+    Tiles are ordered x-outer, y-inner (same as property_locations iteration).
+    Precomputed once at env init; the array is reused for every observation.
+    """
+    w, h = gmap["width"], gmap["height"]
+    out = np.zeros(w * h * N_TILE_PROPS, dtype=np.float32)
+    for xi in range(w):
+        for yi in range(h):
+            prop = get_tile_properties(gmap, xi, yi)
+            base = (xi * h + yi) * N_TILE_PROPS
+            out[base + 0] = float(prop["collision"])
+            out[base + 1] = float(prop["void"])
+            out[base + 2] = float(prop["current_x"])
+            out[base + 3] = float(prop["current_y"])
+            out[base + 4] = float(prop["vortex"]) * 0.5
+            out[base + 5] = float(prop["damage"])
+            out[base + 6] = float(prop["turret_x"])
+            out[base + 7] = float(prop["turret_y"])
+            out[base + 8] = float(prop.get("fast_current", False))
+    return out
 
 
 # ── reward weights ─────────────────────────────────────────────────────────────
@@ -168,14 +218,17 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         self._tile_w = self._map_data["tilewidth"]
         self._tile_h = self._map_data["tileheight"]
 
-        # obs: 9 state floats + ncardslots card vectors
-        obs_dim = 9 + ncardslots * CARD_FEATURES
+        # Precompute static map feature array (reused in every obs, never changes)
+        self._map_features: np.ndarray = encode_map(self._map_data)
+
+        # obs: player state + card features + full map layout
+        obs_dim = 9 + ncardslots * CARD_FEATURES + len(self._map_features)
         self.observation_space = spaces.Box(
-            low=-1.0, high=1.0, shape=(obs_dim,), dtype=np.float32
+            low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32
         )
-        # action: one logit per card slot; argsort gives play order
+        # action: preference score per card type → hand sorted by type preference
         self.action_space = spaces.Box(
-            low=-1.0, high=1.0, shape=(ncardslots,), dtype=np.float32
+            low=-1.0, high=1.0, shape=(N_CARD_TYPES,), dtype=np.float32
         )
 
         # Runtime state — populated by reset()
@@ -218,7 +271,7 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         hand = self._deck[self._next_card : self._next_card + self.ncardslots]
         cards = np.concatenate([encode_card(c) for c in hand])
 
-        return np.concatenate([state, cards])
+        return np.concatenate([state, cards, self._map_features])
 
     # ── gymnasium API ──────────────────────────────────────────────────────────
 
@@ -260,10 +313,17 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         p = self._player
         pid = p.id
 
-        # Decode action: argsort descending → play order for the dealt cards
+        # Decode action: preference score per card type → sort hand accordingly.
+        # Cards with a higher-preferred type play first; ties broken by rank desc.
         hand = self._deck[self._next_card : self._next_card + self.ncardslots]
-        order = list(np.argsort(-np.asarray(action, dtype=np.float32)))
-        played = [hand[i] for i in order]
+        type_scores = np.asarray(action, dtype=np.float32)  # shape (N_CARD_TYPES,)
+
+        def _sort_key(card_val):
+            cid, rank = card_id_rank(card_val)
+            tidx = _CARD_ID_TO_IDX.get(cid, N_CARD_TYPES - 1)
+            return (-float(type_scores[tidx]), -rank)
+
+        played = sorted(hand, key=_sort_key)
 
         # Build flat round_cards list expected by play_one_round
         round_cards: List[int] = []

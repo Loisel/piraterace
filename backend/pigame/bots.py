@@ -178,13 +178,14 @@ def _greedy_pick(playable_cards, mapfile, player_id, current_state, checkpoints,
 
 # ── RL bot ───────────────────────────────────────────────────────────────────
 
-_rl_model_cache: dict = {}   # bot_type → loaded SB3 model
+_rl_model_cache: dict = {}    # tag → loaded SB3 model
+_rl_map_enc_cache: dict = {}  # mapfile → encoded map feature array
 
 
 def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail,
              checkpoints=None, map_data=None):
     """
-    Use a trained PPO model to score and order the playable cards.
+    Use a trained PPO model to pick card play order.
 
     bot_type is the key used to look up the model:
         "rl"           → rl_models/solo_map1.zip  (default)
@@ -194,6 +195,7 @@ def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail,
     Falls back to random on any error (missing model, import failure, etc.).
     """
     import os
+    import math
     import numpy as np
 
     cards = list(playable_cards)
@@ -222,25 +224,19 @@ def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail,
         return cards
 
     try:
-        from pigame.rl_env import encode_card, CARD_FEATURES
-        import math
+        from pigame.rl_env import encode_card, encode_map, _CARD_ID_TO_IDX, N_CARD_TYPES
+        from pigame.models import card_id_rank
 
-        # Build the same obs vector as PirateEnv._build_obs
-        # (must match the training env; defaults ncardslots=5, max_rounds=60)
-        ncardslots = len(playable_cards)
-        max_health = ncardsavail + 3   # FREE_HEALTH_OFFSET = 3
         p = current_state
+        max_health = ncardsavail + 3   # FREE_HEALTH_OFFSET = 3
 
-        # Map dimensions from map_data if available; fall back to rough defaults
         if map_data is not None:
             map_w = map_data.get("width", 25)
             map_h = map_data.get("height", 20)
         else:
-            map_w = getattr(p, "_map_w", 25)
-            map_h = getattr(p, "_map_h", 20)
+            map_w, map_h = 25, 20
         map_diag = math.sqrt(map_w ** 2 + map_h ** 2)
 
-        # Checkpoint position from checkpoints dict if available
         n_cps = len(checkpoints) if checkpoints else 1
         next_cp = min(p.next_checkpoint, n_cps)
         if checkpoints and next_cp in checkpoints:
@@ -258,16 +254,30 @@ def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail,
             (p.next_checkpoint - 1) / max(1, n_cps),
             (cp_x - p.xpos) / map_diag,
             (cp_y - p.ypos) / map_diag,
-            0.0,   # round fraction unknown at inference time; use 0
+            0.0,   # round fraction unknown at inference time
         ], dtype=np.float32)
 
         card_vecs = np.concatenate([encode_card(c) for c in playable_cards])
-        obs = np.concatenate([state, card_vecs])
 
+        # Map features — compute once per mapfile and cache
+        map_key = getattr(map_data, "__hash__", lambda: None)() if map_data else None
+        if map_data is not None and id(map_data) not in _rl_map_enc_cache:
+            _rl_map_enc_cache[id(map_data)] = encode_map(map_data)
+        map_feats = _rl_map_enc_cache.get(id(map_data), np.array([], dtype=np.float32))
+
+        obs = np.concatenate([state, card_vecs, map_feats])
+
+        # model expects obs shape matching training env — if mismatch, fall through
         action, _ = model.predict(obs[np.newaxis], deterministic=True)
-        action = np.asarray(action).flatten()
-        order = list(np.argsort(-action))
-        return [cards[i] for i in order]
+        type_scores = np.asarray(action).flatten()  # shape (N_CARD_TYPES,)
+
+        # Sort hand by type preference, then rank tiebreaker (higher rank first)
+        def _sort_key(card_val):
+            cid, rank = card_id_rank(card_val)
+            tidx = _CARD_ID_TO_IDX.get(cid, N_CARD_TYPES - 1)
+            return (-float(type_scores[tidx]), -rank)
+
+        return sorted(cards, key=_sort_key)
     except Exception:
         random.shuffle(cards)
         return cards
