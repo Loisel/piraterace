@@ -2,9 +2,8 @@
 Pure-Python bot evaluation framework — no per-round DB or Redis writes.
 
 Each EvalGame maintains a players dict across rounds and steps it forward with
-play_one_round() — O(1) per round rather than O(N) full-history replay.
-The greedy bot's per-permutation simulations also use play_one_round with the
-pre-loaded map, eliminating all per-round Redis round-trips.
+play_one_round() — O(1) per round.  run_tournament() fans games out across
+CPU cores with ProcessPoolExecutor for near-linear speedup.
 
 Public API:
     EvalGame(bot_specs, mapfile, ...).run(max_rounds)  →  GameResult
@@ -13,8 +12,10 @@ Public API:
 
 import copy
 import math
+import os
 import random
 import types
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 
@@ -41,7 +42,6 @@ from pigame.models import (
 # ── deck helpers ──────────────────────────────────────────────────────────────
 
 def _make_deck(pct_repair: int = 0) -> List[int]:
-    """Fresh shuffled deck without console output."""
     deck = list(DEFAULT_DECK)
     n_repair = int(round(pct_repair * 1e-2 * len(deck)))
     deck.extend([100 * NRANKINGS] * n_repair)
@@ -50,7 +50,6 @@ def _make_deck(pct_repair: int = 0) -> List[int]:
 
 
 def _advance_deck(deck, next_card, ncardslots, ncardsavail):
-    """Advance pointer by ncardslots; cycle and reshuffle used cards if needed."""
     next_card += ncardslots
     if next_card + ncardsavail > len(deck):
         remaining = deck[next_card:]
@@ -94,8 +93,7 @@ class EvalGame:
         obs = game.reset()
         while True:
             obs, rewards, done, info = game.step()
-            if done:
-                break
+            if done: break
     """
 
     def __init__(
@@ -105,6 +103,7 @@ class EvalGame:
         ncardslots: int = 5,
         ncardsavail: int = 9,
         pct_repair: int = 0,
+        _map_data=None,     # internal: skip Redis call when map is pre-loaded
     ):
         if ncardsavail < ncardslots:
             raise ValueError("ncardsavail must be >= ncardslots")
@@ -115,16 +114,15 @@ class EvalGame:
         self.pct_repair = pct_repair
         self.n_players = len(bot_specs)
 
-        # Load map once; deep-copy so determine_starting_locations can shuffle
-        # the startinglocs layer in-place without polluting the Redis-cached copy.
-        self._map_data = copy.deepcopy(load_map(mapfile))
+        # Deep-copy: determine_starting_locations mutates the map's startinglocs
+        # layer in-place; the copy keeps the Redis-cached version clean.
+        raw = _map_data if _map_data is not None else load_map(mapfile)
+        self._map_data = copy.deepcopy(raw)
         self._checkpoints = determine_checkpoint_locations(self._map_data)
         self._n_checkpoints = len(self._checkpoints)
 
-        # Fake negative player IDs — never collide with real DB users.
         self._player_ids: List[int] = [-(i + 1) for i in range(self.n_players)]
 
-        # Filled by reset()
         self._players: Dict[int, object] = {}
         self._decks: List[List[int]] = []
         self._next_cards: List[int] = []
@@ -139,11 +137,10 @@ class EvalGame:
     # ── internal ──────────────────────────────────────────────────────────────
 
     def _init_players(self):
-        """Build the players dict from current start positions — no play_stack call."""
         color_list = list(COLORS.values())
         self._players = {}
         for i, pid in enumerate(self._player_ids):
-            p = types.SimpleNamespace(
+            self._players[pid] = types.SimpleNamespace(
                 id=pid,
                 name=self._names[i],
                 color=self._colors[i],
@@ -157,7 +154,6 @@ class EvalGame:
                 health=self.ncardsavail + FREE_HEALTH_OFFSET,
                 powered_down=False,
             )
-            self._players[pid] = p
 
     def _observations(self) -> Dict[int, dict]:
         obs = {}
@@ -177,7 +173,6 @@ class EvalGame:
     # ── public API ────────────────────────────────────────────────────────────
 
     def reset(self) -> Dict[int, dict]:
-        """Initialise a fresh game. Returns initial observations keyed by player_id."""
         sx, sy, sd = determine_starting_locations(self._map_data)
         self._start_x = sx[: self.n_players]
         self._start_y = sy[: self.n_players]
@@ -210,10 +205,9 @@ class EvalGame:
 
         prev_obs = self._observations()
 
-        # ── 1. Each bot picks its card order ────────────────────────────────
+        # 1. Each bot picks its card order
         played_per_player: List[List[int]] = []
         for i, (pid, bot_type) in enumerate(zip(self._player_ids, self.bot_specs)):
-            state = self._players[pid]
             hand = list(self._decks[i][self._next_cards[i] : self._next_cards[i] + self.ncardsavail])
             playable = hand[: self.ncardslots]
             remainder = hand[self.ncardslots :]
@@ -223,15 +217,15 @@ class EvalGame:
                 playable,
                 mapfile=self.mapfile,
                 player_id=pid,
-                current_state=state,
+                current_state=self._players[pid],
                 checkpoints=self._checkpoints,
                 ncardsavail=self.ncardsavail,
-                map_data=self._map_data,   # ← fast path: no Redis per simulation
+                map_data=self._map_data,
             )
             played_per_player.append(best)
             self._decks[i][self._next_cards[i] : self._next_cards[i] + self.ncardsavail] = best + remainder
 
-        # ── 2. Interleave cards by slot, sorted by rank (highest first) ─────
+        # 2. Interleave cards by slot, sorted by rank (highest first)
         round_cards: List[int] = []
         for slot in range(self.ncardslots):
             slot_entries = [(self._player_ids[i], played_per_player[i][slot]) for i in range(self.n_players)]
@@ -241,10 +235,10 @@ class EvalGame:
                 round_cards.extend([pid, card])
         round_cards.extend([BACKEND_USERID, ROUNDEND_CARDID])
 
-        # ── 3. Advance one round — O(ncardslots) work, not O(full history) ──
+        # 3. Advance one round — O(ncardslots), not O(full history)
         self.done = play_one_round(self._players, self._map_data, round_cards, self.ncardsavail)
 
-        # ── 4. Advance deck pointers ─────────────────────────────────────────
+        # 4. Advance deck pointers
         for i in range(self.n_players):
             self._decks[i], self._next_cards[i] = _advance_deck(
                 self._decks[i], self._next_cards[i], self.ncardslots, self.ncardsavail
@@ -252,7 +246,6 @@ class EvalGame:
 
         self.round += 1
 
-        # ── 5. Rewards: distance improvement toward next checkpoint ──────────
         curr_obs = self._observations()
         rewards = {
             pid: prev_obs[pid]["dist_to_next_cp"] - curr_obs[pid]["dist_to_next_cp"]
@@ -262,7 +255,6 @@ class EvalGame:
         return curr_obs, rewards, self.done, {"round": self.round}
 
     def run(self, max_rounds: int = 50) -> GameResult:
-        """Play to completion or max_rounds. Returns per-player stats."""
         self.reset()
         min_dists: Dict[int, float] = {pid: float("inf") for pid in self._player_ids}
 
@@ -295,7 +287,18 @@ class EvalGame:
         )
 
 
-# ── tournament ────────────────────────────────────────────────────────────────
+# ── parallel tournament ───────────────────────────────────────────────────────
+
+def _run_game_worker(args):
+    """
+    Top-level worker function (must be picklable for multiprocessing).
+    Runs a single game and returns its GameResult.
+    """
+    bot_specs, mapfile, map_data, max_rounds, ncardslots, ncardsavail, pct_repair, game_seed = args
+    random.seed(game_seed)
+    game = EvalGame(bot_specs, mapfile, ncardslots, ncardsavail, pct_repair, _map_data=map_data)
+    return game.run(max_rounds)
+
 
 @dataclass
 class SlotStats:
@@ -334,17 +337,39 @@ def run_tournament(
     ncardsavail: int = 9,
     pct_repair: int = 0,
     seed: Optional[int] = None,
+    n_workers: int = 1,
     progress_cb=None,
 ) -> Tuple[List[SlotStats], List[GameResult]]:
+    """
+    Run a tournament of n_games games between the given bots.
+
+    Games run in parallel across n_workers processes.  n_workers=1 keeps
+    execution sequential (useful for debugging and exact reproducibility).
+
+    Each game gets a deterministic seed derived from `seed` (or a random one
+    when seed=None) so results are reproducible regardless of worker count.
+    """
+    # Assign each game a unique seed up-front in the parent process.
+    # When seed is None, draw from the parent's random state so different
+    # tournament runs differ even without an explicit seed.
     if seed is not None:
-        random.seed(seed)
+        rng = random.Random(seed)
+    else:
+        rng = random.Random()
+    game_seeds = [rng.randint(0, 2**31) for _ in range(n_games)]
 
-    game = EvalGame(bot_specs, mapfile, ncardslots, ncardsavail, pct_repair)
+    # Load map once in parent; workers receive it as an argument (no Redis per worker).
+    map_data = load_map(mapfile)
+
+    worker_args = [
+        (bot_specs, mapfile, map_data, max_rounds, ncardslots, ncardsavail, pct_repair, gs)
+        for gs in game_seeds
+    ]
+
     slot_stats = [SlotStats(slot=i, bot_type=bt, n_games=n_games) for i, bt in enumerate(bot_specs)]
-
     results: List[GameResult] = []
-    for g in range(n_games):
-        result = game.run(max_rounds)
+
+    def _accumulate(result: GameResult):
         results.append(result)
         for pr in result.players:
             s = slot_stats[pr.slot]
@@ -354,7 +379,22 @@ def run_tournament(
             s.total_checkpoints += pr.checkpoints_reached
             if pr.min_dist_to_next_cp < float("inf"):
                 s.min_dist_samples.append(pr.min_dist_to_next_cp)
-        if progress_cb:
-            progress_cb(g + 1, n_games, result)
+
+    if n_workers <= 1:
+        for g, args in enumerate(worker_args):
+            result = _run_game_worker(args)
+            _accumulate(result)
+            if progress_cb:
+                progress_cb(g + 1, n_games, result)
+    else:
+        completed = 0
+        with ProcessPoolExecutor(max_workers=n_workers) as pool:
+            future_to_idx = {pool.submit(_run_game_worker, args): g for g, args in enumerate(worker_args)}
+            for future in as_completed(future_to_idx):
+                result = future.result()
+                _accumulate(result)
+                completed += 1
+                if progress_cb:
+                    progress_cb(completed, n_games, result)
 
     return slot_stats, results

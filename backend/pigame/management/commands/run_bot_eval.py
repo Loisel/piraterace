@@ -19,6 +19,7 @@ Examples:
 """
 
 import json
+import os
 import sys
 import time
 
@@ -83,6 +84,12 @@ class Command(BaseCommand):
             help="Random seed for reproducibility. Default: none (random)",
         )
         parser.add_argument(
+            "--workers",
+            type=int,
+            default=None,
+            help="Parallel worker processes. Default: CPU count",
+        )
+        parser.add_argument(
             "--format",
             choices=["table", "json"],
             default="table",
@@ -99,6 +106,7 @@ class Command(BaseCommand):
         ncardsavail = options["ncardsavail"]
         pct_repair = options["pct_repair"]
         seed = options["seed"]
+        n_workers = options["workers"] if options["workers"] is not None else os.cpu_count() or 1
         output_format = options["output_format"]
 
         if ncardslots > ncardsavail:
@@ -118,6 +126,7 @@ class Command(BaseCommand):
         self.stderr.write(
             f"Running {n_games} games  ·  {len(bot_specs)} bots: {', '.join(bot_specs)}"
             f"  ·  map: {mapfile}  ·  {ncardslots}/{ncardsavail} cards"
+            f"  ·  {n_workers} worker{'s' if n_workers != 1 else ''}"
             + (f"  ·  seed: {seed}" if seed is not None else "")
         )
         t0 = time.perf_counter()
@@ -130,6 +139,7 @@ class Command(BaseCommand):
             ncardsavail=ncardsavail,
             pct_repair=pct_repair,
             seed=seed,
+            n_workers=n_workers,
             progress_cb=progress,
         )
         elapsed = time.perf_counter() - t0
@@ -176,7 +186,7 @@ class Command(BaseCommand):
             out(f"    Slowest win         : {max(r.rounds_played for r in won_games)} rounds")
         all_cps = [pr.checkpoints_reached for r in results for pr in r.players]
         out(f"    Max CPs in one game : {max(all_cps)}")
-        out(f"    Elapsed             : {elapsed:.1f}s  ({elapsed*1000/n_games:.0f} ms/game)")
+        out(f"    Elapsed             : {elapsed:.1f}s  ({elapsed*1000/n_games:.0f} ms/game)  [{n_workers} worker{'s' if n_workers != 1 else ''}]")
         out(f"{'='*70}")
         out("")
 
