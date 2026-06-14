@@ -150,11 +150,11 @@ class Command(BaseCommand):
         if output_format == "json":
             self._output_json(slot_stats, results, elapsed)
         else:
-            self._output_table(slot_stats, results, elapsed, n_games, max_rounds, mapfile, bot_specs)
+            self._output_table(slot_stats, results, elapsed, n_games, max_rounds, mapfile, bot_specs, n_workers)
 
     # ── table output ──────────────────────────────────────────────────────────
 
-    def _output_table(self, slot_stats, results, elapsed, n_games, max_rounds, mapfile, bot_specs):
+    def _output_table(self, slot_stats, results, elapsed, n_games, max_rounds, mapfile, bot_specs, n_workers):
         out = self.stdout.write
 
         out("")
