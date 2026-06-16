@@ -25,9 +25,9 @@ The scalar prefix (state + cards + opp) is followed by the spatial suffix
 
 obs_dim is map-independent — the same trained model works on any map.
 
-Action (float32, shape = (N_CARD_TYPES,) = (8,)):
-    Preference score per card type.  The hand is sorted so the card whose
-    type has the highest preference score plays first; ties broken by rank.
+Action (float32, shape = (ncardslots,) = (5,)):
+    Priority score per card in the current hand.  The card with the highest
+    score plays first (argsort-descending).  Only relative order matters.
 
 Install deps before use:
     pip install gymnasium stable-baselines3
@@ -71,17 +71,30 @@ from pigame.models import (
 
 # ── card feature encoding ─────────────────────────────────────────────────────
 
-_CARD_ID_TO_IDX: Dict[int, int] = {1: 0, 2: 1, 3: 2, 10: 3, 20: 4, 30: 5, 40: 6, 100: 7}
-N_CARD_TYPES = 8
-CARD_FEATURES = N_CARD_TYPES + 1   # one-hot type + normalised rank
+# Cannon direction cards use their raw card_val (-10 … -13) as dict key —
+# they are NOT stored as id*NRANKINGS+rank like movement cards.
+_CANNON_VALS = frozenset({-10, -11, -12, -13})
+
+_CARD_ID_TO_IDX: Dict[int, int] = {
+    1: 0, 2: 1, 3: 2,           # rotate-left, backup, u-turn
+    10: 3, 20: 4, 30: 5, 40: 6, # rotate-right, fwd1, fwd2, fwd3
+    100: 7,                      # repair
+    -10: 8, -11: 9, -12: 10, -13: 11,  # cannon fwd/right/back/left
+}
+N_CARD_TYPES = 12
+CARD_FEATURES = N_CARD_TYPES + 1   # one-hot type (12) + normalised rank
 
 
 def encode_card(card_val: int) -> np.ndarray:
     """Return a CARD_FEATURES-dim float32 vector for one card."""
-    card_id, rank = card_id_rank(card_val)
     vec = np.zeros(CARD_FEATURES, dtype=np.float32)
-    vec[_CARD_ID_TO_IDX.get(card_id, N_CARD_TYPES - 1)] = 1.0
-    vec[N_CARD_TYPES] = rank / NRANKINGS
+    if card_val in _CANNON_VALS:
+        # Cannon direction cards have no rank — keyed by raw card_val
+        vec[_CARD_ID_TO_IDX[card_val]] = 1.0
+    else:
+        card_id, rank = card_id_rank(card_val)
+        vec[_CARD_ID_TO_IDX.get(card_id, N_CARD_TYPES - 1)] = 1.0
+        vec[N_CARD_TYPES] = rank / NRANKINGS
     return vec
 
 
@@ -210,6 +223,19 @@ IMPULSIVE_WEIGHTS = RewardWeights(
     push_opp=1.5,
 )
 
+AGGRESSIVE_WEIGHTS = RewardWeights(
+    distance=0.5,        # still navigate toward CPs
+    checkpoint=3.0,      # still care about reaching CPs
+    win=10.0,
+    damage_taken=-0.2,   # light self-damage penalty (tanks hits)
+    time=-0.005,
+    win_race=5.0,
+    lose_race=-1.0,      # mild lose penalty — damage is its own reward
+    lead_bonus=0.1,
+    damage_dealt=3.0,    # strong reward for hitting opponent
+    push_opp=1.5,        # reward for pushing opponent off course
+)
+
 
 # ── environment ────────────────────────────────────────────────────────────────
 
@@ -239,6 +265,7 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         ncardsavail: int = 9,
         max_rounds: int = 60,
         pct_repair: int = 0,
+        pct_cannon: int = 0,
         weights: Optional[RewardWeights] = None,
         opponent_types: Optional[List[str]] = None,
         max_opponents: int = 0,
@@ -253,6 +280,7 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         self.ncardsavail = ncardsavail
         self.max_rounds = max_rounds
         self.pct_repair = pct_repair
+        self.pct_cannon = pct_cannon
         self.weights = weights if weights is not None else RewardWeights()
         self.opponent_types: List[str] = list(opponent_types or [])
         # max_opponents fixes the obs size across curriculum stages.
@@ -286,7 +314,7 @@ class PirateEnv(gym.Env if HAS_GYM else object):
             low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32
         )
         self.action_space = spaces.Box(
-            low=-1.0, high=1.0, shape=(N_CARD_TYPES,), dtype=np.float32
+            low=-5.0, high=5.0, shape=(self.ncardslots,), dtype=np.float32
         )
 
         # Runtime state — populated by reset()
@@ -384,7 +412,7 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         sx, sy = _pos(0)
         sd = random.randint(0, 3)
         self._player = self._make_player(-1, sx, sy, sd, "#4488CC", "rl")
-        self._deck = _make_deck(self.pct_repair)
+        self._deck = _make_deck(self.pct_repair, self.pct_cannon)
         self._next_card = 0
         self._round = 0
         self._prev_dist = self._dist_to_cp(self._player)
@@ -401,7 +429,7 @@ class PirateEnv(gym.Env if HAS_GYM else object):
                 opp_pid, osx, osy, osd,
                 opp_colors[i % len(opp_colors)], f"{opp_type}_{i}"
             )
-            self._opp_decks.append(_make_deck(self.pct_repair))
+            self._opp_decks.append(_make_deck(self.pct_repair, self.pct_cannon))
             self._opp_next_cards.append(0)
 
         return self._build_obs(), {}
@@ -413,16 +441,11 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         p = self._player
         pid = p.id
 
-        # Decode action: type preference scores → sort hand
+        # Decode action: per-card priority scores → sort hand by descending score
         hand = self._deck[self._next_card : self._next_card + self.ncardslots]
-        type_scores = np.asarray(action, dtype=np.float32)
-
-        def _sort_key(card_val):
-            cid, rank = card_id_rank(card_val)
-            tidx = _CARD_ID_TO_IDX.get(cid, N_CARD_TYPES - 1)
-            return (-float(type_scores[tidx]), -rank)
-
-        played = sorted(hand, key=_sort_key)
+        scores = np.asarray(action, dtype=np.float32)
+        order = np.argsort(-scores)  # highest score plays first
+        played = [hand[i] for i in order]
 
         # Opponent card selection
         opp_played: Dict[int, List[int]] = {}
@@ -456,6 +479,8 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         prev_health = p.health
         prev_dist = self._prev_dist
         opp_prev_cps = {oid: o.next_checkpoint for oid, o in self._opponents.items()}
+        opp_prev_health = {oid: o.health for oid, o in self._opponents.items()}
+        opp_prev_dist  = {oid: self._dist_to_cp(o) for oid, o in self._opponents.items()}
 
         all_players = {pid: p, **self._opponents}
         game_over = play_one_round(all_players, self._map_data, round_cards, self.ncardsavail)
@@ -496,6 +521,16 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         health_lost = prev_health - p.health
         if health_lost > 0:
             reward += w.damage_taken * health_lost
+
+        # Damage dealt and push opponent off course
+        for oid, opp in self._opponents.items():
+            dmg = opp_prev_health[oid] - opp.health
+            if dmg > 0:
+                reward += w.damage_dealt * dmg
+            new_opp_dist = self._dist_to_cp(opp)
+            push = new_opp_dist - opp_prev_dist[oid]
+            if push > 0:
+                reward += w.push_opp * push
 
         # Lead bonus: checkpoint lead over each opponent
         if w.lead_bonus != 0.0 and self._opponents:

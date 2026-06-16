@@ -41,10 +41,15 @@ from pigame.models import (
 
 # ── deck helpers ──────────────────────────────────────────────────────────────
 
-def _make_deck(pct_repair: int = 0) -> List[int]:
+def _make_deck(pct_repair: int = 0, pct_cannon: int = 0) -> List[int]:
     deck = list(DEFAULT_DECK)
     n_repair = int(round(pct_repair * 1e-2 * len(deck)))
     deck.extend([100 * NRANKINGS] * n_repair)
+    if pct_cannon > 0:
+        n_cannon = int(round(pct_cannon * 1e-2 * len(deck)))
+        cannon_ids = [-10, -11, -12, -13]
+        for i in range(n_cannon):
+            deck.append(cannon_ids[i % len(cannon_ids)])
     random.shuffle(deck)
     return deck
 
@@ -103,6 +108,7 @@ class EvalGame:
         ncardslots: int = 5,
         ncardsavail: int = 9,
         pct_repair: int = 0,
+        pct_cannon: int = 0,
         _map_data=None,     # internal: skip Redis call when map is pre-loaded
     ):
         if ncardsavail < ncardslots:
@@ -112,6 +118,7 @@ class EvalGame:
         self.ncardslots = ncardslots
         self.ncardsavail = ncardsavail
         self.pct_repair = pct_repair
+        self.pct_cannon = pct_cannon
         self.n_players = len(bot_specs)
 
         # Deep-copy: determine_starting_locations mutates the map's startinglocs
@@ -182,7 +189,7 @@ class EvalGame:
         self._colors = [color_list[i % len(color_list)] for i in range(self.n_players)]
         self._names = [f"{bt}_{i}" for i, bt in enumerate(self.bot_specs)]
 
-        self._decks = [_make_deck(self.pct_repair) for _ in range(self.n_players)]
+        self._decks = [_make_deck(self.pct_repair, self.pct_cannon) for _ in range(self.n_players)]
         self._next_cards = [0] * self.n_players
         self.round = 0
         self.done = False
@@ -294,9 +301,9 @@ def _run_game_worker(args):
     Top-level worker function (must be picklable for multiprocessing).
     Runs a single game and returns its GameResult.
     """
-    bot_specs, mapfile, map_data, max_rounds, ncardslots, ncardsavail, pct_repair, game_seed = args
+    bot_specs, mapfile, map_data, max_rounds, ncardslots, ncardsavail, pct_repair, pct_cannon, game_seed = args
     random.seed(game_seed)
-    game = EvalGame(bot_specs, mapfile, ncardslots, ncardsavail, pct_repair, _map_data=map_data)
+    game = EvalGame(bot_specs, mapfile, ncardslots, ncardsavail, pct_repair, pct_cannon, _map_data=map_data)
     return game.run(max_rounds)
 
 
@@ -336,6 +343,7 @@ def run_tournament(
     ncardslots: int = 5,
     ncardsavail: int = 9,
     pct_repair: int = 0,
+    pct_cannon: int = 0,
     seed: Optional[int] = None,
     n_workers: int = 1,
     progress_cb=None,
@@ -362,7 +370,7 @@ def run_tournament(
     map_data = load_map(mapfile)
 
     worker_args = [
-        (bot_specs, mapfile, map_data, max_rounds, ncardslots, ncardsavail, pct_repair, gs)
+        (bot_specs, mapfile, map_data, max_rounds, ncardslots, ncardsavail, pct_repair, pct_cannon, gs)
         for gs in game_seeds
     ]
 

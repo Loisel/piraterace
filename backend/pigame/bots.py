@@ -299,14 +299,19 @@ def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail,
         # layout matches PirateEnv._build_obs: [scalar prefix | crop suffix]
         obs = np.concatenate([state, card_vecs, opp_block, crop]).reshape(1, -1)
 
-        type_scores = sess.run(["action_mean"], {"obs": obs})[0].flatten()
+        scores = sess.run(["action_mean"], {"obs": obs})[0].flatten()
 
-        def _sort_key(card_val):
-            cid, rank = card_id_rank(card_val)
-            tidx = _CARD_ID_TO_IDX.get(cid, N_CARD_TYPES - 1)
-            return (-float(type_scores[tidx]), -rank)
-
-        return sorted(cards, key=_sort_key)
+        if len(scores) == len(cards):
+            # Per-card model (PirateAttentionExtractor): score[i] = priority of card i
+            order = np.argsort(-scores)
+            return [cards[i] for i in order]
+        else:
+            # Legacy type-preference model: scores are per card-type
+            def _sort_key(card_val):
+                cid, rank = card_id_rank(card_val)
+                tidx = _CARD_ID_TO_IDX.get(cid, N_CARD_TYPES - 1)
+                return (-float(scores[tidx]), -rank)
+            return sorted(cards, key=_sort_key)
     except Exception:
         random.shuffle(cards)
         return cards
