@@ -21,8 +21,8 @@ if [ -e $APK ]; then
 fi
 
 cd $PROJECT_ROOT
-docker-compose run --rm frontend sh -c "ionic build --prod"
-docker-compose run --rm frontend sh -c "ionic cap sync --prod"
+docker compose run --rm frontend sh -c "ionic build --prod"
+docker compose run --rm frontend sh -c "ionic cap sync --prod"
 $PROJECT_ROOT/maint/frontend_chown.sh
 
 echo " Now, run"

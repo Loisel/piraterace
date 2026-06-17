@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker-compose run --rm backend bash
+docker compose run --rm backend bash

@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker-compose run --rm frontend sh
+docker compose run --rm frontend sh
