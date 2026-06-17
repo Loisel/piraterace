@@ -9,7 +9,11 @@ Observation (flat float32):
     player_state  (9)               x_norm, y_norm, sin(dir), cos(dir),
                                     health_norm, cp_progress, dx_to_cp,
                                     dy_to_cp, round_norm
-    per card      (ncardslots × 9)  one-hot card type (8) + rank_norm
+    per card      (ncardslots × 13) one-hot card type (12) + rank_norm
+    path_preview  (ncardslots)      per-card distance improvement to current
+                                    checkpoint when played solo as slot-1,
+                                    normalised by map diagonal.  Positive =
+                                    moves toward checkpoint.
     per opp slot  (max_opponents×8) x_norm, y_norm, sin/cos(dir), health_norm,
                                     cp_progress, dx_to_their_cp, dy_to_their_cp
                                     (zero-padded when no opponent in that slot)
@@ -20,8 +24,8 @@ Observation (flat float32):
                                     collision=1.  Layout is (row, col, channel)
                                     i.e. spatial → CNN-friendly.
 
-The scalar prefix (state + cards + opp) is followed by the spatial suffix
-(crop) so the features extractor can split at index n_scalar.
+The scalar prefix (state + cards + preview + opp) is followed by the spatial
+suffix (crop) so the features extractor can split at index n_scalar.
 
 obs_dim is map-independent — the same trained model works on any map.
 
@@ -306,9 +310,10 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         self._tile_arr: np.ndarray = build_tile_feature_array(self._map_data)
 
         # obs layout: [scalar prefix] + [ego crop suffix]
-        # scalar = state(9) + cards(ncardslots×CARD_FEATURES) + opp(max_opponents×8)
+        # scalar = state(9) + cards(ncardslots×CARD_FEATURES)
+        #          + preview(ncardslots) + opp(max_opponents×8)
         # crop  = CROP_SIZE×CROP_SIZE×N_TILE_PROPS  (map-independent size)
-        self.n_scalar = 9 + ncardslots * CARD_FEATURES + self.max_opponents * 8
+        self.n_scalar = 9 + ncardslots * CARD_FEATURES + ncardslots + self.max_opponents * 8
         obs_dim = self.n_scalar + N_CROP_FEATS
         self.observation_space = spaces.Box(
             low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32
@@ -356,6 +361,32 @@ class PirateEnv(gym.Env if HAS_GYM else object):
             block[b + 7] = (cy - opp.ypos) / self._map_diag
         return block
 
+    def _card_preview(self, hand: list, cp_x: float, cp_y: float) -> np.ndarray:
+        """Return (ncardslots,) distance-improvement per card played solo as slot-1.
+        preview[i] = (dist_before - dist_after_card_i) / map_diag, normalised.
+        Positive = card moves toward the current checkpoint.
+        """
+        p = self._player
+        dist_before = math.sqrt((p.xpos - cp_x) ** 2 + (p.ypos - cp_y) ** 2)
+        preview = np.zeros(self.ncardslots, dtype=np.float32)
+        for i, card in enumerate(hand):
+            sim_p = types.SimpleNamespace(
+                id=p.id, xpos=p.xpos, ypos=p.ypos,
+                direction=p.direction, health=p.health,
+                next_checkpoint=p.next_checkpoint,
+                last_cp_x=p.last_cp_x, last_cp_y=p.last_cp_y,
+                cannon_direction=p.cannon_direction, powered_down=False,
+                color=p.color, name=p.name,
+            )
+            sim_cards = [p.id, card, BACKEND_USERID, ROUNDEND_CARDID]
+            try:
+                play_one_round({p.id: sim_p}, self._map_data, sim_cards, self.ncardsavail)
+            except Exception:
+                pass
+            dist_after = math.sqrt((sim_p.xpos - cp_x) ** 2 + (sim_p.ypos - cp_y) ** 2)
+            preview[i] = (dist_before - dist_after) / self._map_diag
+        return preview
+
     def _build_obs(self) -> np.ndarray:
         p = self._player
         cx, cy = self._cp_xy(p)
@@ -376,10 +407,11 @@ class PirateEnv(gym.Env if HAS_GYM else object):
 
         hand = self._deck[self._next_card : self._next_card + self.ncardslots]
         cards = np.concatenate([encode_card(c) for c in hand])
+        preview = self._card_preview(hand, cx, cy)
         crop = ego_crop_flat(self._tile_arr, p.xpos, p.ypos, self._map_w, self._map_h)
 
         # layout: scalar prefix then spatial suffix (CNN extractor splits here)
-        return np.concatenate([state, cards, self._opp_obs_block(), crop])
+        return np.concatenate([state, cards, preview, self._opp_obs_block(), crop])
 
     def _make_player(self, pid, sx, sy, sd, color, name):
         max_health = self.ncardsavail + FREE_HEALTH_OFFSET

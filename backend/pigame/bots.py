@@ -263,6 +263,16 @@ def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail,
 
         card_vecs = np.concatenate([encode_card(c) for c in playable_cards])
 
+        # Path preview: for each card, simulate it played solo as slot-1,
+        # record (dist_before - dist_after) / map_diag toward current checkpoint.
+        dist_before = math.sqrt((p.xpos - cp_x) ** 2 + (p.ypos - cp_y) ** 2)
+        preview = np.zeros(len(playable_cards), dtype=np.float32)
+        if map_data is not None:
+            for i, card in enumerate(playable_cards):
+                ex, ey = _simulate_end_pos_fast(map_data, player_id, p, [card], ncardsavail or 9)
+                dist_after = math.sqrt((ex - cp_x) ** 2 + (ey - cp_y) ** 2)
+                preview[i] = (dist_before - dist_after) / map_diag
+
         # Tile feature array — cached per map_data object
         if map_data is not None and id(map_data) not in _rl_map_enc_cache:
             _rl_map_enc_cache[id(map_data)] = build_tile_feature_array(map_data)
@@ -274,9 +284,10 @@ def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail,
 
         # Infer how many opponent slots the model expects:
         # obs_dim = n_scalar + N_CROP_FEATS
-        # n_scalar = 9 + ncardslots*CARD_FEATURES + n_opp_slots*8
-        model_obs_dim = sess.get_inputs()[0].shape[1] or (9 + len(playable_cards) * CARD_FEATURES + N_CROP_FEATS)
-        n_base = 9 + len(playable_cards) * CARD_FEATURES
+        # n_scalar = 9 + ncardslots*CARD_FEATURES + ncardslots(preview) + n_opp_slots*8
+        ncards = len(playable_cards)
+        model_obs_dim = sess.get_inputs()[0].shape[1] or (9 + ncards * CARD_FEATURES + ncards + N_CROP_FEATS)
+        n_base = 9 + ncards * CARD_FEATURES + ncards  # includes preview
         n_opp_slots = max(0, (model_obs_dim - N_CROP_FEATS - n_base) // 8)
 
         opp_block = np.zeros(n_opp_slots * 8, dtype=np.float32)
@@ -297,7 +308,7 @@ def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail,
                 opp_block[b+7] = (ocy - opp.ypos) / map_diag
 
         # layout matches PirateEnv._build_obs: [scalar prefix | crop suffix]
-        obs = np.concatenate([state, card_vecs, opp_block, crop]).reshape(1, -1)
+        obs = np.concatenate([state, card_vecs, preview, opp_block, crop]).reshape(1, -1)
 
         scores = sess.run(["action_mean"], {"obs": obs})[0].flatten()
 
