@@ -273,22 +273,26 @@ def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail,
                 dist_after = math.sqrt((ex - cp_x) ** 2 + (ey - cp_y) ** 2)
                 preview[i] = (dist_before - dist_after) / map_diag
 
-        # Tile feature array — cached per map_data object
-        if map_data is not None and id(map_data) not in _rl_map_enc_cache:
-            _rl_map_enc_cache[id(map_data)] = build_tile_feature_array(map_data)
-        tile_arr = _rl_map_enc_cache.get(id(map_data))
-
-        crop = (ego_crop_flat(tile_arr, p.xpos, p.ypos, map_w, map_h)
-                if tile_arr is not None
-                else np.zeros(N_CROP_FEATS, dtype=np.float32))
-
-        # Infer how many opponent slots the model expects:
-        # obs_dim = n_scalar + N_CROP_FEATS
-        # n_scalar = 9 + ncardslots*CARD_FEATURES + ncardslots(preview) + n_opp_slots*8
+        # Detect whether the model was trained with or without egocentric crop.
+        # New models (obs_dim=87): no crop — obs = [scalar only].
+        # Old models (obs_dim≥4031): with crop — obs = [scalar | crop].
         ncards = len(playable_cards)
-        model_obs_dim = sess.get_inputs()[0].shape[1] or (9 + ncards * CARD_FEATURES + ncards + N_CROP_FEATS)
-        n_base = 9 + ncards * CARD_FEATURES + ncards  # includes preview
-        n_opp_slots = max(0, (model_obs_dim - N_CROP_FEATS - n_base) // 8)
+        model_obs_dim = sess.get_inputs()[0].shape[1] or (9 + ncards * CARD_FEATURES + ncards)
+        n_base = 9 + ncards * CARD_FEATURES + ncards  # state + cards + preview
+        has_crop = model_obs_dim >= N_CROP_FEATS
+
+        if has_crop:
+            # Legacy crop models — build tile feature array (cached per map)
+            if map_data is not None and id(map_data) not in _rl_map_enc_cache:
+                _rl_map_enc_cache[id(map_data)] = build_tile_feature_array(map_data)
+            tile_arr = _rl_map_enc_cache.get(id(map_data))
+            crop = (ego_crop_flat(tile_arr, p.xpos, p.ypos, map_w, map_h)
+                    if tile_arr is not None
+                    else np.zeros(N_CROP_FEATS, dtype=np.float32))
+            n_opp_slots = max(0, (model_obs_dim - N_CROP_FEATS - n_base) // 8)
+        else:
+            crop = None
+            n_opp_slots = max(0, (model_obs_dim - n_base) // 8)
 
         opp_block = np.zeros(n_opp_slots * 8, dtype=np.float32)
         if n_opp_slots > 0 and opponent_states:
@@ -307,8 +311,10 @@ def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail,
                 opp_block[b+6] = (ocx - opp.xpos) / map_diag
                 opp_block[b+7] = (ocy - opp.ypos) / map_diag
 
-        # layout matches PirateEnv._build_obs: [scalar prefix | crop suffix]
-        obs = np.concatenate([state, card_vecs, preview, opp_block, crop]).reshape(1, -1)
+        parts = [state, card_vecs, preview, opp_block]
+        if has_crop:
+            parts.append(crop)
+        obs = np.concatenate(parts).reshape(1, -1)
 
         scores = sess.run(["action_mean"], {"obs": obs})[0].flatten()
 

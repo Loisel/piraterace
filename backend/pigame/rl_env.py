@@ -5,7 +5,7 @@ Supports solo and multiplayer (with bot opponents) via the `opponent_types`
 parameter.  Use `max_opponents` to fix the observation size across curriculum
 stages so weights can be transferred between solo and multi-player training.
 
-Observation (flat float32):
+Observation (flat float32, total = 87 for ncardslots=5, max_opponents=1):
     player_state  (9)               x_norm, y_norm, sin(dir), cos(dir),
                                     health_norm, cp_progress, dx_to_cp,
                                     dy_to_cp, round_norm
@@ -17,15 +17,10 @@ Observation (flat float32):
     per opp slot  (max_opponents×8) x_norm, y_norm, sin/cos(dir), health_norm,
                                     cp_progress, dx_to_their_cp, dy_to_their_cp
                                     (zero-padded when no opponent in that slot)
-    ego-centric crop  (CROP_SIZE × CROP_SIZE × N_TILE_PROPS)
-                                    CROP_SIZE×CROP_SIZE tile window centred on
-                                    the agent, encoded as N_TILE_PROPS floats
-                                    per tile.  Out-of-bounds tiles filled with
-                                    collision=1.  Layout is (row, col, channel)
-                                    i.e. spatial → CNN-friendly.
 
-The scalar prefix (state + cards + preview + opp) is followed by the spatial
-suffix (crop) so the features extractor can split at index n_scalar.
+No egocentric crop: path_preview already encodes spatial card effects.
+Removing the 3969-feature CNN crop speeds up training ~15× and makes a
+simple flat MLP sufficient (no custom CNN extractor needed).
 
 obs_dim is map-independent — the same trained model works on any map.
 
@@ -306,15 +301,12 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         self._tile_w = self._map_data["tilewidth"]
         self._tile_h = self._map_data["tileheight"]
 
-        # Precompute (W, H, N_TILE_PROPS) array for O(1) crop extraction
-        self._tile_arr: np.ndarray = build_tile_feature_array(self._map_data)
-
-        # obs layout: [scalar prefix] + [ego crop suffix]
-        # scalar = state(9) + cards(ncardslots×CARD_FEATURES)
-        #          + preview(ncardslots) + opp(max_opponents×8)
-        # crop  = CROP_SIZE×CROP_SIZE×N_TILE_PROPS  (map-independent size)
+        # obs = state(9) + cards(ncardslots×CARD_FEATURES) + preview(ncardslots)
+        #       + opp(max_opponents×8)
+        # No ego-centric crop: path preview already encodes spatial card effects,
+        # and removing the 3969-feature CNN crop speeds up training ~15×.
         self.n_scalar = 9 + ncardslots * CARD_FEATURES + ncardslots + self.max_opponents * 8
-        obs_dim = self.n_scalar + N_CROP_FEATS
+        obs_dim = self.n_scalar
         self.observation_space = spaces.Box(
             low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32
         )
@@ -408,10 +400,8 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         hand = self._deck[self._next_card : self._next_card + self.ncardslots]
         cards = np.concatenate([encode_card(c) for c in hand])
         preview = self._card_preview(hand, cx, cy)
-        crop = ego_crop_flat(self._tile_arr, p.xpos, p.ypos, self._map_w, self._map_h)
 
-        # layout: scalar prefix then spatial suffix (CNN extractor splits here)
-        return np.concatenate([state, cards, preview, self._opp_obs_block(), crop])
+        return np.concatenate([state, cards, preview, self._opp_obs_block()])
 
     def _make_player(self, pid, sx, sy, sd, color, name):
         max_health = self.ncardsavail + FREE_HEALTH_OFFSET
