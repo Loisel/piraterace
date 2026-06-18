@@ -1,7 +1,8 @@
 # Ignore trained model weights — they're too large for git.
-# Check in only the .gitkeep placeholder.
+# Check in only the .gitkeep placeholder and the deployed model.
 *.zip
 *.onnx
+!solo_map1.onnx
 *.onnx.data
 *_vecnorm.pkl
 tb_logs/
