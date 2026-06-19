@@ -274,6 +274,11 @@ export class GameComponent {
       label: "Odysseus' Curse",
       description: "You sail too far ahead of the fleet. The gods punish your hubris — all reserve cards are frozen and cannot be reordered.",
     },
+    rose_cannons: {
+      emoji: '🧭',
+      label: 'Rose Cannons',
+      description: 'Your cannons fire in all four cardinal directions simultaneously.',
+    },
     carpenter: {
       emoji: '🔧',
       label: 'Carpenter',

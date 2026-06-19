@@ -649,6 +649,7 @@ export class GameRenderer {
       carpenter: '#2a6a2a',
       shipwright: '#007a7a',
       odysseus_curse: '#4a1a7a',
+      rose_cannons: '#1a5a8a',
     };
     const symbols: Record<string, string> = {
       burning_cannons: '🔥',
@@ -659,6 +660,7 @@ export class GameRenderer {
       carpenter: '🔧',
       shipwright: '⚓',
       odysseus_curse: '🌊',
+      rose_cannons: '🧭',
     };
 
     ctx.fillStyle = bgColors[upg.type] ?? '#555';
@@ -751,6 +753,7 @@ export class GameRenderer {
           solid_rock: '#c8a882',
           carpenter: '#44cc44',
           shipwright: '#00dddd',
+          rose_cannons: '#55aaff',
         };
         ctx.fillStyle = dotColors[t.upgrade] ?? '#fff';
         ctx.beginPath();
@@ -1086,11 +1089,11 @@ export class GameRenderer {
       if (hasUpgrades) {
         const BADGE_COLORS: Record<string, string> = {
           burning_cannons: '#cc2200', shield: '#2244cc', checkpoint_rush: '#cc9900',
-          ghost_ship: '#8833cc', solid_rock: '#6b5a4a', carpenter: '#2a6a2a', shipwright: '#007a7a', odysseus_curse: '#4a1a7a',
+          ghost_ship: '#8833cc', solid_rock: '#6b5a4a', carpenter: '#2a6a2a', shipwright: '#007a7a', odysseus_curse: '#4a1a7a', rose_cannons: '#1a5a8a',
         };
         const BADGE_SYMBOLS: Record<string, string> = {
           burning_cannons: '🔥', shield: '🛡', checkpoint_rush: '⚑', ghost_ship: '👻', solid_rock: '🪨',
-          carpenter: '🔧', shipwright: '⚓', odysseus_curse: '🌊',
+          carpenter: '🔧', shipwright: '⚓', odysseus_curse: '🌊', rose_cannons: '🧭',
         };
         const divY = infoY + INFO_H / 2 + PAD / 2;
         ctx.strokeStyle = 'rgba(255,255,255,0.1)';

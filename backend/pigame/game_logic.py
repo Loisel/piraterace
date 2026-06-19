@@ -47,6 +47,7 @@ UPGRADE_TYPES = {
     "solid_rock": {"name": "Solid as a Rock"},
     "carpenter": {"name": "Carpenter"},
     "shipwright": {"name": "Shipwright"},
+    "rose_cannons": {"name": "Rose Cannons"},
 }
 TREASURES_PER_ROUND_DEFAULT = 2.0
 
@@ -700,21 +701,25 @@ def board_moves(game, gmap, players, fast_current=True, player_upgrades=None):
 
 
 def shoot_player_cannon(game, gmap, players, player, player_upgrades=None, on_fire_set=None):
-    cannon_direction = (player.direction + player.cannon_direction) % 4
-    return shoot_cannon_ball(
-        gmap,
-        xstart=player.xpos,
-        ystart=player.ypos,
-        xinc=DIRID2MOVE[cannon_direction][0],
-        yinc=DIRID2MOVE[cannon_direction][1],
-        source_player=player.id,
-        players=players,
-        cannon_damage=1,
-        collide_terrain=True,
-        collide_players=True,
-        player_upgrades=player_upgrades,
-        on_fire_set=on_fire_set,
-    )
+    has_compass_rose = player_upgrades is not None and "rose_cannons" in player_upgrades.get(player.id, {})
+    directions = list(range(4)) if has_compass_rose else [(player.direction + player.cannon_direction) % 4]
+    actions = []
+    for d in directions:
+        actions.extend(shoot_cannon_ball(
+            gmap,
+            xstart=player.xpos,
+            ystart=player.ypos,
+            xinc=DIRID2MOVE[d][0],
+            yinc=DIRID2MOVE[d][1],
+            source_player=player.id,
+            players=players,
+            cannon_damage=1,
+            collide_terrain=True,
+            collide_players=True,
+            player_upgrades=player_upgrades,
+            on_fire_set=on_fire_set,
+        ))
+    return actions
 
 
 def shoot_cannon_ball(
