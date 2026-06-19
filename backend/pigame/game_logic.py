@@ -295,7 +295,11 @@ def play_stack(game, initial_upgrades=None):
                                  posx=treasure["x"], posy=treasure["y"], treasure_id=treasure["id"])
                         )
                         if upgrade == "shield":
-                            player_upgrades[player.id]["shield"] = {"charges": UPGRADE_TYPES["shield"]["charges"]}
+                            charges = UPGRADE_TYPES["shield"]["charges"]
+                            player_upgrades[player.id]["shield"] = {"charges": charges}
+                            collection_actions.append(
+                                dict(key="upgrade_gained", target=player.id, upgrade=upgrade, charges=charges)
+                            )
                         elif upgrade == "checkpoint_rush":
                             player.next_checkpoint += 1
                             if player.next_checkpoint > len(checkpoints):

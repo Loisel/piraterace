@@ -299,6 +299,25 @@ export class GameComponent {
     return GameComponent.UPGRADE_META[type]?.label ?? type;
   }
 
+  async showTreasureInfo(upgradeType: string | null) {
+    let header: string;
+    let message: string;
+    if (upgradeType) {
+      const meta = GameComponent.UPGRADE_META[upgradeType];
+      header = `Treasure Chest — ${meta?.emoji ?? '?'} ${meta?.label ?? upgradeType}`;
+      message = (meta?.description ?? upgradeType) + '<br><br><i>Stand on this tile at the end of a round to collect it.</i>';
+    } else {
+      const all = Object.entries(GameComponent.UPGRADE_META)
+        .filter(([k]) => k !== 'odysseus_curse')
+        .map(([, m]) => `${m.emoji} ${m.label}`)
+        .join(', ');
+      header = 'Treasure Chest';
+      message = `Contains one of: ${all}.<br><br><i>Stand on this tile at the end of a round to collect it.</i>`;
+    }
+    const alert = await this.alertController.create({ header, message, buttons: ['OK'] });
+    await alert.present();
+  }
+
   async showUpgradeInfo(upg: { type: string; charges?: number }) {
     const meta = GameComponent.UPGRADE_META[upg.type];
     if (!meta) return;

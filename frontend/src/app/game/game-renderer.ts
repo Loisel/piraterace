@@ -1626,8 +1626,13 @@ export class GameRenderer {
           tick: () => {},
           onComplete: () => {
             if (!s.upgrades) s.upgrades = [];
-            if (!s.upgrades.find((u) => u.type === action.upgrade)) {
-              s.upgrades.push({ type: action.upgrade });
+            const existing = s.upgrades.find((u) => u.type === action.upgrade);
+            if (!existing) {
+              const entry: any = { type: action.upgrade };
+              if (action.charges !== undefined) entry.charges = action.charges;
+              s.upgrades.push(entry);
+            } else if (action.charges !== undefined) {
+              existing.charges = action.charges;
             }
             if (isMe_gained) this.component.currentPlayerUpgrades = [...s.upgrades];
           },
@@ -1756,6 +1761,17 @@ export class GameRenderer {
     const worldY = (e.clientY - rect.top) / this.zoom + this.cameraY;
     const tileW: number = GI.map.tilewidth;
     const tileH: number = GI.map.tileheight;
+
+    // treasure chest click
+    for (const [, t] of this.treasures) {
+      if (!t.alive) continue;
+      const cx = (t.x + 0.5) * tileW;
+      const cy = (t.y + 0.5) * tileH;
+      if (Math.abs(worldX - cx) < tileW * 0.5 && Math.abs(worldY - cy) < tileH * 0.5) {
+        this.component.showTreasureInfo(GI.treasure_preview !== false ? t.upgrade : null);
+        return;
+      }
+    }
 
     for (const [pid, s] of this.boatStates) {
       if (s.scale <= 0) continue;
