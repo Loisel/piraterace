@@ -46,6 +46,7 @@ from pigame.game_logic import (
     get_player_deck,
     set_player_deck,
     calc_stats,
+    is_player_cursed,
 )
 
 from pichat.views import gen_gameconfigchatslug, gen_gamechatslug
@@ -67,6 +68,16 @@ def get_play_stack(game, invalidate_cache=False):
     return ret
 
 
+def _serialize_upgrades(player_upgrades, pid):
+    result = []
+    for upgrade_type, state in player_upgrades.get(pid, {}).items():
+        if upgrade_type == "shield":
+            result.append({"type": "shield", "charges": state["charges"]})
+        else:
+            result.append({"type": upgrade_type})
+    return result
+
+
 @api_view(["GET", "POST"])
 @permission_classes((IsAuthenticated,))
 @transaction.atomic
@@ -83,7 +94,7 @@ def player_cards(request, **kwargs):
     pidx = gamecfg.player_ids.index(player.pk)
 
     if request.method == "POST":
-        player_states, actionstack = get_play_stack(player.game)
+        player_states, actionstack, *_ = get_play_stack(player.game)
         player_state = player_states[player.pk]
         cards = []
         for playerid, card in get_cards_on_hand(gamecfg, pidx, gamecfg.ncardsavail):
@@ -97,12 +108,16 @@ def player_cards(request, **kwargs):
             )
 
         src, target = request.data
-        if any([_ >= player_state.health for _ in [src, target]]):
-            return JsonResponse(
-                {"message": f"You are not allowed to switch cards because your boat is damaged.", "cards": cards},
-                status=404,
-                safe=False,
-            )
+        cursed = is_player_cursed(player.pk, player_states)
+        curse_slots = gamecfg.ncardsavail - gamecfg.ncardslots
+        health_limit = min(player_state.health, gamecfg.ncardsavail)
+        effective_health = max(0, health_limit - (curse_slots if cursed else 0))
+        if any([_ >= effective_health for _ in [src, target]]):
+            if cursed and any([effective_health <= _ < health_limit for _ in [src, target]]):
+                msg = f"Odysseus' Curse — you sail too far ahead. Your {curse_slots} reserve cards are sealed by fate."
+            else:
+                msg = "You are not allowed to switch cards because your boat is damaged."
+            return JsonResponse({"message": msg, "cards": cards}, status=404, safe=False)
 
         # move card into place
         deck = get_player_deck(gamecfg, player.pk)
@@ -176,9 +191,11 @@ def game(request, game_id, **kwargs):
         CARDS=CARDS,
         CANNON_DIRECTION_DESCR2ID=CANNON_DIRECTION_DESCR2ID,
         path_highlighting=game.config.path_highlighting,
+        treasure_preview=game.config.treasure_preview,
+        treasures_per_round=game.config.treasures_per_round,
     )
 
-    player_states, actionstack = get_play_stack(game)
+    player_states, actionstack, player_upgrades, active_treasures = get_play_stack(game)
     actionstack = prune_actionstack(actionstack)
 
     num_players_submitted = player_accounts.filter(time_submitted__isnull=False).count()
@@ -230,7 +247,7 @@ def game(request, game_id, **kwargs):
             cards_played.extend((BACKEND_USERID, ROUNDEND_CARDID))
             game.cards_played = cards_played
             game.save(update_fields=["cards_played"])
-            player_states, actionstack = get_play_stack(game, invalidate_cache=True)
+            player_states, actionstack, player_upgrades, active_treasures = get_play_stack(game, invalidate_cache=True)
             actionstack = prune_actionstack(actionstack)
 
             animation_time = (len(actionstack) - len(old_actionstack)) * TIME_PER_ACTION
@@ -283,8 +300,12 @@ def game(request, game_id, **kwargs):
 
     payload["Ngameround"] = game.round
     payload["state"] = game.state
+    payload["active_treasures"] = active_treasures
     payload["players"] = {}
     for p in player_states.values():
+        cursed = is_player_cursed(p.id, player_states)
+        curse_slots = game.config.ncardsavail - game.config.ncardslots
+        effective_health = max(0, min(p.health, game.config.ncardsavail) - (curse_slots if cursed else 0))
         payload["players"][p.id] = dict(
             name=p.name,
             pos_x=p.xpos,
@@ -299,6 +320,9 @@ def game(request, game_id, **kwargs):
             powered_down=p.powered_down,
             is_zombie=p.id not in game.account_set.values_list("user_id", flat=True),
             cannon_direction=str(CANNON_DIRECTION_DIRID2CARDID[p.cannon_direction]),
+            upgrades=_serialize_upgrades(player_upgrades, p.id),
+            is_cursed=cursed,
+            effective_health=effective_health,
         )
 
     summary = None
@@ -505,7 +529,7 @@ def predict_path(request):
         return JsonResponse(f"Can not predict path. Path highlighting is disabled.", status=404, safe=False)
     gamecfg = player.game.config
     game = player.game
-    player_states, old_actionstack = get_play_stack(game)
+    player_states, old_actionstack, player_upgrades, _ = get_play_stack(game)
 
     player_idx = gamecfg.player_ids.index(player.pk)
     cards_played_next = get_cards_on_hand(gamecfg, player_idx, gamecfg.ncardslots)
@@ -520,7 +544,7 @@ def predict_path(request):
     game.cards_played = flatten_list_of_tuples(cards_played_next)
     game.cards_played.extend((BACKEND_USERID, ROUNDEND_CARDID))
 
-    player_states, actionstack = play_stack(game)
+    player_states, actionstack, *_ = play_stack(game, initial_upgrades={player.pk: player_upgrades.get(player.pk, {})})
     path = []
     for actiongroup in actionstack:
         for action in actiongroup:
@@ -560,11 +584,16 @@ def update_gamecfg_options(request, gameconfig_id, request_id):
     if data["countdown"] < 0:
         return JsonResponse(f"Countdown has to be a positive number", status=404, safe=False)
 
+    if data["treasures_per_round"] < 0:
+        return JsonResponse(f"Treasures per round must be >= 0", status=404, safe=False)
+
     gamecfg.request_id = request_id
     gamecfg.ncardsavail = data["ncardsavail"]
     gamecfg.ncardslots = data["ncardslots"]
     gamecfg.countdown = data["countdown"]
     gamecfg.path_highlighting = data["path_highlighting"]
+    gamecfg.treasure_preview = data["treasure_preview"]
+    gamecfg.treasures_per_round = data["treasures_per_round"]
     gamecfg.percentage_repaircards = data["percentage_repaircards"]
     bot_ids = set(Account.objects.filter(pk__in=gamecfg.player_ids, is_bot=True).values_list("pk", flat=True))
     for i, pid in enumerate(gamecfg.player_ids):

@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { MenuController, Platform } from '@ionic/angular';
+import { IonModal } from '@ionic/angular';
 import { StorageService } from './services/storage.service';
 import { AuthService } from './services/auth.service';
 import { HttpService } from './services/http.service';
@@ -14,6 +15,8 @@ import { StatusBar } from '@capacitor/status-bar';
   styleUrls: ['app.component.scss'],
 })
 export class AppComponent {
+  @ViewChild('leaveGameModal') leaveGameModal: IonModal;
+
   constructor(
     private menu: MenuController,
     public authService: AuthService,
@@ -25,7 +28,12 @@ export class AppComponent {
     this.initializeApp();
   }
 
+  openLeaveGameModal() {
+    this.leaveGameModal?.present();
+  }
+
   leaveGame() {
+    this.leaveGameModal?.dismiss();
     this.httpService.get_leaveGame().subscribe(
       (success) => {
         console.log('Success leave game: ', success);

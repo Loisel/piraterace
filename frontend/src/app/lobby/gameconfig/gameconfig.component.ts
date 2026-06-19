@@ -23,6 +23,8 @@ export class GameConfigComponent implements OnInit {
     countdown: 'Countdown duration (seconds)',
     percentage_repaircards: 'Fraction of repaircards in deck',
     path_highlighting: 'Preview ship path',
+    treasure_preview: 'Show treasure contents',
+    treasures_per_round: 'Chests per round (0.5 = every 2nd round)',
   };
   startButtonActive: boolean = true;
   botTypes = [
@@ -65,6 +67,11 @@ export class GameConfigComponent implements OnInit {
             Validators.compose([Validators.required, Validators.min(0), Validators.max(100), Validators.pattern('^[0-9]+$')])
           ),
           path_highlighting: new FormControl(this.gameConfig.path_highlighting),
+          treasure_preview: new FormControl(this.gameConfig.treasure_preview),
+          treasures_per_round: new FormControl(
+            this.gameConfig.treasures_per_round,
+            Validators.compose([Validators.required, Validators.min(0)])
+          ),
         },
         { validators: cardsSlotsLECardsAvailValidator }
       );
@@ -136,6 +143,8 @@ export class GameConfigComponent implements OnInit {
           countdown: gameconfig['countdown'],
           percentage_repaircards: gameconfig['percentage_repaircards'],
           path_highlighting: gameconfig['path_highlighting'],
+          treasure_preview: gameconfig['treasure_preview'],
+          treasures_per_round: gameconfig['treasures_per_round'],
         });
       }
       if (this.gameConfig['game']) {

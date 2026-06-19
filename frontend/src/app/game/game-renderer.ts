@@ -13,6 +13,18 @@ interface BoatState {
   name: string;
   nextCheckpoint: number;
   isMe: boolean;
+  upgrades: { type: string; charges?: number }[];
+  onFire: boolean;
+  isCursed: boolean;
+}
+
+interface TreasureSprite {
+  id: string;
+  x: number; // tile coords
+  y: number;
+  upgrade: string;
+  spawnMs: number;
+  alive: boolean;
 }
 
 interface Cannonball {
@@ -22,6 +34,7 @@ interface Cannonball {
   y1: number;
   progress: number;
   alive: boolean;
+  onFire?: boolean;
 }
 
 interface StarBurst {
@@ -48,8 +61,13 @@ interface CardOverlay {
 interface BoatTooltip {
   x: number;
   y: number;
-  text: string;
-  bgColor: string;
+  color: string;
+  name: string;
+  health: number;
+  maxHealth: number;
+  nextCheckpoint: number;
+  upgrades: { type: string; charges?: number }[];
+  onFire: boolean;
   startMs: number;
   durationMs: number;
 }
@@ -78,6 +96,8 @@ interface FireParticle {
   startMs: number;
   durationMs: number;
   alive: boolean;
+  noGravity?: boolean; // boat-fire rises; explosion fire droops
+  grow?: boolean;      // smoke expands as it rises
 }
 
 interface AnimStep {
@@ -120,6 +140,7 @@ export class GameRenderer {
   private octopuses: OctopusSprite[] = [];
   private octopusFrameCount = 5;
   private pathTiles: { x: number; y: number }[] = [];
+  private treasures = new Map<string, TreasureSprite>();
 
   // Visual effects
   private cannonballs: Cannonball[] = [];
@@ -227,8 +248,22 @@ export class GameRenderer {
         name: player.name,
         nextCheckpoint: player.next_checkpoint,
         isMe: +pid === GI.me,
+        upgrades: player.upgrades ?? [],
+        onFire: false,
+        isCursed: player.is_cursed ?? false,
       });
     });
+
+    // Restore any active treasures from server state (handles reconnect)
+    if (GI.active_treasures) {
+      for (const t of GI.active_treasures) {
+        this.treasures.set(t.id, { ...t, spawnMs: 0, alive: true });
+      }
+    }
+
+    // Seed animated state for the HTML panel (reconnect / fresh load)
+    this.component.currentPlayerUpgrades = [...(GI.players[GI.me]?.upgrades ?? [])];
+    this.component.currentPlayerHealth = GI.players[GI.me]?.health ?? 0;
 
     // Center camera on own boat
     const me = this.boatStates.get(GI.me);
@@ -337,6 +372,7 @@ export class GameRenderer {
   // ---------------------------------------------------------------------------
 
   private render(now: number): void {
+    const anyBoatOnFire = (() => { for (const s of this.boatStates.values()) if (s.onFire && s.scale > 0) return true; return false; })();
     const hasActiveEffects =
       this.timeline.length > 0 ||
       this.cannonballs.some((c) => c.alive) ||
@@ -344,7 +380,9 @@ export class GameRenderer {
       this.explosions.length > 0 ||
       this.fireParticles.length > 0 ||
       this.cardOverlays.length > 0 ||
-      this.boatTooltips.length > 0;
+      this.boatTooltips.length > 0 ||
+      this.treasures.size > 0 || // treasures bob continuously
+      anyBoatOnFire;
 
     if (!hasActiveEffects && !this.dirty) return;
     this.dirty = false;
@@ -361,11 +399,62 @@ export class GameRenderer {
     this.drawGrid();
     this.drawPathHighlights();
     this.drawCheckpoints();
+    this.drawTreasures(now);
     this.processTimeline(now);
     this.drawBoats();
+    if (anyBoatOnFire) this.emitBoatFireParticles(now);
     this.drawEffects(now);
 
     ctx.restore();
+  }
+
+  private emitBoatFireParticles(now: number): void {
+    const GI = this.component.gameinfo;
+    if (!GI) return;
+    const tileW: number = GI.map.tilewidth;
+    const tileH: number = GI.map.tileheight;
+    const fireColors = ['#ff6600', '#ff9900', '#ffcc00', '#ff4400', '#ff2200'];
+
+    for (const s of this.boatStates.values()) {
+      if (!s.onFire || s.scale <= 0) continue;
+
+      // 1-2 fire particles per frame
+      const nFire = Math.random() < 0.6 ? 2 : 1;
+      for (let i = 0; i < nFire; i++) {
+        const angle = -Math.PI / 2 + (Math.random() - 0.5) * 0.9;
+        const speed = tileH * (0.8 + Math.random() * 0.8);
+        this.fireParticles.push({
+          x: s.x + (Math.random() - 0.5) * tileW * 0.5,
+          y: s.y + (Math.random() - 0.5) * tileH * 0.25,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          size: 2.5 + Math.random() * 3.5,
+          color: fireColors[Math.floor(Math.random() * fireColors.length)],
+          startMs: now,
+          durationMs: 270 + Math.random() * 220,
+          alive: true,
+          noGravity: true,
+        });
+      }
+
+      // occasional smoke puff
+      if (Math.random() < 0.35) {
+        const grey = 65 + Math.floor(Math.random() * 75);
+        this.fireParticles.push({
+          x: s.x + (Math.random() - 0.5) * tileW * 0.4,
+          y: s.y - tileH * 0.1,
+          vx: (Math.random() - 0.5) * tileW * 0.12,
+          vy: -tileH * (0.28 + Math.random() * 0.28),
+          size: 7 + Math.random() * 9,
+          color: `rgb(${grey},${grey},${grey})`,
+          startMs: now,
+          durationMs: 750 + Math.random() * 500,
+          alive: true,
+          noGravity: true,
+          grow: true,
+        });
+      }
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -422,7 +511,7 @@ export class GameRenderer {
     const ctx = this.ctx;
     const tileW: number = GI.map.tilewidth;
     const tileH: number = GI.map.tileheight;
-    const nextCp: number = GI.players[GI.me]?.next_checkpoint ?? 999;
+    const nextCp: number = this.boatStates.get(GI.me)?.nextCheckpoint ?? GI.players[GI.me]?.next_checkpoint ?? 999;
 
     ctx.save();
     ctx.textAlign = 'center';
@@ -515,6 +604,162 @@ export class GameRenderer {
     const frac = Math.max(0, s.health / initialHealth);
     ctx.fillStyle = frac <= 0.3 ? '#ff0000' : frac <= 0.6 ? '#ffe900' : '#00ff00';
     ctx.fillRect(bx + 2, by + 2, frac * (barW - 4), barH - 2);
+
+    // upgrade badges below health bar (upgrades + curse indicator)
+    const allBadges: { type: string; charges?: number }[] = [
+      ...(s.upgrades ?? []),
+      ...(s.isCursed ? [{ type: 'odysseus_curse' }] : []),
+    ];
+    if (allBadges.length > 0) {
+      const badgeSize = tileH * 0.18;
+      const gap = badgeSize * 0.25;
+      const totalW = allBadges.length * (badgeSize + gap) - gap;
+      let bx2 = s.x - totalW / 2;
+      const by2 = by + barH + 3;
+      for (const upg of allBadges) {
+        this.drawUpgradeBadge(ctx, bx2, by2, badgeSize, upg);
+        bx2 += badgeSize + gap;
+      }
+    }
+
+    // fire overlay when on fire
+    if (s.onFire) {
+      ctx.save();
+      ctx.globalAlpha = 0.55;
+      const grad = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, tileW * 0.6);
+      grad.addColorStop(0, '#ff6600');
+      grad.addColorStop(1, 'rgba(255,0,0,0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(s.x - tileW / 2, s.y - tileH / 2, tileW, tileH);
+      ctx.restore();
+    }
+  }
+
+  private drawUpgradeBadge(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, upg: { type: string; charges?: number }): void {
+    const r = size / 2;
+    ctx.save();
+
+    // badge background colour per upgrade type
+    const bgColors: Record<string, string> = {
+      burning_cannons: '#cc2200',
+      shield: '#2244cc',
+      checkpoint_rush: '#cc9900',
+      ghost_ship: '#8833cc',
+      solid_rock: '#6b5a4a',
+      carpenter: '#2a6a2a',
+      shipwright: '#007a7a',
+      odysseus_curse: '#4a1a7a',
+    };
+    const symbols: Record<string, string> = {
+      burning_cannons: '🔥',
+      shield: '🛡',
+      checkpoint_rush: '⚑',
+      ghost_ship: '👻',
+      solid_rock: '🪨',
+      carpenter: '🔧',
+      shipwright: '⚓',
+      odysseus_curse: '🌊',
+    };
+
+    ctx.fillStyle = bgColors[upg.type] ?? '#555';
+    ctx.beginPath();
+    ctx.arc(x + r, y + r, r, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // symbol or letter fallback
+    const sym = symbols[upg.type];
+    if (sym) {
+      ctx.font = `${size * 0.65}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#fff';
+      ctx.fillText(sym, x + r, y + r + 0.5);
+    }
+
+    // shield charge counter
+    if (upg.type === 'shield' && upg.charges !== undefined) {
+      ctx.font = `bold ${size * 0.45}px Arial`;
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'bottom';
+      ctx.fillStyle = '#fff';
+      ctx.fillText(String(upg.charges), x + size - 1, y + size - 1);
+    }
+
+    ctx.restore();
+  }
+
+  private drawTreasures(now: number): void {
+    const GI = this.component.gameinfo;
+    const ctx = this.ctx;
+    const tileW: number = GI.map.tilewidth;
+    const tileH: number = GI.map.tileheight;
+
+    for (const [, t] of this.treasures) {
+      if (!t.alive) continue;
+      const cx = (t.x + 0.5) * tileW;
+      const cy = (t.y + 0.5) * tileH;
+
+      // gentle bob
+      const bob = Math.sin(now * 0.003 + t.x * 1.3 + t.y * 0.7) * tileH * 0.06;
+
+      // spawn pop-in scale (0→1 over 300ms)
+      const age = t.spawnMs > 0 ? Math.min(1, (now - t.spawnMs) / 300) : 1;
+      const sc = age;
+
+      ctx.save();
+      ctx.translate(cx, cy + bob);
+      ctx.scale(sc, sc);
+
+      const w = tileW * 0.6;
+      const h = tileH * 0.45;
+
+      // chest body
+      ctx.fillStyle = '#8B4513';
+      ctx.fillRect(-w / 2, -h / 4, w, h * 0.7);
+
+      // chest lid
+      ctx.fillStyle = '#A0522D';
+      ctx.beginPath();
+      ctx.ellipse(0, -h / 4, w / 2, h * 0.28, 0, Math.PI, 0);
+      ctx.fill();
+
+      // gold trim horizontal
+      ctx.strokeStyle = '#FFD700';
+      ctx.lineWidth = tileH * 0.05;
+      ctx.beginPath();
+      ctx.moveTo(-w / 2, -h / 4);
+      ctx.lineTo(w / 2, -h / 4);
+      ctx.stroke();
+
+      // lock
+      ctx.fillStyle = '#FFD700';
+      ctx.beginPath();
+      ctx.arc(0, 0, w * 0.1, 0, Math.PI * 2);
+      ctx.fill();
+
+      // upgrade type colour dot on lid — only when treasure_preview is enabled
+      if (GI.treasure_preview !== false) {
+        const dotColors: Record<string, string> = {
+          burning_cannons: '#ff3300',
+          shield: '#3366ff',
+          checkpoint_rush: '#ffcc00',
+          ghost_ship: '#aa44ff',
+          solid_rock: '#c8a882',
+          carpenter: '#44cc44',
+          shipwright: '#00dddd',
+        };
+        ctx.fillStyle = dotColors[t.upgrade] ?? '#fff';
+        ctx.beginPath();
+        ctx.arc(0, -h / 4 - h * 0.12, w * 0.09, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.restore();
+    }
   }
 
   private drawHealBurst(ctx: CanvasRenderingContext2D, burst: StarBurst, t: number, tileW: number, tileH: number): void {
@@ -625,7 +870,13 @@ export class GameRenderer {
       const x = lerp(ball.x0, ball.x1, ball.progress);
       const y = lerp(ball.y0, ball.y1, ball.progress);
       ctx.save();
-      ctx.fillStyle = '#111';
+      if (ball.onFire) {
+        ctx.fillStyle = '#cc0000';
+        ctx.shadowColor = '#ff4400';
+        ctx.shadowBlur = 14;
+      } else {
+        ctx.fillStyle = '#111';
+      }
       ctx.beginPath();
       ctx.arc(x, y, 7, 0, Math.PI * 2);
       ctx.fill();
@@ -653,23 +904,22 @@ export class GameRenderer {
       }
     }
 
-    // Fire particles (embers shooting outward from explosion)
+    // Fire particles (embers from explosions and continuous boat fire)
     for (let i = this.fireParticles.length - 1; i >= 0; i--) {
       const p = this.fireParticles[i];
       const t = (now - p.startMs) / p.durationMs;
       if (t < 0) continue;
       if (t >= 1) { p.alive = false; this.fireParticles.splice(i, 1); continue; }
       const x = p.x + p.vx * t;
-      const y = p.y + p.vy * t + 40 * t * t; // gravity droop
-      const alpha = t < 0.2 ? t / 0.2 : 1 - (t - 0.2) / 0.8;
-      const size = p.size * (1 - t * 0.5);
+      const y = p.y + p.vy * t + (p.noGravity ? 0 : 40 * t * t);
+      const alpha = t < 0.15 ? t / 0.15 : 1 - (t - 0.15) / 0.85;
+      const size = p.grow ? p.size * (1 + t * 1.5) : p.size * (1 - t * 0.5);
       ctx.save();
-      ctx.globalAlpha = alpha * 0.9;
+      ctx.globalAlpha = (p.grow ? alpha * 0.55 : alpha * 0.9); // smoke is dimmer
       ctx.fillStyle = p.color;
-      ctx.shadowColor = p.color;
-      ctx.shadowBlur = size * 2;
+      if (!p.grow) { ctx.shadowColor = p.color; ctx.shadowBlur = size * 2; }
       ctx.beginPath();
-      ctx.arc(x, y, size, 0, Math.PI * 2);
+      ctx.arc(x, y, Math.max(0.5, size), 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     }
@@ -719,24 +969,157 @@ export class GameRenderer {
       ctx.restore();
     }
 
-    // Boat name tooltips
+    // Boat info cards — drawn in screen space so font sizes are always readable
     for (let i = this.boatTooltips.length - 1; i >= 0; i--) {
       const tip = this.boatTooltips[i];
-      const t = Math.min(1, (now - tip.startMs) / tip.durationMs);
-      if (t >= 1) {
-        this.boatTooltips.splice(i, 1);
-        continue;
-      }
+      const elapsed = now - tip.startMs;
+      if (elapsed >= tip.durationMs) { this.boatTooltips.splice(i, 1); continue; }
+
+      const fadeDur = 500;
+      const alpha = elapsed > tip.durationMs - fadeDur ? 1 - (elapsed - (tip.durationMs - fadeDur)) / fadeDur : 1;
+      const scaleIn = Math.min(1, elapsed / 180);
+
+      // Convert boat world position → screen pixels
+      const sx = (tip.x - this.cameraX) * this.zoom;
+      const sy = (tip.y - this.cameraY) * this.zoom;
+
+      // Fixed screen-space dimensions
+      const hasUpgrades = tip.upgrades.length > 0;
+      const HEADER_H = 28;
+      const HB_H = 16;
+      const INFO_H = 20;
+      const BADGE_ROW_H = hasUpgrades ? 34 : 0;
+      const PAD = 10;
+      const panelW = 192;
+      const panelH = HEADER_H + PAD / 2 + HB_H + PAD / 2 + INFO_H + (hasUpgrades ? PAD / 2 + BADGE_ROW_H : 0) + PAD / 2;
+      const r = 7;
+
+      // Position: above the boat, clamped to canvas edges
+      const boatScreenR = tileH * this.zoom * 0.55;
+      let px = sx - panelW / 2;
+      let py = sy - boatScreenR - panelH;
+      if (py < 4) py = sy + boatScreenR;
+      px = Math.max(4, Math.min(this.canvas.width - panelW - 4, px));
+      py = Math.max(4, Math.min(this.canvas.height - panelH - 4, py));
+
       ctx.save();
-      ctx.globalAlpha = 1 - t;
-      ctx.font = '24px Arial';
+      ctx.resetTransform();
+      ctx.globalAlpha = alpha;
+
+      // Scale-in from panel centre
+      const cx = px + panelW / 2;
+      const cy = py + panelH / 2;
+      ctx.translate(cx, cy);
+      ctx.scale(scaleIn, scaleIn);
+      ctx.translate(-cx, -cy);
+
+      // Drop shadow
+      ctx.shadowColor = 'rgba(0,0,0,0.6)';
+      ctx.shadowBlur = 12;
+      ctx.shadowOffsetY = 4;
+
+      // Panel body
+      ctx.fillStyle = 'rgba(16,18,28,0.96)';
+      ctx.beginPath();
+      ctx.moveTo(px + r, py);
+      ctx.lineTo(px + panelW - r, py);
+      ctx.arcTo(px + panelW, py, px + panelW, py + r, r);
+      ctx.lineTo(px + panelW, py + panelH - r);
+      ctx.arcTo(px + panelW, py + panelH, px + panelW - r, py + panelH, r);
+      ctx.lineTo(px + r, py + panelH);
+      ctx.arcTo(px, py + panelH, px, py + panelH - r, r);
+      ctx.lineTo(px, py + r);
+      ctx.arcTo(px, py, px + r, py, r);
+      ctx.closePath();
+      ctx.fill();
+      ctx.shadowColor = 'transparent';
+
+      // Coloured header strip
+      ctx.fillStyle = tip.color;
+      ctx.beginPath();
+      ctx.moveTo(px + r, py);
+      ctx.lineTo(px + panelW - r, py);
+      ctx.arcTo(px + panelW, py, px + panelW, py + r, r);
+      ctx.lineTo(px + panelW, py + HEADER_H);
+      ctx.lineTo(px, py + HEADER_H);
+      ctx.lineTo(px, py + r);
+      ctx.arcTo(px, py, px + r, py, r);
+      ctx.closePath();
+      ctx.fill();
+
+      // Player name
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 14px sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      const tw = ctx.measureText(tip.text).width;
-      ctx.fillStyle = tip.bgColor;
-      ctx.fillRect(tip.x - tw / 2 - 6, tip.y - 14, tw + 12, 28);
-      ctx.fillStyle = '#ffffff';
-      ctx.fillText(tip.text, tip.x, tip.y);
+      ctx.fillText(tip.name, px + panelW / 2, py + HEADER_H / 2, panelW - 12);
+
+      // Health bar
+      const hbX = px + PAD;
+      const hbY = py + HEADER_H + PAD / 2;
+      const hbW = panelW - PAD * 2;
+      const hpFrac = Math.max(0, tip.health / tip.maxHealth);
+      const hbColor = hpFrac > 0.6 ? '#00cc44' : hpFrac > 0.3 ? '#ffe900' : '#ff3333';
+      ctx.fillStyle = '#2a2a3a';
+      ctx.fillRect(hbX, hbY, hbW, HB_H);
+      ctx.fillStyle = hbColor;
+      ctx.fillRect(hbX, hbY, hbW * hpFrac, HB_H);
+      ctx.fillStyle = 'rgba(255,255,255,0.92)';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`${tip.health} / ${tip.maxHealth}`, hbX + hbW / 2, hbY + HB_H / 2);
+
+      // Checkpoint + on-fire indicator
+      const infoY = hbY + HB_H + PAD / 2 + INFO_H / 2;
+      ctx.font = '12px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#bbb';
+      ctx.fillText(`→ CP ${tip.nextCheckpoint}`, hbX, infoY);
+      if (tip.onFire) {
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#ff7700';
+        ctx.fillText('🔥 on fire', px + panelW - PAD, infoY);
+      }
+
+      // Upgrade badges
+      if (hasUpgrades) {
+        const BADGE_COLORS: Record<string, string> = {
+          burning_cannons: '#cc2200', shield: '#2244cc', checkpoint_rush: '#cc9900',
+          ghost_ship: '#8833cc', solid_rock: '#6b5a4a', carpenter: '#2a6a2a', shipwright: '#007a7a', odysseus_curse: '#4a1a7a',
+        };
+        const BADGE_SYMBOLS: Record<string, string> = {
+          burning_cannons: '🔥', shield: '🛡', checkpoint_rush: '⚑', ghost_ship: '👻', solid_rock: '🪨',
+          carpenter: '🔧', shipwright: '⚓', odysseus_curse: '🌊',
+        };
+        const divY = infoY + INFO_H / 2 + PAD / 2;
+        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(px + PAD, divY);
+        ctx.lineTo(px + panelW - PAD, divY);
+        ctx.stroke();
+
+        const badgeR = 13;
+        const badgeY = divY + PAD / 2 + badgeR;
+        tip.upgrades.forEach((upg, idx) => {
+          const bx = hbX + badgeR + idx * (badgeR * 2 + 6);
+          ctx.fillStyle = BADGE_COLORS[upg.type] ?? '#555';
+          ctx.beginPath();
+          ctx.arc(bx, badgeY, badgeR, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.font = '16px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(BADGE_SYMBOLS[upg.type] ?? '?', bx, badgeY);
+          if (upg.type === 'shield' && upg.charges !== undefined) {
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 9px sans-serif';
+            ctx.fillText(String(upg.charges), bx + 9, badgeY - 9);
+          }
+        });
+      }
+
       ctx.restore();
     }
   }
@@ -790,7 +1173,28 @@ export class GameRenderer {
           s.nextCheckpoint = player.next_checkpoint;
           s.frame = player.is_zombie ? 2 : player.powered_down ? 1 : 0;
           s.scale = Math.max(s.scale, 0); // keep whatever death/respawn left
+          s.upgrades = player.upgrades ?? [];
+          s.onFire = false;
+          s.isCursed = player.is_cursed ?? false;
         });
+        // push animated state to the HTML panel (fires at end of animation, not mid-round)
+        const meState = this.boatStates.get(GI2.me);
+        if (meState) {
+          this.component.currentPlayerUpgrades = [...meState.upgrades];
+          this.component.currentPlayerHealth = meState.health;
+        }
+        // sync treasure map with server's authoritative list
+        if (GI2.active_treasures) {
+          const serverIds = new Set(GI2.active_treasures.map((t: any) => t.id));
+          for (const id of this.treasures.keys()) {
+            if (!serverIds.has(id)) this.treasures.delete(id);
+          }
+          for (const t of GI2.active_treasures) {
+            if (!this.treasures.has(t.id)) {
+              this.treasures.set(t.id, { ...t, spawnMs: 0, alive: true });
+            }
+          }
+        }
         this.component.highlightedCardSlot = -1;
       },
     });
@@ -852,6 +1256,7 @@ export class GameRenderer {
         if (!s || dur < this.animCutoff) return;
         const wiggle = tileW * 0.1 * action.val;
         const nWiggles = 4;
+        const isMe_cx = action.target === GI.me;
         let baseX: number | null = null;
         this.timeline.push({
           startMs,
@@ -863,6 +1268,7 @@ export class GameRenderer {
           onComplete: () => {
             if (baseX !== null) s.x = baseX;
             s.health = action.health;
+            if (isMe_cx) this.component.currentPlayerHealth = s.health;
           },
         });
         break;
@@ -873,6 +1279,7 @@ export class GameRenderer {
         if (!s || dur < this.animCutoff) return;
         const wiggle = tileH * 0.1 * action.val;
         const nWiggles = 4;
+        const isMe_cy = action.target === GI.me;
         let baseY: number | null = null;
         this.timeline.push({
           startMs,
@@ -884,6 +1291,7 @@ export class GameRenderer {
           onComplete: () => {
             if (baseY !== null) s.y = baseY;
             s.health = action.health;
+            if (isMe_cy) this.component.currentPlayerHealth = s.health;
           },
         });
         break;
@@ -899,9 +1307,32 @@ export class GameRenderer {
           y1: (action.collided_at[1] + 0.5) * tileH,
           progress: 0,
           alive: false,
+          onFire: !!action.on_fire,
         };
         this.cannonballs.push(ball);
         const travelDur = (dur * 2) / 3;
+
+        // Fire trail for burning cannonballs
+        if (ball.onFire) {
+          const trailColors = ['#ff0000', '#ff3300', '#ff6600', '#ff9900'];
+          const nTrail = 28;
+          for (let ti = 0; ti < nTrail; ti++) {
+            const frac = ti / nTrail;
+            this.fireParticles.push({
+              x: lerp(ball.x0, ball.x1, frac) + (Math.random() - 0.5) * tileW * 0.12,
+              y: lerp(ball.y0, ball.y1, frac) + (Math.random() - 0.5) * tileH * 0.12,
+              vx: (Math.random() - 0.5) * tileW * 0.15,
+              vy: (Math.random() - 0.5) * tileH * 0.15 - tileH * 0.1,
+              size: 2.5 + Math.random() * 3.5,
+              color: trailColors[Math.floor(Math.random() * trailColors.length)],
+              startMs: startMs + frac * travelDur,
+              durationMs: 200 + Math.random() * 180,
+              alive: true,
+              noGravity: true,
+            });
+          }
+        }
+
         this.timeline.push({
           startMs,
           durationMs: travelDur,
@@ -916,7 +1347,10 @@ export class GameRenderer {
             const hitBoat = action.other_player !== undefined;
             if (hitBoat) {
               const target = this.boatStates.get(action.other_player);
-              if (target) target.health = action.other_player_health;
+              if (target) {
+                target.health = action.other_player_health;
+                if (action.other_player === GI.me) this.component.currentPlayerHealth = target.health;
+              }
             }
             // Explosion sprite
             this.explosions.push({
@@ -950,7 +1384,24 @@ export class GameRenderer {
 
       // -----------------------------------------------------------------------
       case 'death': {
-        if (!s || dur < this.animCutoff) return;
+        if (!s) return;
+        const isMe_death = action.target === GI.me;
+        // Clear upgrades immediately when the boat dies, regardless of animation duration
+        this.timeline.push({
+          startMs,
+          durationMs: 0,
+          tick: () => {},
+          onComplete: () => {
+            s.upgrades = [];
+            s.onFire = false;
+            s.health = 0;
+            if (isMe_death) {
+              this.component.currentPlayerUpgrades = [];
+              this.component.currentPlayerHealth = 0;
+            }
+          },
+        });
+        if (dur < this.animCutoff) break;
         let baseScale: number | null = null;
         let baseAngle: number | null = null;
         const spinDeath = action.type === 'void';
@@ -975,12 +1426,14 @@ export class GameRenderer {
         const tx = (action.posx + 0.5) * tileW;
         const ty = (action.posy + 0.5) * tileH;
         const ta = action.direction * 90;
+        const isMe_respawn = action.target === GI.me;
         if (dur < this.animCutoff) {
           s.x = tx;
           s.y = ty;
           s.angle = ta;
           s.scale = 1;
           s.health = action.health;
+          if (isMe_respawn) this.component.currentPlayerHealth = s.health;
         } else {
           // Teleport immediately at startMs, then grow scale 0→1
           this.timeline.push({
@@ -1001,6 +1454,7 @@ export class GameRenderer {
             onComplete: () => {
               s.scale = 1;
               s.health = action.health;
+              if (isMe_respawn) this.component.currentPlayerHealth = s.health;
             },
           });
         }
@@ -1010,6 +1464,7 @@ export class GameRenderer {
       // -----------------------------------------------------------------------
       case 'repair': {
         if (dur < this.animCutoff) return;
+        const isMe_repair = action.target === GI.me;
         this.starBursts.push({
           x: (action.posx + 0.5) * tileW,
           baseY: (action.posy + 0.5) * tileH,
@@ -1025,7 +1480,10 @@ export class GameRenderer {
           durationMs: dur,
           tick: () => {},
           onComplete: () => {
-            if (s) s.health = action.health;
+            if (s) {
+              s.health = action.health;
+              if (isMe_repair) this.component.currentPlayerHealth = s.health;
+            }
           },
         });
         break;
@@ -1073,6 +1531,7 @@ export class GameRenderer {
       // -----------------------------------------------------------------------
       case 'powerdownrepair': {
         if (dur < this.animCutoff) return;
+        const isMe_pdr = action.target === GI.me;
         this.timeline.push({
           startMs,
           durationMs: 0,
@@ -1081,6 +1540,7 @@ export class GameRenderer {
             if (s) {
               s.health = action.health;
               s.frame = 1;
+              if (isMe_pdr) this.component.currentPlayerHealth = s.health;
             }
           },
         });
@@ -1098,6 +1558,158 @@ export class GameRenderer {
             this.component.presentSummary();
           },
         });
+        break;
+      }
+
+      // -----------------------------------------------------------------------
+      case 'treasure_spawn': {
+        this.timeline.push({
+          startMs,
+          durationMs: 0,
+          tick: () => {},
+          onComplete: () => {
+            this.treasures.set(action.id, {
+              id: action.id,
+              x: action.x,
+              y: action.y,
+              upgrade: action.upgrade,
+              spawnMs: startMs,
+              alive: true,
+            });
+          },
+        });
+        break;
+      }
+
+      // -----------------------------------------------------------------------
+      case 'treasure_collected': {
+        this.timeline.push({
+          startMs,
+          durationMs: 0,
+          tick: () => {},
+          onComplete: () => {
+            const t = this.treasures.get(action.treasure_id);
+            if (t) t.alive = false;
+            this.treasures.delete(action.treasure_id);
+            // golden sparkle burst at chest position
+            const cx = (action.posx + 0.5) * tileW;
+            const cy = (action.posy + 0.5) * tileH;
+            for (let pi = 0; pi < 12; pi++) {
+              const angle = (pi / 12) * Math.PI * 2 + Math.random() * 0.3;
+              const speed = tileW * (0.4 + Math.random() * 0.6);
+              this.fireParticles.push({
+                x: cx, y: cy,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed - tileH * 0.3,
+                size: 4 + Math.random() * 5,
+                color: Math.random() > 0.5 ? '#FFD700' : '#FFA500',
+                startMs,
+                durationMs: 600,
+                alive: true,
+              });
+            }
+          },
+        });
+        break;
+      }
+
+      // -----------------------------------------------------------------------
+      case 'upgrade_gained': {
+        if (!s) return;
+        const isMe_gained = action.target === GI.me;
+        this.timeline.push({
+          startMs,
+          durationMs: 0,
+          tick: () => {},
+          onComplete: () => {
+            if (!s.upgrades) s.upgrades = [];
+            if (!s.upgrades.find((u) => u.type === action.upgrade)) {
+              s.upgrades.push({ type: action.upgrade });
+            }
+            if (isMe_gained) this.component.currentPlayerUpgrades = [...s.upgrades];
+          },
+        });
+        break;
+      }
+
+      // -----------------------------------------------------------------------
+      case 'upgrade_lost': {
+        if (!s) return;
+        const isMe_lost = action.target === GI.me;
+        this.timeline.push({
+          startMs,
+          durationMs: 0,
+          tick: () => {},
+          onComplete: () => {
+            if (s.upgrades) {
+              s.upgrades = s.upgrades.filter((u) => u.type !== action.upgrade);
+            }
+            if (isMe_lost) this.component.currentPlayerUpgrades = [...(s.upgrades ?? [])];
+          },
+        });
+        break;
+      }
+
+      // -----------------------------------------------------------------------
+      case 'shield_absorb': {
+        if (!s) return;
+        const isMe_shield = action.target === GI.me;
+        this.timeline.push({
+          startMs,
+          durationMs: 0,
+          tick: () => {},
+          onComplete: () => {
+            // update shield charges on the badge
+            if (s.upgrades) {
+              const shieldUpg = s.upgrades.find((u) => u.type === 'shield');
+              if (shieldUpg) shieldUpg.charges = action.charges;
+            }
+            if (isMe_shield) this.component.currentPlayerUpgrades = [...(s.upgrades ?? [])];
+          },
+        });
+        // brief blue flash on the boat
+        if (dur >= this.animCutoff) {
+          this.starBursts.push({
+            x: s.x, baseY: s.y, tileH, color: '#4488ff', type: 'damage',
+            startMs, durationMs: dur * 0.5, alive: true,
+          });
+        }
+        break;
+      }
+
+      // -----------------------------------------------------------------------
+      case 'set_on_fire': {
+        if (!s) return;
+        this.timeline.push({
+          startMs,
+          durationMs: 0,
+          tick: () => {},
+          onComplete: () => { s.onFire = true; },
+        });
+        break;
+      }
+
+      // -----------------------------------------------------------------------
+      case 'burn_damage': {
+        if (!s) return;
+        const isMe_burn = action.target === GI.me;
+        this.timeline.push({
+          startMs,
+          durationMs: 0,
+          tick: () => {},
+          onComplete: () => {
+            s.health = action.health;
+            s.onFire = false;
+            if (isMe_burn) this.component.currentPlayerHealth = s.health;
+          },
+        });
+        // fire damage star burst
+        if (dur >= this.animCutoff) {
+          this.starBursts.push({
+            x: s.x, baseY: s.y, tileH, color: '#ff4400', type: 'damage',
+            startMs, durationMs: dur, alive: true,
+          });
+        }
         break;
       }
     }
@@ -1143,15 +1755,25 @@ export class GameRenderer {
     const tileH: number = GI.map.tileheight;
 
     for (const [pid, s] of this.boatStates) {
+      if (s.scale <= 0) continue;
       if (Math.abs(worldX - s.x) < tileW / 2 && Math.abs(worldY - s.y) < tileH / 2) {
-        const player = GI.players[pid];
+        // Remove any existing tooltip for this boat before adding a fresh one
+        this.boatTooltips = this.boatTooltips.filter((t) => t.name !== s.name);
         this.boatTooltips.push({
           x: s.x,
           y: s.y,
-          text: `${player.name} ➤ ${player.next_checkpoint}`,
-          bgColor: s.color,
+          color: s.color,
+          name: s.name,
+          health: s.health,
+          maxHealth: GI.initial_health,
+          nextCheckpoint: s.nextCheckpoint,
+          upgrades: [
+            ...(s.upgrades ?? []),
+            ...(s.isCursed ? [{ type: 'odysseus_curse' }] : []),
+          ],
+          onFire: s.onFire ?? false,
           startMs: performance.now(),
-          durationMs: 2000,
+          durationMs: 3500,
         });
         break;
       }

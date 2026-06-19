@@ -5,6 +5,35 @@
       <ion-card #tools_menu>
         <ion-card-content>
           <ion-label>Round {{ Ngameround | async }}</ion-label>
+          <div class="health-bar-wrap" *ngIf="gameinfo">
+            <div
+              class="health-bar-fill"
+              [style.width.%]="100 * currentPlayerHealth / gameinfo.initial_health"
+              [class.health-bar-fill--low]="currentPlayerHealth / gameinfo.initial_health <= 0.3"
+              [class.health-bar-fill--mid]="currentPlayerHealth / gameinfo.initial_health > 0.3 && currentPlayerHealth / gameinfo.initial_health <= 0.6"
+            ></div>
+            <span class="health-bar-label">{{ currentPlayerHealth }}&thinsp;/&thinsp;{{ gameinfo.initial_health }}</span>
+          </div>
+          <div class="upgrade-panel" *ngIf="currentPlayerUpgrades?.length || gameinfo?.players[gameinfo.me]?.is_cursed">
+            <div
+              *ngFor="let upg of currentPlayerUpgrades"
+              class="upgrade-badge"
+              [class]="'upgrade-badge upgrade-badge--' + upg.type"
+              (click)="showUpgradeInfo(upg)"
+            >
+              <span class="upgrade-badge__icon">{{ upgradeEmoji(upg.type) }}</span>
+              <span class="upgrade-badge__label">{{ upgradeLabel(upg.type) }}</span>
+              <span class="upgrade-badge__charges" *ngIf="upg.type === 'shield'">{{ upg.charges }}</span>
+            </div>
+            <div
+              *ngIf="gameinfo?.players[gameinfo.me]?.is_cursed"
+              class="upgrade-badge upgrade-badge--odysseus_curse"
+              (click)="showUpgradeInfo({type: 'odysseus_curse'})"
+            >
+              <span class="upgrade-badge__icon">{{ upgradeEmoji('odysseus_curse') }}</span>
+              <span class="upgrade-badge__label">{{ upgradeLabel('odysseus_curse') }}</span>
+            </div>
+          </div>
           <ion-button id="power_down_button" [disabled]="poweredDown || submittedCards">
             <ion-icon name="construct"></ion-icon>
             <ion-label id="power_down_label">Re-Rig</ion-label>
@@ -114,35 +143,6 @@
               </ion-item>
             </ng-template>
           </ion-modal>
-          <ion-modal id="leave-modal" trigger="leave_game_button" #leaveModal>
-            <ng-template>
-              <ion-header>
-                <ion-title>Really abandon ship?</ion-title>
-              </ion-header>
-
-              <ion-row class="ion-justify-content-center">
-                <ion-col>
-                  <p>
-                    Are you sure you want to abandon your crew?<br />
-                    <b>You will not be able re-enter</b><br />
-                    and the souls aboard will be condemned<br />
-                    to sail on this forsaken boat for all eternity!
-                  </p>
-                  <ion-list>
-                    <ion-button color="primary" (click)="leaveModal.dismiss()">
-                      <ion-icon slot="start" name="send"></ion-icon>
-                      One more turn!
-                    </ion-button>
-                    <ion-button color="danger" (click)="leaveGame()">
-                      <ion-icon slot="start" name="log-out"></ion-icon>
-                      Ay, leave them!
-                    </ion-button>
-                  </ion-list>
-                </ion-col>
-              </ion-row>
-            </ng-template>
-          </ion-modal>
-
           <ion-progress-bar id="time-progress-bar" [value]="countDownTimer | async" color="danger"></ion-progress-bar>
 
           <ion-button id="submit_cards_button" (click)="submitCards()" [disabled]="submittedCards">
@@ -151,10 +151,6 @@
           </ion-button>
           <ion-item-divider></ion-item-divider>
 
-          <ion-button color="primary" id="leave_game_button">
-            <ion-icon name="log-out"></ion-icon>
-            <ion-label id="leave_game_label">Leave Game</ion-label>
-          </ion-button>
         </ion-card-content>
       </ion-card>
       <ion-card id="chatbox-card">

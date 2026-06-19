@@ -38,12 +38,13 @@ export class GameComponent {
   gameHeight: number;
   submittedCards: boolean = false;
   poweredDown: boolean = false;
+  currentPlayerUpgrades: { type: string; charges?: number }[] = [];
+  currentPlayerHealth: number = 0;
 
   @ViewChild('cards_menu', { read: ElementRef }) cards_menu: ElementRef;
   @ViewChild('tools_menu', { read: ElementRef }) tools_menu: ElementRef;
   @ViewChild('cannonModal') cannonModal: IonModal;
   @ViewChild('rerigModal') rerigModal: IonModal;
-  @ViewChild('leaveModal') leaveModal: IonModal;
   @ViewChild('statsModal') statsModal: IonModal;
   @ViewChild('appgamecontent') appGameContent: ViewContainerRef;
 
@@ -149,7 +150,7 @@ export class GameComponent {
       if (this.submittedCards) {
         return true;
       }
-      return i >= this.gameinfo.players[this.gameinfo.me]['health'];
+      return i >= this.gameinfo.players[this.gameinfo.me]['effective_health'];
     } else {
       return false;
     }
@@ -202,7 +203,6 @@ export class GameComponent {
   }
 
   leaveGame() {
-    this.leaveModal.dismiss();
     this.httpService.get_leaveGame().subscribe(
       (ret) => {
         console.log('Success leave game: ', ret);
@@ -241,5 +241,68 @@ export class GameComponent {
         this.cannonModal.dismiss();
       }
     );
+  }
+
+  private static readonly UPGRADE_META: Record<string, { emoji: string; label: string; description: string }> = {
+    burning_cannons: {
+      emoji: '🔥',
+      label: 'Burning Cannons',
+      description: 'Your cannon shots set opponents on fire. They take 1 extra damage at the end of each round.',
+    },
+    shield: {
+      emoji: '🛡',
+      label: 'Shield',
+      description: 'Absorbs up to 3 damage from cannon hits. Disappears when all charges are used.',
+    },
+    checkpoint_rush: {
+      emoji: '⚑',
+      label: 'Checkpoint Rush',
+      description: 'Instantly skips your next required checkpoint — or wins the race if it was the last one.',
+    },
+    ghost_ship: {
+      emoji: '👻',
+      label: 'Ghost Ship',
+      description: 'Your ship is immune to vortex rotation. Sail straight through the whirlpools.',
+    },
+    solid_rock: {
+      emoji: '🪨',
+      label: 'Solid as a Rock',
+      description: 'Your ship cannot be pushed by other ships. They will be blocked if they try.',
+    },
+    odysseus_curse: {
+      emoji: '🌊',
+      label: "Odysseus' Curse",
+      description: "You sail too far ahead of the fleet. The gods punish your hubris — all reserve cards are frozen and cannot be reordered.",
+    },
+    carpenter: {
+      emoji: '🔧',
+      label: 'Carpenter',
+      description: "The ship's carpenter patches the hull each round, restoring +1 health.",
+    },
+    shipwright: {
+      emoji: '⚓',
+      label: 'Shipwright',
+      description: 'A master shipwright keeps the vessel battle-ready, restoring +2 health each round.',
+    },
+  };
+
+  upgradeEmoji(type: string): string {
+    return GameComponent.UPGRADE_META[type]?.emoji ?? '?';
+  }
+
+  upgradeLabel(type: string): string {
+    return GameComponent.UPGRADE_META[type]?.label ?? type;
+  }
+
+  async showUpgradeInfo(upg: { type: string; charges?: number }) {
+    const meta = GameComponent.UPGRADE_META[upg.type];
+    if (!meta) return;
+    const chargesLine = upg.type === 'shield' ? `<br><b>Charges remaining:</b> ${upg.charges}` : '';
+    const alert = await this.alertController.create({
+      header: `${meta.emoji} ${meta.label}`,
+      message: meta.description + chargesLine,
+      buttons: ['OK'],
+    });
+    await alert.present();
   }
 }

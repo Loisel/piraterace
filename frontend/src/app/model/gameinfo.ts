@@ -14,6 +14,7 @@ export interface GameInfo {
   CARDS: any;
   CANNON_DIRECTION_DESCR2ID: any;
   path_highlighting: boolean;
+  treasure_preview: boolean;
   actionstack: any[];
   Ngameround: number;
   state: string;

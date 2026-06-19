@@ -13,6 +13,8 @@ export interface GameConfig {
   ncardsavail: number;
   ncardslots: number;
   path_highlighting: boolean;
+  treasure_preview: boolean;
+  treasures_per_round: number;
   percentage_repaircards: number;
   player_color_choices: string[];
   player_colors: string[];

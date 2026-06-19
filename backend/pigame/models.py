@@ -181,6 +181,8 @@ class GameConfig(models.Model):
     ncardslots = models.PositiveSmallIntegerField(default=5)
     ncardsavail = models.PositiveSmallIntegerField(default=7)
     path_highlighting = models.BooleanField(default=False)
+    treasure_preview = models.BooleanField(default=True)
+    treasures_per_round = models.FloatField(default=2.0)
     creator_userid = models.PositiveIntegerField()
     countdown_mode = models.CharField(max_length=1, choices=CHOICE_MODES, default="d")
     countdown = models.PositiveIntegerField(default=30)

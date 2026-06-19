@@ -19,6 +19,10 @@
                   <ion-icon name="settings-outline" slot="end"></ion-icon>
                   Settings
                 </ion-item>
+                <ion-item *ngIf="(authService.userDetail | async)?.game" [button]="true" (click)="openLeaveGameModal()">
+                  <ion-icon name="log-out-outline" slot="end"></ion-icon>
+                  Leave Game
+                </ion-item>
                 <ion-item [button]="true" (click)="authService.logout()">
                   <ion-icon name="log-out-outline" slot="end"></ion-icon>
                   Logout
@@ -62,7 +66,7 @@
           </ion-item>
         </ion-menu-toggle>
         <ion-menu-toggle *ngIf="(authService.userDetail | async)?.game" auto-hide="true">
-          <ion-item [button]="true" (click)="leaveGame()">Leave Game</ion-item>
+          <ion-item [button]="true" (click)="openLeaveGameModal()">Leave Game</ion-item>
         </ion-menu-toggle>
         <ion-menu-toggle auto-hide="true" routerLink="home/about">
           <ion-item [button]="true" routerLink="home/about">Imprint</ion-item>
@@ -74,6 +78,34 @@
   <ion-content>
     <ion-router-outlet id="main"></ion-router-outlet>
   </ion-content>
+  <ion-modal #leaveGameModal>
+    <ng-template>
+      <ion-header>
+        <ion-title>Really abandon ship?</ion-title>
+      </ion-header>
+      <ion-row class="ion-justify-content-center">
+        <ion-col>
+          <p>
+            Are you sure you want to abandon your crew?<br />
+            <b>You will not be able re-enter</b><br />
+            and the souls aboard will be condemned<br />
+            to sail on this forsaken boat for all eternity!
+          </p>
+          <ion-list>
+            <ion-button color="primary" (click)="leaveGameModal.dismiss()">
+              <ion-icon slot="start" name="send"></ion-icon>
+              One more turn!
+            </ion-button>
+            <ion-button color="danger" (click)="leaveGame()">
+              <ion-icon slot="start" name="log-out"></ion-icon>
+              Ay, leave them!
+            </ion-button>
+          </ion-list>
+        </ion-col>
+      </ion-row>
+    </ng-template>
+  </ion-modal>
+
   <!--ion-footer>
     <ion-toolbar>
       <ion-title>Footer</ion-title>

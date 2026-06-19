@@ -127,6 +127,17 @@
                       <ion-icon name="close" *ngIf="!gameConfig?.path_highlighting"></ion-icon>
                     </ion-col>
                   </ion-row>
+                  <ion-row>
+                    <ion-col sizeMd="3">{{ cfgOptionsLabels["treasure_preview"] }}</ion-col>
+                    <ion-col sizeMd="2">
+                      <ion-icon name="checkmark" *ngIf="gameConfig?.treasure_preview"></ion-icon>
+                      <ion-icon name="close" *ngIf="!gameConfig?.treasure_preview"></ion-icon>
+                    </ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col sizeMd="3">{{ cfgOptionsLabels["treasures_per_round"] }}</ion-col>
+                    <ion-col sizeMd="2">{{ gameConfig?.treasures_per_round }}</ion-col>
+                  </ion-row>
                 </div>
                 <form class="form div-item" *ngIf="cfgOptionsForm" [formGroup]="cfgOptionsForm">
                   <ion-row>
@@ -202,6 +213,32 @@
                       ></ion-checkbox>
                     </ion-col>
                     <ion-col class="ion-padding"></ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col size-xs="9" class="ion-padding">
+                      <ion-icon name="eye"></ion-icon> {{ cfgOptionsLabels["treasure_preview"] }}
+                    </ion-col>
+                    <ion-col size-xs="3">
+                      <ion-checkbox
+                        style="margin-top: 0.7em"
+                        checked="{{ gameConfig?.treasure_preview }}"
+                        formControlName="treasure_preview"
+                      ></ion-checkbox>
+                    </ion-col>
+                    <ion-col class="ion-padding"></ion-col>
+                  </ion-row>
+                  <ion-row>
+                    <ion-col size-xs="9" class="ion-padding">
+                      <ion-icon name="gift"></ion-icon> {{ cfgOptionsLabels["treasures_per_round"] }}
+                    </ion-col>
+                    <ion-col size-xs="3">
+                      <ion-input type="number" step="0.5" formControlName="treasures_per_round"></ion-input>
+                    </ion-col>
+                    <ion-col class="ion-padding">
+                      <ion-text color="danger" *ngIf="cfgOptionsForm && !cfgOptionsForm?.controls.treasures_per_round.valid">
+                        <ion-icon name="warning"></ion-icon> Must be >= 0.
+                      </ion-text>
+                    </ion-col>
                   </ion-row>
                 </form>
                 <ion-row *ngIf="isCreator()">
