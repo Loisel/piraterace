@@ -93,13 +93,17 @@ def player_cards(request, **kwargs):
     gamecfg = player.game.config
     pidx = gamecfg.player_ids.index(player.pk)
 
+    player_states, actionstack, player_upgrades_view, _ = get_play_stack(player.game)
+    player_state = player_states[player.pk]
+    extra_hand = 1 if "quartermaster" in player_upgrades_view.get(player.pk, {}) else 0
+    effective_ncardsavail = gamecfg.ncardsavail + extra_hand
+
+    cards = []
+    for playerid, card in get_cards_on_hand(gamecfg, pidx, effective_ncardsavail):
+        cardid, cardrank = card_id_rank(card)
+        cards.append([cardid, cardrank, CARDS[cardid]])
+
     if request.method == "POST":
-        player_states, actionstack, *_ = get_play_stack(player.game)
-        player_state = player_states[player.pk]
-        cards = []
-        for playerid, card in get_cards_on_hand(gamecfg, pidx, gamecfg.ncardsavail):
-            cardid, cardrank = card_id_rank(card)
-            cards.append([cardid, cardrank, CARDS[cardid]])
         if player_state.powered_down:
             return JsonResponse(
                 {"message": f"You are not allowed to switch cards because are in a power down.", "cards": cards},
@@ -109,8 +113,8 @@ def player_cards(request, **kwargs):
 
         src, target = request.data
         cursed = is_player_cursed(player.pk, player_states)
-        curse_slots = gamecfg.ncardsavail - gamecfg.ncardslots
-        health_limit = min(player_state.health, gamecfg.ncardsavail)
+        curse_slots = effective_ncardsavail - gamecfg.ncardslots
+        health_limit = min(player_state.health, effective_ncardsavail)
         effective_health = max(0, health_limit - (curse_slots if cursed else 0))
         if any([_ >= effective_health for _ in [src, target]]):
             if cursed and any([effective_health <= _ < health_limit for _ in [src, target]]):
@@ -126,10 +130,10 @@ def player_cards(request, **kwargs):
         deck.insert(next_card + target, tmp)
         set_player_deck(gamecfg, player.pk, deck)
 
-    cards = []
-    for playerid, card in get_cards_on_hand(gamecfg, pidx, gamecfg.ncardsavail):
-        cardid, cardrank = card_id_rank(card)
-        cards.append([cardid, cardrank, CARDS[cardid]])
+        cards = []
+        for playerid, card in get_cards_on_hand(gamecfg, pidx, effective_ncardsavail):
+            cardid, cardrank = card_id_rank(card)
+            cards.append([cardid, cardrank, CARDS[cardid]])
 
     return JsonResponse(cards, safe=False)
 
@@ -304,8 +308,9 @@ def game(request, game_id, **kwargs):
     payload["players"] = {}
     for p in player_states.values():
         cursed = is_player_cursed(p.id, player_states)
-        curse_slots = game.config.ncardsavail - game.config.ncardslots
-        effective_health = max(0, min(p.health, game.config.ncardsavail) - (curse_slots if cursed else 0))
+        eff_ncardsavail = game.config.ncardsavail + (1 if "quartermaster" in player_upgrades.get(p.id, {}) else 0)
+        curse_slots = eff_ncardsavail - game.config.ncardslots
+        effective_health = max(0, min(p.health, eff_ncardsavail) - (curse_slots if cursed else 0))
         payload["players"][p.id] = dict(
             name=p.name,
             pos_x=p.xpos,

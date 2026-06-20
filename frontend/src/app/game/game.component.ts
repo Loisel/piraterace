@@ -262,7 +262,7 @@ export class GameComponent {
     ghost_ship: {
       emoji: '👻',
       label: 'Ghost Ship',
-      description: 'Your ship is immune to vortex rotation. Sail straight through the whirlpools.',
+      description: 'Your ship passes through void tiles unharmed. Vortexes still spin you around.',
     },
     solid_rock: {
       emoji: '🪨',
@@ -278,6 +278,11 @@ export class GameComponent {
       emoji: '🧭',
       label: 'Rose Cannons',
       description: 'Your cannons fire in all four cardinal directions simultaneously.',
+    },
+    quartermaster: {
+      emoji: '🗺️',
+      label: 'Quartermaster',
+      description: 'A skilled quartermaster expands your options — you draw one extra card each round to choose from.',
     },
     carpenter: {
       emoji: '🔧',

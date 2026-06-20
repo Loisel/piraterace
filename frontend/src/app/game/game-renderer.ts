@@ -70,6 +70,16 @@ interface BoatTooltip {
   onFire: boolean;
   startMs: number;
   durationMs: number;
+  peerOffset?: number;
+}
+
+interface TreasureTooltip {
+  x: number;
+  y: number;
+  upgrade: string | null;
+  startMs: number;
+  durationMs: number;
+  peerOffset?: number;
 }
 
 interface OctopusSprite {
@@ -149,6 +159,7 @@ export class GameRenderer {
   private fireParticles: FireParticle[] = [];
   private cardOverlays: CardOverlay[] = [];
   private boatTooltips: BoatTooltip[] = [];
+  private treasureTooltips: TreasureTooltip[] = [];
 
   // Animation
   private timeline: AnimStep[] = [];
@@ -381,6 +392,7 @@ export class GameRenderer {
       this.fireParticles.length > 0 ||
       this.cardOverlays.length > 0 ||
       this.boatTooltips.length > 0 ||
+      this.treasureTooltips.length > 0 ||
       this.treasures.size > 0 || // treasures bob continuously
       anyBoatOnFire;
 
@@ -650,6 +662,7 @@ export class GameRenderer {
       shipwright: '#007a7a',
       odysseus_curse: '#4a1a7a',
       rose_cannons: '#1a5a8a',
+      quartermaster: '#8a6000',
     };
     const symbols: Record<string, string> = {
       burning_cannons: '🔥',
@@ -661,6 +674,7 @@ export class GameRenderer {
       shipwright: '⚓',
       odysseus_curse: '🌊',
       rose_cannons: '🧭',
+      quartermaster: '🗺️',
     };
 
     ctx.fillStyle = bgColors[upg.type] ?? '#555';
@@ -754,6 +768,7 @@ export class GameRenderer {
           carpenter: '#44cc44',
           shipwright: '#00dddd',
           rose_cannons: '#55aaff',
+          quartermaster: '#cc9933',
         };
         ctx.fillStyle = dotColors[t.upgrade] ?? '#fff';
         ctx.beginPath();
@@ -972,6 +987,17 @@ export class GameRenderer {
       ctx.restore();
     }
 
+    // Shared lookup tables for both tooltip types
+    const BADGE_COLORS_SHARED: Record<string, string> = {
+      burning_cannons: '#cc2200', shield: '#2244cc', checkpoint_rush: '#cc9900',
+      ghost_ship: '#8833cc', solid_rock: '#6b5a4a', carpenter: '#2a6a2a', shipwright: '#007a7a',
+      odysseus_curse: '#4a1a7a', rose_cannons: '#1a5a8a', quartermaster: '#8a6000',
+    };
+    const BADGE_SYMBOLS_SHARED: Record<string, string> = {
+      burning_cannons: '🔥', shield: '🛡', checkpoint_rush: '⚑', ghost_ship: '👻', solid_rock: '🪨',
+      carpenter: '🔧', shipwright: '⚓', odysseus_curse: '🌊', rose_cannons: '🧭', quartermaster: '🗺️',
+    };
+
     // Boat info cards — drawn in screen space so font sizes are always readable
     for (let i = this.boatTooltips.length - 1; i >= 0; i--) {
       const tip = this.boatTooltips[i];
@@ -999,7 +1025,7 @@ export class GameRenderer {
 
       // Position: above the boat, clamped to canvas edges
       const boatScreenR = tileH * this.zoom * 0.55;
-      let px = sx - panelW / 2;
+      let px = sx - panelW / 2 + (tip.peerOffset ?? 0);
       let py = sy - boatScreenR - panelH;
       if (py < 4) py = sy + boatScreenR;
       px = Math.max(4, Math.min(this.canvas.width - panelW - 4, px));
@@ -1087,14 +1113,8 @@ export class GameRenderer {
 
       // Upgrade badges
       if (hasUpgrades) {
-        const BADGE_COLORS: Record<string, string> = {
-          burning_cannons: '#cc2200', shield: '#2244cc', checkpoint_rush: '#cc9900',
-          ghost_ship: '#8833cc', solid_rock: '#6b5a4a', carpenter: '#2a6a2a', shipwright: '#007a7a', odysseus_curse: '#4a1a7a', rose_cannons: '#1a5a8a',
-        };
-        const BADGE_SYMBOLS: Record<string, string> = {
-          burning_cannons: '🔥', shield: '🛡', checkpoint_rush: '⚑', ghost_ship: '👻', solid_rock: '🪨',
-          carpenter: '🔧', shipwright: '⚓', odysseus_curse: '🌊', rose_cannons: '🧭',
-        };
+        const BADGE_COLORS = BADGE_COLORS_SHARED;
+        const BADGE_SYMBOLS = BADGE_SYMBOLS_SHARED;
         const divY = infoY + INFO_H / 2 + PAD / 2;
         ctx.strokeStyle = 'rgba(255,255,255,0.1)';
         ctx.lineWidth = 1;
@@ -1122,6 +1142,131 @@ export class GameRenderer {
           }
         });
       }
+
+      ctx.restore();
+    }
+
+    // Treasure chest tooltips
+    const UPGRADE_LABELS: Record<string, string> = {
+      burning_cannons: 'Burning Cannons', shield: 'Shield', checkpoint_rush: 'Checkpoint Rush',
+      ghost_ship: 'Ghost Ship', solid_rock: 'Solid as a Rock', carpenter: 'Carpenter',
+      shipwright: 'Shipwright', rose_cannons: 'Rose Cannons', quartermaster: 'Quartermaster',
+    };
+    const UPGRADE_DESCS: Record<string, string> = {
+      burning_cannons: 'Shots set opponents on fire each round',
+      shield: 'Absorbs up to 3 damage from cannon hits',
+      checkpoint_rush: 'Skip your next checkpoint instantly',
+      ghost_ship: 'Pass through void tiles unharmed',
+      solid_rock: 'Cannot be pushed by other ships',
+      carpenter: 'Repairs +1 health at end of each round',
+      shipwright: 'Repairs +2 health at end of each round',
+      rose_cannons: 'Fires cannons in all 4 directions',
+      quartermaster: 'Draw one extra card to choose from',
+    };
+
+    for (let i = this.treasureTooltips.length - 1; i >= 0; i--) {
+      const tip = this.treasureTooltips[i];
+      const elapsed = now - tip.startMs;
+      if (elapsed >= tip.durationMs) { this.treasureTooltips.splice(i, 1); continue; }
+
+      const fadeDur = 500;
+      const alpha = elapsed > tip.durationMs - fadeDur ? 1 - (elapsed - (tip.durationMs - fadeDur)) / fadeDur : 1;
+      const scaleIn = Math.min(1, elapsed / 180);
+
+      const sx = (tip.x - this.cameraX) * this.zoom;
+      const sy = (tip.y - this.cameraY) * this.zoom;
+
+      const HEADER_H = 28;
+      const PAD = 10;
+      const panelW = 192;
+      const DESC_H = tip.upgrade ? 32 : 22;
+      const FOOTER_H = 20;
+      const panelH = HEADER_H + PAD / 2 + DESC_H + PAD / 2 + FOOTER_H + PAD / 2;
+      const r = 7;
+
+      const boatScreenR = tileH * this.zoom * 0.55;
+      let px = sx - panelW / 2 + (tip.peerOffset ?? 0);
+      let py = sy - boatScreenR - panelH;
+      if (py < 4) py = sy + boatScreenR;
+      px = Math.max(4, Math.min(this.canvas.width - panelW - 4, px));
+      py = Math.max(4, Math.min(this.canvas.height - panelH - 4, py));
+
+      ctx.save();
+      ctx.resetTransform();
+      ctx.globalAlpha = alpha;
+
+      const cx2 = px + panelW / 2;
+      const cy2 = py + panelH / 2;
+      ctx.translate(cx2, cy2);
+      ctx.scale(scaleIn, scaleIn);
+      ctx.translate(-cx2, -cy2);
+
+      ctx.shadowColor = 'rgba(0,0,0,0.6)';
+      ctx.shadowBlur = 12;
+      ctx.shadowOffsetY = 4;
+
+      ctx.fillStyle = 'rgba(16,18,28,0.96)';
+      ctx.beginPath();
+      ctx.moveTo(px + r, py); ctx.lineTo(px + panelW - r, py);
+      ctx.arcTo(px + panelW, py, px + panelW, py + r, r);
+      ctx.lineTo(px + panelW, py + panelH - r);
+      ctx.arcTo(px + panelW, py + panelH, px + panelW - r, py + panelH, r);
+      ctx.lineTo(px + r, py + panelH);
+      ctx.arcTo(px, py + panelH, px, py + panelH - r, r);
+      ctx.lineTo(px, py + r);
+      ctx.arcTo(px, py, px + r, py, r);
+      ctx.closePath();
+      ctx.fill();
+      ctx.shadowColor = 'transparent';
+
+      const headerColor = tip.upgrade ? (BADGE_COLORS_SHARED[tip.upgrade] ?? '#8B4513') : '#5a3010';
+      ctx.fillStyle = headerColor;
+      ctx.beginPath();
+      ctx.moveTo(px + r, py); ctx.lineTo(px + panelW - r, py);
+      ctx.arcTo(px + panelW, py, px + panelW, py + r, r);
+      ctx.lineTo(px + panelW, py + HEADER_H);
+      ctx.lineTo(px, py + HEADER_H);
+      ctx.lineTo(px, py + r);
+      ctx.arcTo(px, py, px + r, py, r);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 13px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const headerLabel = tip.upgrade
+        ? `${BADGE_SYMBOLS_SHARED[tip.upgrade] ?? '?'} ${UPGRADE_LABELS[tip.upgrade] ?? tip.upgrade}`
+        : '? Treasure Chest';
+      ctx.fillText(headerLabel, px + panelW / 2, py + HEADER_H / 2, panelW - 12);
+
+      const bodyY = py + HEADER_H + PAD / 2;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      if (tip.upgrade) {
+        ctx.font = '11px sans-serif';
+        ctx.fillStyle = '#ccc';
+        const desc = UPGRADE_DESCS[tip.upgrade] ?? '';
+        // wrap at ~28 chars
+        if (desc.length > 28) {
+          const mid = desc.lastIndexOf(' ', 28);
+          ctx.fillText(desc.slice(0, mid), px + panelW / 2, bodyY, panelW - PAD * 2);
+          ctx.fillText(desc.slice(mid + 1), px + panelW / 2, bodyY + 14, panelW - PAD * 2);
+        } else {
+          ctx.fillText(desc, px + panelW / 2, bodyY + 8, panelW - PAD * 2);
+        }
+      } else {
+        ctx.font = '16px sans-serif';
+        ctx.fillStyle = '#ddd';
+        const allSymbols = Object.values(BADGE_SYMBOLS_SHARED).join(' ');
+        ctx.fillText(allSymbols, px + panelW / 2, bodyY + 2, panelW - PAD);
+      }
+
+      const footerY = py + HEADER_H + PAD / 2 + DESC_H + PAD / 2 + FOOTER_H / 2;
+      ctx.font = 'italic 10px sans-serif';
+      ctx.fillStyle = '#FFD700';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('Stand here at round end to collect', px + panelW / 2, footerY, panelW - PAD * 2);
 
       ctx.restore();
     }
@@ -1762,40 +1907,67 @@ export class GameRenderer {
     const tileW: number = GI.map.tilewidth;
     const tileH: number = GI.map.tileheight;
 
-    // treasure chest click
+    const PANEL_W = 192;
+    const PEER_SHIFT = PANEL_W / 2 + 4; // half panel + gap
+
+    // find clicked treasure
+    let clickedTreasure: TreasureSprite | null = null;
     for (const [, t] of this.treasures) {
       if (!t.alive) continue;
       const cx = (t.x + 0.5) * tileW;
       const cy = (t.y + 0.5) * tileH;
       if (Math.abs(worldX - cx) < tileW * 0.5 && Math.abs(worldY - cy) < tileH * 0.5) {
-        this.component.showTreasureInfo(GI.treasure_preview !== false ? t.upgrade : null);
-        return;
+        clickedTreasure = t;
+        break;
       }
     }
 
-    for (const [pid, s] of this.boatStates) {
+    // find clicked boat
+    let clickedBoat: BoatState | null = null;
+    for (const [, s] of this.boatStates) {
       if (s.scale <= 0) continue;
       if (Math.abs(worldX - s.x) < tileW / 2 && Math.abs(worldY - s.y) < tileH / 2) {
-        // Remove any existing tooltip for this boat before adding a fresh one
-        this.boatTooltips = this.boatTooltips.filter((t) => t.name !== s.name);
-        this.boatTooltips.push({
-          x: s.x,
-          y: s.y,
-          color: s.color,
-          name: s.name,
-          health: s.health,
-          maxHealth: GI.initial_health,
-          nextCheckpoint: s.nextCheckpoint,
-          upgrades: [
-            ...(s.upgrades ?? []),
-            ...(s.isCursed ? [{ type: 'odysseus_curse' }] : []),
-          ],
-          onFire: s.onFire ?? false,
-          startMs: performance.now(),
-          durationMs: 3500,
-        });
+        clickedBoat = s;
         break;
       }
+    }
+
+    const hasBoth = clickedTreasure !== null && clickedBoat !== null;
+
+    if (clickedTreasure) {
+      const cx = (clickedTreasure.x + 0.5) * tileW;
+      const cy = (clickedTreasure.y + 0.5) * tileH;
+      this.treasureTooltips = this.treasureTooltips.filter((t) => t.x !== cx || t.y !== cy);
+      this.treasureTooltips.push({
+        x: cx,
+        y: cy,
+        upgrade: GI.treasure_preview !== false ? clickedTreasure.upgrade : null,
+        startMs: performance.now(),
+        durationMs: 3500,
+        peerOffset: hasBoth ? PEER_SHIFT : 0,
+      });
+    }
+
+    if (clickedBoat) {
+      const s = clickedBoat;
+      this.boatTooltips = this.boatTooltips.filter((t) => t.name !== s.name);
+      this.boatTooltips.push({
+        x: s.x,
+        y: s.y,
+        color: s.color,
+        name: s.name,
+        health: s.health,
+        maxHealth: GI.initial_health,
+        nextCheckpoint: s.nextCheckpoint,
+        upgrades: [
+          ...(s.upgrades ?? []),
+          ...(s.isCursed ? [{ type: 'odysseus_curse' }] : []),
+        ],
+        onFire: s.onFire ?? false,
+        startMs: performance.now(),
+        durationMs: 3500,
+        peerOffset: hasBoth ? -PEER_SHIFT : 0,
+      });
     }
   }
 }

@@ -48,6 +48,7 @@ UPGRADE_TYPES = {
     "carpenter": {"name": "Carpenter"},
     "shipwright": {"name": "Shipwright"},
     "rose_cannons": {"name": "Rose Cannons"},
+    "quartermaster": {"name": "Quartermaster"},
 }
 TREASURES_PER_ROUND_DEFAULT = 2.0
 
@@ -646,8 +647,6 @@ def board_moves(game, gmap, players, fast_current=True, player_upgrades=None):
             break
         tile_prop = get_tile_properties(gmap, p.xpos, p.ypos)
         if (tile_prop["vortex"] != 0) and (tile_prop["current_x"] == 0) and (tile_prop["current_y"] == 0):
-            if player_upgrades and "ghost_ship" in player_upgrades.get(pid, {}):
-                continue
             actions.append({"key": "rotate", "target": pid, "from": p.direction, "to": (p.direction + tile_prop["vortex"]) % 4})
             p.direction = (p.direction + tile_prop["vortex"]) % 4
 
@@ -664,16 +663,15 @@ def board_moves(game, gmap, players, fast_current=True, player_upgrades=None):
                         player_moved[pid] = True
                         next_tile_prop = get_tile_properties(gmap, p.xpos, p.ypos)
                         if next_tile_prop["vortex"] != 0:
-                            if not (player_upgrades and "ghost_ship" in player_upgrades.get(pid, {})):
-                                actions.append(
-                                    {
-                                        "key": "rotate",
-                                        "target": pid,
-                                        "from": p.direction,
-                                        "to": (p.direction + next_tile_prop["vortex"]) % 4,
-                                    }
-                                )
-                                p.direction = (p.direction + next_tile_prop["vortex"]) % 4
+                            actions.append(
+                                {
+                                    "key": "rotate",
+                                    "target": pid,
+                                    "from": p.direction,
+                                    "to": (p.direction + next_tile_prop["vortex"]) % 4,
+                                }
+                            )
+                            p.direction = (p.direction + next_tile_prop["vortex"]) % 4
 
                 if tile_prop["current_y"] != 0:
                     old_ypos = p.ypos
@@ -682,16 +680,15 @@ def board_moves(game, gmap, players, fast_current=True, player_upgrades=None):
                         player_moved[pid] = True
                         next_tile_prop = get_tile_properties(gmap, p.xpos, p.ypos)
                         if next_tile_prop["vortex"] != 0:
-                            if not (player_upgrades and "ghost_ship" in player_upgrades.get(pid, {})):
-                                actions.append(
-                                    {
-                                        "key": "rotate",
-                                        "target": pid,
-                                        "from": p.direction,
-                                        "to": (p.direction + next_tile_prop["vortex"]) % 4,
-                                    }
-                                )
-                                p.direction = (p.direction + next_tile_prop["vortex"]) % 4
+                            actions.append(
+                                {
+                                    "key": "rotate",
+                                    "target": pid,
+                                    "from": p.direction,
+                                    "to": (p.direction + next_tile_prop["vortex"]) % 4,
+                                }
+                            )
+                            p.direction = (p.direction + next_tile_prop["vortex"]) % 4
     if fast_current:
         fb_players = {}
         # call board moves again for players on fast belt
