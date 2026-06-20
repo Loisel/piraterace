@@ -48,6 +48,7 @@ export class GameComponent {
   @ViewChild('cannonModal') cannonModal: IonModal;
   @ViewChild('rerigModal') rerigModal: IonModal;
   @ViewChild('statsModal') statsModal: IonModal;
+  @ViewChild('soundModal') soundModal: IonModal;
   @ViewChild('appgamecontent') appGameContent: ViewContainerRef;
 
   constructor(

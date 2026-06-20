@@ -1931,7 +1931,8 @@ export class GameRenderer {
     const tileH: number = GI.map.tileheight;
 
     const PANEL_W = 192;
-    const PEER_SHIFT = PANEL_W / 2 + 4; // half panel + gap
+    const GAP = 4;
+    const STEP = PANEL_W + GAP;
 
     // find clicked treasure
     let clickedTreasure: TreasureSprite | null = null;
@@ -1945,34 +1946,23 @@ export class GameRenderer {
       }
     }
 
-    // find clicked boat
-    let clickedBoat: BoatState | null = null;
+    // find ALL boats on the clicked tile
+    const clickedBoats: BoatState[] = [];
     for (const [, s] of this.boatStates) {
       if (s.scale <= 0) continue;
       if (Math.abs(worldX - s.x) < tileW / 2 && Math.abs(worldY - s.y) < tileH / 2) {
-        clickedBoat = s;
-        break;
+        clickedBoats.push(s);
       }
     }
 
-    const hasBoth = clickedTreasure !== null && clickedBoat !== null;
+    if (!clickedTreasure && clickedBoats.length === 0) return;
 
-    if (clickedTreasure) {
-      const cx = (clickedTreasure.x + 0.5) * tileW;
-      const cy = (clickedTreasure.y + 0.5) * tileH;
-      this.treasureTooltips = this.treasureTooltips.filter((t) => t.x !== cx || t.y !== cy);
-      this.treasureTooltips.push({
-        x: cx,
-        y: cy,
-        upgrade: GI.treasure_preview !== false ? clickedTreasure.upgrade : null,
-        startMs: performance.now(),
-        durationMs: 3500,
-        peerOffset: hasBoth ? PEER_SHIFT : 0,
-      });
-    }
+    // Total panels: boats first (left→right), treasure last
+    const N = clickedBoats.length + (clickedTreasure ? 1 : 0);
+    const groupHalfW = (N * PANEL_W + (N - 1) * GAP) / 2;
+    const offset = (idx: number) => -groupHalfW + idx * STEP + PANEL_W / 2;
 
-    if (clickedBoat) {
-      const s = clickedBoat;
+    clickedBoats.forEach((s, i) => {
       this.boatTooltips = this.boatTooltips.filter((t) => t.name !== s.name);
       this.boatTooltips.push({
         x: s.x,
@@ -1989,7 +1979,21 @@ export class GameRenderer {
         onFire: s.onFire ?? false,
         startMs: performance.now(),
         durationMs: 3500,
-        peerOffset: hasBoth ? -PEER_SHIFT : 0,
+        peerOffset: offset(i),
+      });
+    });
+
+    if (clickedTreasure) {
+      const cx = (clickedTreasure.x + 0.5) * tileW;
+      const cy = (clickedTreasure.y + 0.5) * tileH;
+      this.treasureTooltips = this.treasureTooltips.filter((t) => t.x !== cx || t.y !== cy);
+      this.treasureTooltips.push({
+        x: cx,
+        y: cy,
+        upgrade: GI.treasure_preview !== false ? clickedTreasure.upgrade : null,
+        startMs: performance.now(),
+        durationMs: 3500,
+        peerOffset: offset(N - 1),
       });
     }
   }
