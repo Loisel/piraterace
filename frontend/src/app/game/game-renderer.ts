@@ -350,6 +350,9 @@ export class GameRenderer {
     // Play any accumulated actionstack immediately (handles reconnect)
     this.play_actionstack(0);
 
+    // Start background music (first canvas interaction already satisfies autoplay policy)
+    this.component.audio.startBackgroundMusic();
+
     // 1-second polling loop
     this.updateIntervalId = setInterval(() => this.updateEvent(), 1000);
 
@@ -1314,9 +1317,11 @@ export class GameRenderer {
       tick: () => {},
       onComplete: () => {
         const GI2 = this.component.gameinfo;
+        const audio2 = this.component.audio;
         Object.entries(GI2.players).forEach(([pid, player]: [string, any]) => {
           const s = this.boatStates.get(+pid);
           if (!s) return;
+          if (player.next_checkpoint > s.nextCheckpoint) audio2.playCheckpoint();
           s.health = player.health;
           s.nextCheckpoint = player.next_checkpoint;
           s.frame = player.is_zombie ? 2 : player.powered_down ? 1 : 0;
@@ -1406,6 +1411,7 @@ export class GameRenderer {
         const nWiggles = 4;
         const isMe_cx = action.target === GI.me;
         let baseX: number | null = null;
+        this.timeline.push({ startMs, durationMs: 0, tick: () => {}, onComplete: () => this.component.audio.playRockHit() });
         this.timeline.push({
           startMs,
           durationMs: dur,
@@ -1429,6 +1435,7 @@ export class GameRenderer {
         const nWiggles = 4;
         const isMe_cy = action.target === GI.me;
         let baseY: number | null = null;
+        this.timeline.push({ startMs, durationMs: 0, tick: () => {}, onComplete: () => this.component.audio.playRockHit() });
         this.timeline.push({
           startMs,
           durationMs: dur,
@@ -1499,6 +1506,7 @@ export class GameRenderer {
                 target.health = action.other_player_health;
                 if (action.other_player === GI.me) this.component.currentPlayerHealth = target.health;
               }
+              this.component.audio.playHit();
             }
             // Explosion sprite
             this.explosions.push({
@@ -1553,6 +1561,8 @@ export class GameRenderer {
         let baseScale: number | null = null;
         let baseAngle: number | null = null;
         const spinDeath = action.type === 'void';
+        this.timeline.push({ startMs, durationMs: 0, tick: () => {},
+          onComplete: () => spinDeath ? this.component.audio.playOctopus() : this.component.audio.playSink() });
         this.timeline.push({
           startMs,
           durationMs: dur,
@@ -1613,6 +1623,7 @@ export class GameRenderer {
       case 'repair': {
         if (dur < this.animCutoff) return;
         const isMe_repair = action.target === GI.me;
+        this.timeline.push({ startMs, durationMs: 0, tick: () => {}, onComplete: () => this.component.audio.playRepair() });
         this.starBursts.push({
           x: (action.posx + 0.5) * tileW,
           baseY: (action.posy + 0.5) * tileH,
@@ -1680,6 +1691,7 @@ export class GameRenderer {
       case 'powerdownrepair': {
         if (dur < this.animCutoff) return;
         const isMe_pdr = action.target === GI.me;
+        this.timeline.push({ startMs, durationMs: 0, tick: () => {}, onComplete: () => this.component.audio.playRepair() });
         this.timeline.push({
           startMs,
           durationMs: 0,
@@ -1702,6 +1714,7 @@ export class GameRenderer {
           durationMs: 0,
           tick: () => {},
           onComplete: () => {
+            this.component.audio.playFinalCheckpoint();
             clearInterval(this.updateIntervalId);
             this.component.presentSummary();
           },
@@ -1736,6 +1749,7 @@ export class GameRenderer {
           durationMs: 0,
           tick: () => {},
           onComplete: () => {
+            this.component.audio.playTreasurePickup();
             const t = this.treasures.get(action.treasure_id);
             if (t) t.alive = false;
             this.treasures.delete(action.treasure_id);
@@ -1807,6 +1821,7 @@ export class GameRenderer {
       case 'shield_absorb': {
         if (!s) return;
         const isMe_shield = action.target === GI.me;
+        this.timeline.push({ startMs, durationMs: 0, tick: () => {}, onComplete: () => this.component.audio.playShieldAbsorb() });
         this.timeline.push({
           startMs,
           durationMs: 0,
@@ -1846,6 +1861,7 @@ export class GameRenderer {
       case 'burn_damage': {
         if (!s) return;
         const isMe_burn = action.target === GI.me;
+        this.timeline.push({ startMs, durationMs: 0, tick: () => {}, onComplete: () => this.component.audio.playBurnDamage() });
         this.timeline.push({
           startMs,
           durationMs: 0,
@@ -1873,12 +1889,19 @@ export class GameRenderer {
   // ---------------------------------------------------------------------------
 
   updateEvent(): void {
+    const prevState = this.component.gameinfo?.state;
     this.component.load_gameinfo().subscribe((gameinfo: any) => {
+      const newState = gameinfo.state;
       this.component.gameinfo = gameinfo;
       this.component.Ngameround.next(gameinfo['Ngameround']);
       this.play_actionstack(gameinfo['time_per_action'] * 900);
       if (gameinfo.countdown && this.component.countDownValue < 0) {
         this.component.setupCountDown(gameinfo.countdown_duration - gameinfo.countdown, gameinfo.countdown_duration);
+      }
+      const audio = this.component.audio;
+      if (prevState !== newState) {
+        if (newState === 'countdown') audio.playSailsSet();
+        else if (newState === 'animate') audio.playAnimationStart();
       }
     });
   }

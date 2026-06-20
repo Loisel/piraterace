@@ -14,6 +14,7 @@ import { environment } from '../../environments/environment';
 import { GameInfo } from '../model/gameinfo';
 
 import { GameRenderer } from './game-renderer';
+import { GameAudio } from './game-audio';
 
 @Component({
   selector: 'app-game',
@@ -40,6 +41,7 @@ export class GameComponent {
   poweredDown: boolean = false;
   currentPlayerUpgrades: { type: string; charges?: number }[] = [];
   currentPlayerHealth: number = 0;
+  audio = new GameAudio();
 
   @ViewChild('cards_menu', { read: ElementRef }) cards_menu: ElementRef;
   @ViewChild('tools_menu', { read: ElementRef }) tools_menu: ElementRef;
@@ -89,6 +91,7 @@ export class GameComponent {
         }
         this.poweredDown = false;
         this.getPlayerCards();
+        this.audio.playRoundStart();
       });
   }
 
@@ -115,6 +118,7 @@ export class GameComponent {
 
   ionViewWillLeave() {
     console.log('Leaving Game');
+    this.audio.destroy();
     this.renderer?.destroy();
     this.renderer = null;
     try {
@@ -162,6 +166,7 @@ export class GameComponent {
 
   onCardsReorder(event) {
     event.detail.complete(true);
+    this.audio.playCardReorder();
     this.httpService.switchPlayerCards(event.detail.from, event.detail.to).subscribe(
       (result) => {
         console.log('switch cards:', result);
