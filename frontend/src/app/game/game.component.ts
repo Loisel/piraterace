@@ -235,6 +235,9 @@ export class GameComponent {
     this.statsModal.present();
   }
 
+  setMusicOn(event: any) { this.audio.setMusicOn(event.detail.checked); }
+  setSfxOn(event: any) { this.audio.setSfxOn(event.detail.checked); }
+
   changeCannonDirection(event) {
     this.httpService.changeCannonDirection(event.detail.value).subscribe(
       (ret) => {

@@ -60,7 +60,7 @@
                   <ion-toggle
                     slot="end"
                     [checked]="audio.musicOn"
-                    (ionChange)="audio.setMusicOn($event.detail.checked)"
+                    (ionChange)="setMusicOn($event)"
                   ></ion-toggle>
                 </ion-item>
                 <ion-item>
@@ -68,7 +68,7 @@
                   <ion-toggle
                     slot="end"
                     [checked]="audio.sfxOn"
-                    (ionChange)="audio.setSfxOn($event.detail.checked)"
+                    (ionChange)="setSfxOn($event)"
                   ></ion-toggle>
                 </ion-item>
               </ion-list>
