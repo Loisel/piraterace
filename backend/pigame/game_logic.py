@@ -308,6 +308,8 @@ def play_stack(game, initial_upgrades=None):
                                 game.save(update_fields=["state"])
                                 collection_actions.append(dict(key="win", target=player.id))
                             else:
+                                cp = checkpoints[player.next_checkpoint - 1]
+                                player.last_cp_x, player.last_cp_y = cp[0], cp[1]
                                 collection_actions.append(
                                     dict(key="upgrade_gained", target=player.id, upgrade=upgrade)
                                 )
@@ -502,6 +504,9 @@ def play_one_round(players, initial_map, round_cards, ncardsavail, player_upgrad
                             player.next_checkpoint += 1
                             if player.next_checkpoint > len(checkpoints):
                                 game_over = True
+                            else:
+                                cp = checkpoints[player.next_checkpoint - 1]
+                                player.last_cp_x, player.last_cp_y = cp[0], cp[1]
                         else:
                             player_upgrades[player.id][upgrade] = True
                         break
