@@ -250,23 +250,30 @@ def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail,
         else:
             cp_x, cp_y = p.xpos, p.ypos
 
-        # Infer max_ncardsavail from the model's expected input dimension.
-        # Formula (no crop): obs_dim = 9 + max_nca*(CARD_FEATURES+1) + n_opp*8
+        # Infer max_ncardsavail and obs format from the model's expected input dim.
+        # v3+ format: obs_dim = 9 + max_nca*15 + n_opp*8 (adds greedy_slot vector)
+        # v2  format: obs_dim = 9 + max_nca*14 + n_opp*8 (preview only)
         ncards = len(playable_cards)
         model_obs_dim = sess.get_inputs()[0].shape[1] or (9 + ncards * CARD_FEATURES + ncards)
         has_crop = model_obs_dim >= N_CROP_FEATS
-        n14 = CARD_FEATURES + 1   # 13 card features + 1 preview slot
         max_ncardsavail_inferred = ncards
         n_opp_slots = 0
+        has_greedy_slot = False
         if not has_crop:
-            for n_opp in range(5):
-                remainder = model_obs_dim - 9 - n_opp * 8
-                if remainder > 0 and remainder % n14 == 0:
-                    candidate = remainder // n14
-                    if candidate >= ncards:
-                        max_ncardsavail_inferred = candidate
-                        n_opp_slots = n_opp
-                        break
+            found = False
+            for n_per_card in [15, 14]:   # try v3 format first, fall back to v2
+                for n_opp in range(5):
+                    remainder = model_obs_dim - 9 - n_opp * 8
+                    if remainder > 0 and remainder % n_per_card == 0:
+                        candidate = remainder // n_per_card
+                        if candidate >= ncards:
+                            max_ncardsavail_inferred = candidate
+                            n_opp_slots = n_opp
+                            has_greedy_slot = (n_per_card == 15)
+                            found = True
+                            break
+                if found:
+                    break
 
         # Health normalised by max_ncardsavail so obs is consistent with training.
         max_health = max_ncardsavail_inferred + 3   # FREE_HEALTH_OFFSET = 3
@@ -303,6 +310,16 @@ def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail,
         if max_ncardsavail_inferred > ncards:
             preview = np.concatenate([preview, np.zeros(max_ncardsavail_inferred - ncards, dtype=np.float32)])
 
+        # v3+ obs: greedy_slot = normalized rank by preview score (0=best, 1=worst)
+        if has_greedy_slot:
+            preview_real = preview[:ncards]
+            if ncards > 1:
+                ranks = np.argsort(np.argsort(-preview_real)).astype(np.float32) / (ncards - 1)
+            else:
+                ranks = np.zeros(ncards, dtype=np.float32)
+            greedy_slot = np.zeros(max_ncardsavail_inferred, dtype=np.float32)
+            greedy_slot[:ncards] = ranks
+
         if has_crop:
             n_base = 9 + ncards * CARD_FEATURES + ncards
             if map_data is not None and id(map_data) not in _rl_map_enc_cache:
@@ -332,7 +349,10 @@ def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail,
                 opp_block[b+6] = (ocx - opp.xpos) / map_diag
                 opp_block[b+7] = (ocy - opp.ypos) / map_diag
 
-        parts = [state, card_vecs, preview, opp_block]
+        parts = [state, card_vecs, preview]
+        if has_greedy_slot:
+            parts.append(greedy_slot)
+        parts.append(opp_block)
         if has_crop:
             parts.append(crop)
         obs = np.concatenate(parts).reshape(1, -1)

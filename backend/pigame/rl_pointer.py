@@ -52,7 +52,7 @@ class PointerDecoder(nn.Module):
         self.hidden_dim  = hidden_dim
         self.card_dim    = card_dim
 
-        # Scalar obs encoder: state(9) + preview(nca) + opp(*8)
+        # Scalar obs encoder: state(9) + preview(nca) + greedy_slot(nca) + opp(*8)
         # (raw per-card type vectors are encoded separately below)
         scalar_obs_dim = obs_dim - ncardsavail * CARD_FEATURES
         self.obs_encoder = nn.Sequential(
@@ -61,9 +61,9 @@ class PointerDecoder(nn.Module):
             nn.Linear(hidden_dim, hidden_dim),     nn.ReLU(),
         )
 
-        # Per-card encoder: CARD_FEATURES (13) + 1 preview value → card_dim
+        # Per-card encoder: CARD_FEATURES (13) + preview (1) + greedy_slot (1) → card_dim
         self.card_encoder = nn.Sequential(
-            nn.Linear(CARD_FEATURES + 1, card_dim), nn.ReLU(),
+            nn.Linear(CARD_FEATURES + 2, card_dim), nn.ReLU(),
             nn.Linear(card_dim, card_dim),           nn.ReLU(),
         )
 
@@ -89,7 +89,11 @@ class PointerDecoder(nn.Module):
         """
         Split obs into components and encode.
 
-        obs layout: [state(9)] [cards(nca×13)] [preview(nca)] [opp(*8)]
+        obs layout: [state(9)] [cards(nca×13)] [preview(nca)] [greedy_slot(nca)] [opp(*8)]
+
+        greedy_slot[i] = rank of card i when sorted by preview score, normalised
+        to [0, 1] (0 = best card by solo preview, 1 = worst).  Gives the pointer
+        network an explicit multi-step-quality signal per card without extra sims.
 
         Returns:
           context   (B, hidden_dim)      — initial decoder hidden state
@@ -104,18 +108,19 @@ class PointerDecoder(nn.Module):
         state      = obs[:, :N_STATE]
         cards_flat = obs[:, N_STATE : N_STATE + nca * CF]
         preview    = obs[:, N_STATE + nca * CF : N_STATE + nca * CF + nca]
-        opp        = obs[:, N_STATE + nca * CF + nca:]
+        greedy_sl  = obs[:, N_STATE + nca * CF + nca : N_STATE + nca * CF + 2 * nca]
+        opp        = obs[:, N_STATE + nca * CF + 2 * nca:]
 
-        # Scalar context: state + preview + opp (NOT the raw card one-hots —
-        # those are handled by card_encoder for per-card attention)
-        scalar  = torch.cat([state, preview, opp], dim=1)
+        # Scalar context: state + preview + greedy_slot + opp
+        scalar  = torch.cat([state, preview, greedy_sl, opp], dim=1)
         context = self.obs_encoder(scalar)                      # (B, hidden)
 
-        # Per-card: combine 13-d type/rank vector with its preview scalar
-        cards_2d = cards_flat.view(B, nca, CF)                  # (B, nca, 13)
-        prev_2d  = preview.unsqueeze(2)                         # (B, nca,  1)
-        card_in  = torch.cat([cards_2d, prev_2d], dim=2)       # (B, nca, 14)
-        card_enc = self.card_encoder(card_in)                   # (B, nca, card_dim)
+        # Per-card: combine 13-d type/rank vector with preview and greedy_slot
+        cards_2d  = cards_flat.view(B, nca, CF)                 # (B, nca, 13)
+        prev_2d   = preview.unsqueeze(2)                        # (B, nca,  1)
+        gslot_2d  = greedy_sl.unsqueeze(2)                     # (B, nca,  1)
+        card_in   = torch.cat([cards_2d, prev_2d, gslot_2d], dim=2)  # (B, nca, 15)
+        card_enc  = self.card_encoder(card_in)                  # (B, nca, card_dim)
         card_keys = self.key_proj(card_enc)                     # (B, nca, hidden)
 
         value = self.value_head(context).squeeze(-1)            # (B,)

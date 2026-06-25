@@ -236,6 +236,21 @@ AGGRESSIVE_WEIGHTS = RewardWeights(
     push_opp=1.5,        # reward for pushing opponent off course
 )
 
+# Race weights plus combat bonuses — keeps full racing motivation while rewarding
+# hitting and pushing opponents. Used for greedy-opponent envs in PPO-2.
+RACE_AGGRESSIVE_WEIGHTS = RewardWeights(
+    distance=1.0,
+    checkpoint=5.0,
+    win=20.0,
+    damage_taken=-0.5,
+    time=-0.01,
+    win_race=10.0,
+    lose_race=-5.0,
+    lead_bonus=0.3,
+    damage_dealt=2.0,
+    push_opp=1.0,
+)
+
 
 # ── environment ────────────────────────────────────────────────────────────────
 
@@ -273,6 +288,7 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         _map_data=None,
         mapfiles: Optional[List[str]] = None,
         ncardsavail_options: Optional[List[int]] = None,
+        opponent_types_pool: Optional[List[str]] = None,
     ):
         if not HAS_GYM:
             raise ImportError("Install gymnasium: pip install gymnasium")
@@ -291,6 +307,10 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         self.pct_cannon = pct_cannon
         self.weights = weights if weights is not None else RewardWeights()
         self.opponent_types: List[str] = list(opponent_types or [])
+        # When set, each episode randomly samples one type per opponent slot from
+        # this list instead of using the fixed opponent_types ordering.
+        self.opponent_types_pool: Optional[List[str]] = list(opponent_types_pool) if opponent_types_pool else None
+        self._episode_opponent_types: List[str] = list(self.opponent_types)
         # max_opponents fixes the obs size across curriculum stages.
         # Must be >= len(opponent_types); defaults to len(opponent_types).
         self.max_opponents = max(max_opponents, len(self.opponent_types))
@@ -308,10 +328,11 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         self._load_map(self._all_mapfiles[0])
 
         # obs = state(9) + cards(max_ncardsavail×CARD_FEATURES) + preview(max_ncardsavail)
-        #       + opp(max_opponents×8)
-        # Slots beyond ncardsavail are zero-padded so obs/action size stays fixed
-        # regardless of how many cards are actually in hand this game.
-        self.n_scalar = 9 + self.max_ncardsavail * CARD_FEATURES + self.max_ncardsavail + self.max_opponents * 8
+        #       + greedy_slot(max_ncardsavail) + opp(max_opponents×8)
+        # greedy_slot[i] = normalized rank of card i by solo-preview score (0=best, 1=worst),
+        # giving the network an explicit "greedy would pick this first" signal per card.
+        # Slots beyond ncardsavail are zero-padded so obs/action size stays fixed.
+        self.n_scalar = 9 + self.max_ncardsavail * CARD_FEATURES + self.max_ncardsavail * 2 + self.max_opponents * 8
         obs_dim = self.n_scalar
         self.observation_space = spaces.Box(
             low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32
@@ -448,13 +469,23 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         cards = np.concatenate([encode_card(c) for c in hand])
         preview = self._card_preview(hand, cx, cy)
 
-        # Zero-pad card features and preview to max_ncardsavail
-        pad = self.max_ncardsavail - self.ncardsavail
+        # greedy_slot: normalized rank by preview score (0.0 = best card, 1.0 = worst).
+        # Gives the pointer network an explicit "greedy ordering" signal per card.
+        nca = self.ncardsavail
+        if nca > 1:
+            ranks = np.argsort(np.argsort(-preview))
+            greedy_slot = ranks.astype(np.float32) / (nca - 1)
+        else:
+            greedy_slot = np.zeros(nca, dtype=np.float32)
+
+        # Zero-pad card features, preview, and greedy_slot to max_ncardsavail
+        pad = self.max_ncardsavail - nca
         if pad > 0:
             cards = np.concatenate([cards, np.zeros(pad * CARD_FEATURES, dtype=np.float32)])
             preview = np.concatenate([preview, np.zeros(pad, dtype=np.float32)])
+            greedy_slot = np.concatenate([greedy_slot, np.zeros(pad, dtype=np.float32)])
 
-        return np.concatenate([state, cards, preview, self._opp_obs_block()])
+        return np.concatenate([state, cards, preview, greedy_slot, self._opp_obs_block()])
 
     def _make_player(self, pid, sx, sy, sd, color, name):
         max_health = self.ncardsavail + FREE_HEALTH_OFFSET
@@ -501,8 +532,18 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         self._opponents = {}
         self._opp_decks = []
         self._opp_next_cards = []
+
+        # Resample opponent types from pool each episode for self-play diversity.
+        if self.opponent_types_pool is not None and self.opponent_types:
+            self._episode_opponent_types = [
+                random.choice(self.opponent_types_pool)
+                for _ in self.opponent_types
+            ]
+        else:
+            self._episode_opponent_types = list(self.opponent_types)
+
         opp_colors = ["#CC4444", "#44CC44", "#CC44CC"]
-        for i, opp_type in enumerate(self.opponent_types):
+        for i, opp_type in enumerate(self._episode_opponent_types):
             osx, osy = _pos(i + 1)
             osd = random.randint(0, 3)
             opp_pid = -(i + 2)
@@ -548,7 +589,7 @@ class PirateEnv(gym.Env if HAS_GYM else object):
 
         # Opponent card selection
         opp_played: Dict[int, List[int]] = {}
-        for i, (opp_pid, opp_type) in enumerate(zip(self._opponents.keys(), self.opponent_types)):
+        for i, (opp_pid, opp_type) in enumerate(zip(self._opponents.keys(), self._episode_opponent_types)):
             opp = self._opponents[opp_pid]
             opp_hand = self._opp_decks[i][
                 self._opp_next_cards[i] : self._opp_next_cards[i] + self.ncardslots

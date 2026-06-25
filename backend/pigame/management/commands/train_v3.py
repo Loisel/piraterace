@@ -47,7 +47,7 @@ from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv, VecNormalize
 from stable_baselines3.common.callbacks import BaseCallback
 
-from pigame.rl_env import PirateEnv, SOLO_WEIGHTS, RACE_WEIGHTS
+from pigame.rl_env import PirateEnv, SOLO_WEIGHTS, RACE_WEIGHTS, RACE_AGGRESSIVE_WEIGHTS
 from pigame.rl_pointer import PointerDecoder, PointerActorCriticPolicy, PointerOnnxWrapper
 from pigame.bots import _greedy_pick, _simulate_end_pos_fast
 
@@ -440,8 +440,14 @@ N_GREEDY = N_ENVS // 2
 N_SOLO2  = N_ENVS - N_GREEDY
 
 def make_env_greedy():
+    # Opponent pool: each episode randomly chooses greedy or the PPO-1 RL bot.
+    # This adds self-play diversity without a separate league: the RL bot from
+    # PPO-1 is already strong enough to provide useful gradient signal.
+    # RACE_AGGRESSIVE_WEIGHTS keeps full racing motivation while rewarding combat.
     return PirateEnv(mapfile=MAPS[0], max_rounds=MAX_ROUNDS,
-                     weights=RACE_WEIGHTS, opponent_types=["greedy"],
+                     weights=RACE_AGGRESSIVE_WEIGHTS,
+                     opponent_types=["greedy"],
+                     opponent_types_pool=["greedy", "rl:v3_solo"],
                      max_opponents=1, ncardsavail_options=NCARDSAVAIL_OPTIONS,
                      ncardslots=NCARDSLOTS, max_ncardsavail=MAX_NCARDSAVAIL,
                      mapfiles=MAPS)
