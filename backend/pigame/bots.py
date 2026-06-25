@@ -46,7 +46,8 @@ def pick_cards(bot_type, playable_cards, *, mapfile=None, player_id=None,
     if bot_type.startswith("rl"):
         return _rl_pick(bot_type, playable_cards, current_state, ncardsavail,
                         checkpoints=checkpoints, map_data=map_data,
-                        opponent_states=kwargs.get("opponent_states"))
+                        opponent_states=kwargs.get("opponent_states"),
+                        player_id=player_id)
     cards = list(playable_cards)
     random.shuffle(cards)
     return cards
@@ -184,7 +185,8 @@ _rl_map_enc_cache: dict = {}   # id(map_data) → encoded map feature array
 
 
 def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail,
-             checkpoints=None, map_data=None, opponent_states=None):
+             checkpoints=None, map_data=None, opponent_states=None,
+             player_id=None):
     """
     Use a trained PPO policy (exported to ONNX) to pick card play order.
 
@@ -231,8 +233,8 @@ def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail,
                                     N_CARD_TYPES, N_CROP_FEATS, CARD_FEATURES)
         from pigame.models import card_id_rank
 
-        p = current_state
-        max_health = ncardsavail + 3   # FREE_HEALTH_OFFSET = 3
+        p  = current_state
+        pid = player_id if player_id is not None else getattr(p, "id", -1)
 
         if map_data is not None:
             map_w = map_data.get("width", 25)
@@ -248,6 +250,27 @@ def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail,
         else:
             cp_x, cp_y = p.xpos, p.ypos
 
+        # Infer max_ncardsavail from the model's expected input dimension.
+        # Formula (no crop): obs_dim = 9 + max_nca*(CARD_FEATURES+1) + n_opp*8
+        ncards = len(playable_cards)
+        model_obs_dim = sess.get_inputs()[0].shape[1] or (9 + ncards * CARD_FEATURES + ncards)
+        has_crop = model_obs_dim >= N_CROP_FEATS
+        n14 = CARD_FEATURES + 1   # 13 card features + 1 preview slot
+        max_ncardsavail_inferred = ncards
+        n_opp_slots = 0
+        if not has_crop:
+            for n_opp in range(5):
+                remainder = model_obs_dim - 9 - n_opp * 8
+                if remainder > 0 and remainder % n14 == 0:
+                    candidate = remainder // n14
+                    if candidate >= ncards:
+                        max_ncardsavail_inferred = candidate
+                        n_opp_slots = n_opp
+                        break
+
+        # Health normalised by max_ncardsavail so obs is consistent with training.
+        max_health = max_ncardsavail_inferred + 3   # FREE_HEALTH_OFFSET = 3
+
         angle = p.direction * math.pi / 2
         state = np.array([
             p.xpos / map_w * 2.0 - 1.0,
@@ -261,28 +284,27 @@ def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail,
             0.0,   # round fraction unknown at inference time
         ], dtype=np.float32)
 
+        # Build card features, zero-padded to max_ncardsavail
         card_vecs = np.concatenate([encode_card(c) for c in playable_cards])
+        if max_ncardsavail_inferred > ncards:
+            pad_cards = np.zeros((max_ncardsavail_inferred - ncards) * CARD_FEATURES, dtype=np.float32)
+            card_vecs = np.concatenate([card_vecs, pad_cards])
 
         # Path preview: for each card, simulate it played solo as slot-1,
         # record (dist_before - dist_after) / map_diag toward current checkpoint.
         dist_before = math.sqrt((p.xpos - cp_x) ** 2 + (p.ypos - cp_y) ** 2)
-        preview = np.zeros(len(playable_cards), dtype=np.float32)
+        preview = np.zeros(ncards, dtype=np.float32)
         if map_data is not None:
             for i, card in enumerate(playable_cards):
-                ex, ey = _simulate_end_pos_fast(map_data, player_id, p, [card], ncardsavail or 9)
+                ex, ey = _simulate_end_pos_fast(map_data, pid, p, [card], ncardsavail or 9)
                 dist_after = math.sqrt((ex - cp_x) ** 2 + (ey - cp_y) ** 2)
                 preview[i] = (dist_before - dist_after) / map_diag
-
-        # Detect whether the model was trained with or without egocentric crop.
-        # New models (obs_dim=87): no crop — obs = [scalar only].
-        # Old models (obs_dim≥4031): with crop — obs = [scalar | crop].
-        ncards = len(playable_cards)
-        model_obs_dim = sess.get_inputs()[0].shape[1] or (9 + ncards * CARD_FEATURES + ncards)
-        n_base = 9 + ncards * CARD_FEATURES + ncards  # state + cards + preview
-        has_crop = model_obs_dim >= N_CROP_FEATS
+        # Pad preview to max_ncardsavail (padding slots = 0)
+        if max_ncardsavail_inferred > ncards:
+            preview = np.concatenate([preview, np.zeros(max_ncardsavail_inferred - ncards, dtype=np.float32)])
 
         if has_crop:
-            # Legacy crop models — build tile feature array (cached per map)
+            n_base = 9 + ncards * CARD_FEATURES + ncards
             if map_data is not None and id(map_data) not in _rl_map_enc_cache:
                 _rl_map_enc_cache[id(map_data)] = build_tile_feature_array(map_data)
             tile_arr = _rl_map_enc_cache.get(id(map_data))
@@ -292,7 +314,6 @@ def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail,
             n_opp_slots = max(0, (model_obs_dim - N_CROP_FEATS - n_base) // 8)
         else:
             crop = None
-            n_opp_slots = max(0, (model_obs_dim - n_base) // 8)
 
         opp_block = np.zeros(n_opp_slots * 8, dtype=np.float32)
         if n_opp_slots > 0 and opponent_states:
@@ -316,10 +337,31 @@ def _rl_pick(bot_type: str, playable_cards, current_state, ncardsavail,
             parts.append(crop)
         obs = np.concatenate(parts).reshape(1, -1)
 
-        scores = sess.run(["action_mean"], {"obs": obs})[0].flatten()
+        output_name = sess.get_outputs()[0].name
+        raw_out     = sess.run([output_name], {"obs": obs})[0].flatten()
 
+        if output_name == "card_indices":
+            # Pointer network: raw_out is (ncardslots,) float card indices.
+            # Return played cards first (in pointer order), then remainder.
+            ncardslots = len(raw_out)
+            played_idx = [int(round(float(v))) for v in raw_out]
+            played_idx = [max(0, min(i, len(cards) - 1)) for i in played_idx]
+            # Deduplicate
+            seen = set(); deduped = []
+            for idx in played_idx:
+                if idx not in seen:
+                    deduped.append(idx); seen.add(idx)
+            for i in range(len(cards)):
+                if len(deduped) >= ncardslots: break
+                if i not in seen:
+                    deduped.append(i); seen.add(i)
+            played    = [cards[i] for i in deduped[:ncardslots]]
+            remainder = [cards[i] for i in range(len(cards)) if i not in set(deduped[:ncardslots])]
+            return played + remainder
+
+        scores = raw_out
         if len(scores) == len(cards):
-            # Per-card model (PirateAttentionExtractor): score[i] = priority of card i
+            # Per-card score model: score[i] = priority of card i
             order = np.argsort(-scores)
             return [cards[i] for i in order]
         else:
@@ -363,16 +405,34 @@ def bot_submit_cards(gamecfg, player_idx, bot_type, game=None, player_states=Non
             except Exception:
                 pass
 
-    best_playable = pick_cards(
-        bot_type,
-        playable,
-        mapfile=gamecfg.mapfile,
-        player_id=player_id,
-        current_state=current_state,
-        checkpoints=checkpoints,
-        ncardsavail=ncardsavail,
-        map_data=map_data,
-        opponent_states=opponent_states,
-    )
-    deck[next_card : next_card + ncardsavail] = best_playable + remainder
+    if bot_type == "rl" or bot_type.startswith("rl:"):
+        # Pass the full hand so the RL model can score and select ncardslots
+        # from all ncardsavail cards (matches training obs format).
+        # pick_cards returns all ncardsavail cards in priority order;
+        # the first ncardslots are treated as played by the deck advance logic.
+        best_ordered = pick_cards(
+            bot_type,
+            hand,
+            mapfile=gamecfg.mapfile,
+            player_id=player_id,
+            current_state=current_state,
+            checkpoints=checkpoints,
+            ncardsavail=ncardsavail,
+            map_data=map_data,
+            opponent_states=opponent_states,
+        )
+        deck[next_card : next_card + ncardsavail] = best_ordered
+    else:
+        best_playable = pick_cards(
+            bot_type,
+            playable,
+            mapfile=gamecfg.mapfile,
+            player_id=player_id,
+            current_state=current_state,
+            checkpoints=checkpoints,
+            ncardsavail=ncardsavail,
+            map_data=map_data,
+            opponent_states=opponent_states,
+        )
+        deck[next_card : next_card + ncardsavail] = best_playable + remainder
     set_player_deck(gamecfg, player_id, deck)

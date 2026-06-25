@@ -5,18 +5,18 @@ Supports solo and multiplayer (with bot opponents) via the `opponent_types`
 parameter.  Use `max_opponents` to fix the observation size across curriculum
 stages so weights can be transferred between solo and multi-player training.
 
-Observation (flat float32, total = 87 for ncardslots=5, max_opponents=1):
-    player_state  (9)               x_norm, y_norm, sin(dir), cos(dir),
-                                    health_norm, cp_progress, dx_to_cp,
-                                    dy_to_cp, round_norm
-    per card      (ncardslots × 13) one-hot card type (12) + rank_norm
-    path_preview  (ncardslots)      per-card distance improvement to current
-                                    checkpoint when played solo as slot-1,
-                                    normalised by map diagonal.  Positive =
-                                    moves toward checkpoint.
-    per opp slot  (max_opponents×8) x_norm, y_norm, sin/cos(dir), health_norm,
-                                    cp_progress, dx_to_their_cp, dy_to_their_cp
-                                    (zero-padded when no opponent in that slot)
+Observation (flat float32, total = 9 + ncardsavail×14 + max_opponents×8):
+    player_state  (9)                x_norm, y_norm, sin(dir), cos(dir),
+                                     health_norm, cp_progress, dx_to_cp,
+                                     dy_to_cp, round_norm
+    per card      (ncardsavail × 13) one-hot card type (12) + rank_norm
+    path_preview  (ncardsavail)      per-card distance improvement to current
+                                     checkpoint when played solo as slot-1,
+                                     normalised by map diagonal.  Positive =
+                                     moves toward checkpoint.
+    per opp slot  (max_opponents×8)  x_norm, y_norm, sin/cos(dir), health_norm,
+                                     cp_progress, dx_to_their_cp, dy_to_their_cp
+                                     (zero-padded when no opponent in that slot)
 
 No egocentric crop: path_preview already encodes spatial card effects.
 Removing the 3969-feature CNN crop speeds up training ~15× and makes a
@@ -24,9 +24,10 @@ simple flat MLP sufficient (no custom CNN extractor needed).
 
 obs_dim is map-independent — the same trained model works on any map.
 
-Action (float32, shape = (ncardslots,) = (5,)):
-    Priority score per card in the current hand.  The card with the highest
-    score plays first (argsort-descending).  Only relative order matters.
+Action (float32, shape = (ncardsavail,)):
+    Priority score per card in the full available hand.  The ncardslots cards
+    with the highest scores are selected and played in score order (highest
+    first).  Only relative order matters.
 
 Install deps before use:
     pip install gymnasium stable-baselines3
@@ -262,6 +263,7 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         mapfile: str = "map1.json",
         ncardslots: int = 5,
         ncardsavail: int = 9,
+        max_ncardsavail: Optional[int] = None,
         max_rounds: int = 60,
         pct_repair: int = 0,
         pct_cannon: int = 0,
@@ -269,6 +271,8 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         opponent_types: Optional[List[str]] = None,
         max_opponents: int = 0,
         _map_data=None,
+        mapfiles: Optional[List[str]] = None,
+        ncardsavail_options: Optional[List[int]] = None,
     ):
         if not HAS_GYM:
             raise ImportError("Install gymnasium: pip install gymnasium")
@@ -277,6 +281,11 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         self.mapfile = mapfile
         self.ncardslots = ncardslots
         self.ncardsavail = ncardsavail
+        # max_ncardsavail fixes obs/action size so the same model can handle
+        # any number of available cards (≤ max_ncardsavail) via zero-padding.
+        # Defaults to the max of ncardsavail_options (or ncardsavail) when not set.
+        self._ncardsavail_options: List[int] = list(ncardsavail_options or [ncardsavail])
+        self.max_ncardsavail = max_ncardsavail if max_ncardsavail is not None else max(self._ncardsavail_options)
         self.max_rounds = max_rounds
         self.pct_repair = pct_repair
         self.pct_cannon = pct_cannon
@@ -286,32 +295,33 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         # Must be >= len(opponent_types); defaults to len(opponent_types).
         self.max_opponents = max(max_opponents, len(self.opponent_types))
 
-        raw = _map_data if _map_data is not None else load_map(mapfile)
-        self._map_data = copy.deepcopy(raw)
-        self._checkpoints = determine_checkpoint_locations(self._map_data)
-        self._n_checkpoints = len(self._checkpoints)
-        self._map_w = self._map_data["width"]
-        self._map_h = self._map_data["height"]
-        self._map_diag = math.sqrt(self._map_w ** 2 + self._map_h ** 2)
-        self._start_positions = [
-            layer["objects"]
-            for layer in self._map_data["layers"]
-            if layer["name"] == "startinglocs"
-        ][0]
-        self._tile_w = self._map_data["tilewidth"]
-        self._tile_h = self._map_data["tileheight"]
+        # Pre-cache all maps so reset() can switch without filesystem I/O.
+        self._all_mapfiles: List[str] = list(mapfiles or [mapfile])
+        self._map_cache: Dict[str, dict] = {}
+        for mf in self._all_mapfiles:
+            if mf == mapfile and _map_data is not None:
+                self._map_cache[mf] = copy.deepcopy(_map_data)
+            else:
+                self._map_cache[mf] = copy.deepcopy(load_map(mf))
 
-        # obs = state(9) + cards(ncardslots×CARD_FEATURES) + preview(ncardslots)
+        # Initialise with the first map (reset() will randomise)
+        self._load_map(self._all_mapfiles[0])
+
+        # obs = state(9) + cards(max_ncardsavail×CARD_FEATURES) + preview(max_ncardsavail)
         #       + opp(max_opponents×8)
-        # No ego-centric crop: path preview already encodes spatial card effects,
-        # and removing the 3969-feature CNN crop speeds up training ~15×.
-        self.n_scalar = 9 + ncardslots * CARD_FEATURES + ncardslots + self.max_opponents * 8
+        # Slots beyond ncardsavail are zero-padded so obs/action size stays fixed
+        # regardless of how many cards are actually in hand this game.
+        self.n_scalar = 9 + self.max_ncardsavail * CARD_FEATURES + self.max_ncardsavail + self.max_opponents * 8
         obs_dim = self.n_scalar
         self.observation_space = spaces.Box(
             low=-np.inf, high=np.inf, shape=(obs_dim,), dtype=np.float32
         )
-        self.action_space = spaces.Box(
-            low=-5.0, high=5.0, shape=(self.ncardslots,), dtype=np.float32
+        # Action: ncardslots integer indices into the ncardsavail-card hand,
+        # in play order (index 0 plays first).  Produced by the autoregressive
+        # pointer network.  MultiDiscrete so the rollout buffer stores them as
+        # (ncardslots,) int — compatible with teacher-forcing evaluate_actions().
+        self.action_space = spaces.MultiDiscrete(
+            [self.max_ncardsavail] * self.ncardslots
         )
 
         # Runtime state — populated by reset()
@@ -326,6 +336,23 @@ class PirateEnv(gym.Env if HAS_GYM else object):
 
     # ── helpers ────────────────────────────────────────────────────────────────
 
+    def _load_map(self, mapfile: str) -> None:
+        """Load (from cache) and set all map-derived attributes."""
+        raw = self._map_cache[mapfile]
+        self._map_data = copy.deepcopy(raw)
+        self._checkpoints = determine_checkpoint_locations(self._map_data)
+        self._n_checkpoints = len(self._checkpoints)
+        self._map_w = self._map_data["width"]
+        self._map_h = self._map_data["height"]
+        self._map_diag = math.sqrt(self._map_w ** 2 + self._map_h ** 2)
+        self._start_positions = [
+            layer["objects"]
+            for layer in self._map_data["layers"]
+            if layer["name"] == "startinglocs"
+        ][0]
+        self._tile_w = self._map_data["tilewidth"]
+        self._tile_h = self._map_data["tileheight"]
+
     def _cp_xy(self, player) -> Tuple[float, float]:
         cp_idx = min(player.next_checkpoint, self._n_checkpoints)
         return self._checkpoints.get(cp_idx, (player.xpos, player.ypos))
@@ -334,9 +361,29 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         cx, cy = self._cp_xy(player)
         return math.sqrt((player.xpos - cx) ** 2 + (player.ypos - cy) ** 2)
 
+    def _total_remaining_dist(self, player) -> float:
+        """Sum of straight-line distances along the remaining checkpoint path.
+
+        dist(pos → cp_k) + dist(cp_k → cp_{k+1}) + ... + dist(cp_{n-1} → cp_n)
+
+        This removes the jump discontinuity in the distance-based reward: when a
+        checkpoint is reached, curr_dist drops by exactly the distance covered to
+        get there, so (prev_dist - curr_dist) is always a smooth progress signal.
+        """
+        cp_idx = player.next_checkpoint
+        if cp_idx > self._n_checkpoints:
+            return 0.0
+        x, y = player.xpos, player.ypos
+        total = 0.0
+        for i in range(cp_idx, self._n_checkpoints + 1):
+            cx, cy = self._checkpoints.get(i, (x, y))
+            total += math.sqrt((x - cx) ** 2 + (y - cy) ** 2)
+            x, y = cx, cy
+        return total
+
     def _opp_obs_block(self) -> np.ndarray:
         block = np.zeros(self.max_opponents * 8, dtype=np.float32)
-        max_h = self.ncardsavail + FREE_HEALTH_OFFSET
+        max_h = self.max_ncardsavail + FREE_HEALTH_OFFSET  # fixed normaliser across variable nca
         for i, opp in enumerate(self._opponents.values()):
             if i >= self.max_opponents:
                 break
@@ -360,7 +407,7 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         """
         p = self._player
         dist_before = math.sqrt((p.xpos - cp_x) ** 2 + (p.ypos - cp_y) ** 2)
-        preview = np.zeros(self.ncardslots, dtype=np.float32)
+        preview = np.zeros(len(hand), dtype=np.float32)
         for i, card in enumerate(hand):
             sim_p = types.SimpleNamespace(
                 id=p.id, xpos=p.xpos, ypos=p.ypos,
@@ -383,7 +430,7 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         p = self._player
         cx, cy = self._cp_xy(p)
         angle = p.direction * math.pi / 2
-        max_health = self.ncardsavail + FREE_HEALTH_OFFSET
+        max_health = self.max_ncardsavail + FREE_HEALTH_OFFSET  # fixed normaliser
 
         state = np.array([
             p.xpos / self._map_w * 2.0 - 1.0,
@@ -397,9 +444,15 @@ class PirateEnv(gym.Env if HAS_GYM else object):
             self._round / self.max_rounds,
         ], dtype=np.float32)
 
-        hand = self._deck[self._next_card : self._next_card + self.ncardslots]
+        hand = self._deck[self._next_card : self._next_card + self.ncardsavail]
         cards = np.concatenate([encode_card(c) for c in hand])
         preview = self._card_preview(hand, cx, cy)
+
+        # Zero-pad card features and preview to max_ncardsavail
+        pad = self.max_ncardsavail - self.ncardsavail
+        if pad > 0:
+            cards = np.concatenate([cards, np.zeros(pad * CARD_FEATURES, dtype=np.float32)])
+            preview = np.concatenate([preview, np.zeros(pad, dtype=np.float32)])
 
         return np.concatenate([state, cards, preview, self._opp_obs_block()])
 
@@ -423,6 +476,12 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         if seed is not None:
             random.seed(seed)
 
+        # Randomise map and hand size for this episode (curriculum / multi-map).
+        if len(self._all_mapfiles) > 1:
+            self._load_map(random.choice(self._all_mapfiles))
+        if len(self._ncardsavail_options) > 1:
+            self.ncardsavail = random.choice(self._ncardsavail_options)
+
         # Shuffle a copy so self._map_data is never mutated.
         positions = list(self._start_positions)
         random.shuffle(positions)
@@ -437,7 +496,7 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         self._deck = _make_deck(self.pct_repair, self.pct_cannon)
         self._next_card = 0
         self._round = 0
-        self._prev_dist = self._dist_to_cp(self._player)
+        self._prev_dist = self._total_remaining_dist(self._player)
 
         self._opponents = {}
         self._opp_decks = []
@@ -463,11 +522,29 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         p = self._player
         pid = p.id
 
-        # Decode action: per-card priority scores → sort hand by descending score
-        hand = self._deck[self._next_card : self._next_card + self.ncardslots]
-        scores = np.asarray(action, dtype=np.float32)
-        order = np.argsort(-scores)  # highest score plays first
-        played = [hand[i] for i in order]
+        # Decode action: (ncardslots,) integer indices into the ncardsavail-card
+        # hand, in play order.  Produced by the pointer network (or converted
+        # from float32 via rounding for legacy compat).
+        hand = self._deck[self._next_card : self._next_card + self.ncardsavail]
+        raw  = np.asarray(action, dtype=np.float64)[:self.ncardslots]
+        indices = [int(round(float(v))) for v in raw]
+        # Clamp to valid range and deduplicate (pointer network should not repeat,
+        # but this guards against numerical noise at inference time).
+        selected_idx = []
+        used: set = set()
+        for idx in indices:
+            idx = max(0, min(idx, self.ncardsavail - 1))
+            if idx not in used:
+                selected_idx.append(idx)
+                used.add(idx)
+        # Fill any missing slots with the first unused card
+        for i in range(self.ncardsavail):
+            if len(selected_idx) >= self.ncardslots:
+                break
+            if i not in used:
+                selected_idx.append(i)
+                used.add(i)
+        played = [hand[i] for i in selected_idx[:self.ncardslots]]
 
         # Opponent card selection
         opp_played: Dict[int, List[int]] = {}
@@ -507,8 +584,8 @@ class PirateEnv(gym.Env if HAS_GYM else object):
         all_players = {pid: p, **self._opponents}
         game_over = play_one_round(all_players, self._map_data, round_cards, self.ncardsavail)
 
-        # Write played cards back into agent deck then advance pointer
-        remainder = self._deck[self._next_card + self.ncardslots : self._next_card + self.ncardsavail]
+        selected_set = set(selected_idx[:self.ncardslots])
+        remainder    = [hand[i] for i in range(self.ncardsavail) if i not in selected_set]
         self._deck[self._next_card : self._next_card + self.ncardsavail] = played + remainder
         self._deck, self._next_card = _advance_deck(
             self._deck, self._next_card, self.ncardslots, self.ncardsavail
@@ -528,10 +605,13 @@ class PirateEnv(gym.Env if HAS_GYM else object):
             )
 
         self._round += 1
-        curr_dist = self._dist_to_cp(p)
+        curr_dist = self._total_remaining_dist(p)
         self._prev_dist = curr_dist
 
         # ── reward ────────────────────────────────────────────────────────────
+        # prev_dist and curr_dist are total remaining path lengths (sum of all
+        # remaining checkpoint distances), so (prev_dist - curr_dist) is always
+        # a smooth progress signal with no jump when a checkpoint is reached.
         reward = 0.0
         reward += w.distance * (prev_dist - curr_dist)
         reward += w.time
