@@ -247,7 +247,7 @@ RACE_AGGRESSIVE_WEIGHTS = RewardWeights(
     win_race=10.0,
     lose_race=-5.0,
     lead_bonus=0.3,
-    damage_dealt=2.0,
+    damage_dealt=0.1,
     push_opp=1.0,
 )
 

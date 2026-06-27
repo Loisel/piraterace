@@ -70,7 +70,7 @@ BC_BATCH_SIZE = 512
 BC_LR         = 3e-4
 
 # ── PPO config ─────────────────────────────────────────────────────────────────
-PPO_STEPS_SOLO   = 5_000_000  # needs longer for large maps; runs fast with 16 parallel envs
+PPO_STEPS_SOLO   = 20_000_000  # extended to give greedy_slot feature time to be useful
 PPO_STEPS_SOLO_RESUME = 10_000_000  # when resuming from v3_solo: much longer for multi-map
 PPO_STEPS_GREEDY = 3_000_000
 WIN_RATE_FREQ    = 500_000
