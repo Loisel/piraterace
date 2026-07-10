@@ -4,9 +4,11 @@ import { IonModal } from '@ionic/angular';
 import { StorageService } from './services/storage.service';
 import { AuthService } from './services/auth.service';
 import { HttpService } from './services/http.service';
+import { LobbyAudioService } from './services/lobby-audio.service';
 import { BehaviorSubject } from 'rxjs';
 import { ToastController } from '@ionic/angular';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { StatusBar } from '@capacitor/status-bar';
 
 @Component({
@@ -23,9 +25,18 @@ export class AppComponent {
     private httpService: HttpService,
     private router: Router,
     private toastController: ToastController,
-    private platform: Platform
+    private platform: Platform,
+    private lobbyAudio: LobbyAudioService
   ) {
     this.initializeApp();
+
+    this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe((event: NavigationEnd) => {
+      if (event.urlAfterRedirects.startsWith('/lobby')) {
+        this.lobbyAudio.start();
+      } else {
+        this.lobbyAudio.stop();
+      }
+    });
   }
 
   openLeaveGameModal() {
