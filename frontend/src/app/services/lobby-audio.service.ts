@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
 // Original "swashbuckler" adventure theme for the lobby/menu screens —
 // driving minor-key string ostinato + brass stabs, in the spirit of
@@ -22,6 +23,10 @@ export class LobbyAudioService {
 
   musicVolume = 0.15;
   musicOn = localStorage.getItem('audio_music') !== 'off';
+  // Single source of truth for the shared "Music" preference (the header
+  // toggle) so any currently-playing GameAudio instance can stay in sync
+  // live, not just on its own next construction.
+  musicOn$ = new BehaviorSubject<boolean>(this.musicOn);
 
   private static readonly BPM = 138;
 
@@ -49,6 +54,7 @@ export class LobbyAudioService {
     this.musicOn = val;
     localStorage.setItem('audio_music', val ? 'on' : 'off');
     if (this.musicGain && this.ctx) this.musicGain.gain.setTargetAtTime(val ? this.musicVolume : 0, this.ctx.currentTime, 0.15);
+    this.musicOn$.next(val);
   }
 
   private ensure(): AudioContext {

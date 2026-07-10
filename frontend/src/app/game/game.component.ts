@@ -7,7 +7,7 @@ import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild, ElementRef, Vie
 import { Router, ActivatedRoute } from '@angular/router';
 import { interval, BehaviorSubject } from 'rxjs';
 import { filter, pairwise } from 'rxjs/operators';
-import { timer, Subject, of } from 'rxjs';
+import { timer, Subject, of, Subscription } from 'rxjs';
 import { map, takeUntil, takeWhile, finalize } from 'rxjs/operators';
 import { HttpService } from '../services/http.service';
 import { environment } from '../../environments/environment';
@@ -15,6 +15,7 @@ import { GameInfo } from '../model/gameinfo';
 
 import { GameRenderer } from './game-renderer';
 import { GameAudio } from './game-audio';
+import { LobbyAudioService } from '../services/lobby-audio.service';
 
 @Component({
   selector: 'app-game',
@@ -42,6 +43,7 @@ export class GameComponent {
   currentPlayerUpgrades: { type: string; charges?: number }[] = [];
   currentPlayerHealth: number = 0;
   audio = new GameAudio();
+  private musicPrefSub: Subscription;
 
   @ViewChild('cards_menu', { read: ElementRef }) cards_menu: ElementRef;
   @ViewChild('tools_menu', { read: ElementRef }) tools_menu: ElementRef;
@@ -56,9 +58,12 @@ export class GameComponent {
     private route: ActivatedRoute,
     private router: Router,
     private toastController: ToastController,
-    private alertController: AlertController
+    private alertController: AlertController,
+    private lobbyAudio: LobbyAudioService
   ) {
     this.canvasId = 'piraterace-game-' + Math.random().toString(36).substring(2);
+    // keep the in-game music toggle in sync with the shared header preference
+    this.musicPrefSub = this.lobbyAudio.musicOn$.subscribe((val) => this.audio.setMusicOn(val));
   }
 
   ionViewDidEnter() {
@@ -119,6 +124,7 @@ export class GameComponent {
 
   ionViewWillLeave() {
     console.log('Leaving Game');
+    this.musicPrefSub?.unsubscribe();
     this.audio.destroy();
     this.renderer?.destroy();
     this.renderer = null;
@@ -235,7 +241,6 @@ export class GameComponent {
     this.statsModal.present();
   }
 
-  setMusicOn(event: any) { this.audio.setMusicOn(event.detail.checked); }
   setSfxOn(event: any) { this.audio.setSfxOn(event.detail.checked); }
 
   changeCannonDirection(event) {
