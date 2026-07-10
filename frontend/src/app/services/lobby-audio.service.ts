@@ -1,12 +1,39 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
-// Original "swashbuckler" adventure theme for the lobby/menu screens —
-// driving minor-key string ostinato + brass stabs, in the spirit of
-// pirate-adventure film scores (not a reproduction of any copyrighted
-// melody). Shares the `audio_music` on/off preference with the in-game
-// GameAudio (frontend/src/app/game/game-audio.ts) so the single "Music"
-// toggle in the sound settings modal controls both.
+// Original "swashbuckler" adventure theme for the lobby/menu screens — a
+// full ~20-bar arrangement (intro -> theme -> bridge -> climax -> repeat)
+// in the spirit of pirate-adventure film scores, NOT a reproduction of any
+// copyrighted melody. Shares the `audio_music` on/off preference with the
+// in-game GameAudio (frontend/src/app/game/game-audio.ts) via musicOn$, so
+// the single header "Music" toggle controls both.
+//
+// D natural minor throughout. All four melodic/harmonic tracks (strings,
+// bass, lead, brass) share one 80-beat master cycle so their section
+// changes land together; percussion follows the same cycle for dynamics
+// (quiet intro, driving theme, sparse bridge, full climax).
+const D2 = 73.42,
+  F2 = 87.31,
+  G2 = 98.0,
+  A2 = 110.0,
+  Bb2 = 116.54,
+  C3 = 130.81,
+  D3 = 146.83,
+  A3 = 220.0,
+  Bb3 = 233.08,
+  C4 = 261.63,
+  D4 = 293.66,
+  E4 = 329.63,
+  F4 = 349.23,
+  G4 = 392.0,
+  A4 = 440.0,
+  Bb4 = 466.16,
+  C5 = 523.25,
+  D5 = 587.33,
+  F5 = 698.46,
+  G5 = 783.99;
+const R = 0; // rest marker
+
 @Injectable({ providedIn: 'root' })
 export class LobbyAudioService {
   private ctx: AudioContext | null = null;
@@ -16,6 +43,10 @@ export class LobbyAudioService {
 
   private stringTime = 0;
   private stringIdx = 0;
+  private bassTime = 0;
+  private bassIdx = 0;
+  private leadTime = 0;
+  private leadIdx = 0;
   private brassTime = 0;
   private brassIdx = 0;
   private percTime = 0;
@@ -28,25 +59,96 @@ export class LobbyAudioService {
   // live, not just on its own next construction.
   musicOn$ = new BehaviorSubject<boolean>(this.musicOn);
 
-  private static readonly BPM = 138;
+  private static readonly BPM = 132;
 
-  // Driving eighth-note string ostinato — D natural minor
+  // Section boundaries within the shared 80-beat master cycle.
+  private static readonly INTRO_END = 16;
+  private static readonly THEME_END = 48;
+  private static readonly BRIDGE_END = 64;
+  private static readonly CYCLE_BEATS = 80;
+
+  // ── Strings: eighth-note ostinato, one long arc through the whole cycle ──
+  // Intro (16 beats): sparse quarter-note arpeggio, i-i-VI-VII
+  private static readonly STR_INTRO: number[] = [
+    D4, R, F4, R, A4, R, F4, R, D4, R, F4, R, A4, R, F4, R, Bb3, R, D4, R, F4, R, D4, R, C4, R, E4, R, G4, R, E4, R,
+  ];
+  // Theme A (64 beats / 8 bars): full driving ostinato, i-i-VI-VII x2,
+  // matching BASS's 8-bar theme progression below.
+  private static readonly STR_THEME: number[] = [
+    D4, F4, A4, F4, D4, F4, A4, F4,
+    D4, F4, A4, F4, D4, F4, A4, F4,
+    Bb3, D4, F4, D4, Bb3, D4, F4, D4,
+    C4, E4, G4, E4, C4, E4, G4, E4,
+    D4, F4, A4, F4, D4, F4, A4, F4,
+    D4, F4, A4, F4, D4, F4, A4, F4,
+    Bb3, D4, F4, D4, Bb3, D4, F4, D4,
+    C4, E4, G4, E4, C4, E4, G4, E4,
+  ];
+  // Bridge (16 beats): thinner, brighter relative-major color, III-VII-VI-v
+  private static readonly STR_BRIDGE: number[] = [
+    F4, R, A4, R, C5, R, A4, R, C4, R, E4, R, G4, R, E4, R, Bb3, R, D4, R, F4, R, D4, R, A3, R, C4, R, E4, R, C4, R,
+  ];
+  // Climax (16 beats): loud, full, octave lift on the final bar
+  private static readonly STR_CLIMAX: number[] = [
+    D4, F4, A4, F4, D4, F4, A4, F4,
+    Bb3, D4, F4, D4, Bb3, D4, F4, D4,
+    C4, E4, G4, E4, C4, E4, G4, E4,
+    D5, A4, F4, A4, D5, A4, F4, A4,
+  ];
   private static readonly STRINGS: number[] = [
-    293.66, 349.23, 440.0, 349.23, // D4 F4 A4 F4
-    293.66, 349.23, 440.0, 349.23,
-    261.63, 349.23, 415.3, 349.23, // C4 F4 Ab4 F4
-    293.66, 349.23, 440.0, 523.25, // ...climb to D5
+    ...LobbyAudioService.STR_INTRO,
+    ...LobbyAudioService.STR_THEME,
+    ...LobbyAudioService.STR_BRIDGE,
+    ...LobbyAudioService.STR_CLIMAX,
   ];
 
-  // Brass fanfare stabs — sequential [freq, slot-beats] pairs, freq 0 = rest.
-  // Each note is played short/punchy within its slot, mirroring how
-  // GameAudio's MELODY/BASS patterns are scheduled.
+  // ── Bass: one sustained root per bar, tracking the same chords ──
+  private static readonly BASS: [number, number][] = [
+    // intro — i i VI VII
+    [D2, 4], [D2, 4], [Bb2, 4], [C3, 4],
+    // theme — i i VI VII i i VI VII
+    [D2, 4], [D2, 4], [Bb2, 4], [C3, 4], [D2, 4], [D2, 4], [Bb2, 4], [C3, 4],
+    // bridge — III VII VI v
+    [F2, 4], [C3, 4], [Bb2, 4], [A2, 4],
+    // climax — i VI VII i(up)
+    [D2, 4], [Bb2, 4], [C3, 4], [D3, 4],
+  ];
+
+  // ── Lead: the actual melodic hook — silent in the intro, then develops ──
+  private static readonly LEAD_THEME: [number, number][] = [
+    [A4, 2], [C5, 2], [D5, 2], [C5, 2],
+    [Bb4, 2], [A4, 2], [F4, 2], [A4, 2],
+    [C5, 2], [Bb4, 2], [A4, 2], [G4, 2],
+    [A4, 1], [Bb4, 1], [C5, 2], [D5, 4],
+  ];
+  private static readonly LEAD_BRIDGE: [number, number][] = [
+    [F4, 2], [A4, 2], [C5, 2], [Bb4, 2],
+    [A4, 2], [G4, 2], [E4, 2], [F4, 2],
+  ];
+  private static readonly LEAD_CLIMAX: [number, number][] = [
+    [D5, 1], [D5, 1], [F5, 1], [A4, 1], [D5, 1], [F5, 1], [G5, 2],
+    [F5, 1], [D5, 1], [C5, 1], [Bb4, 1], [A4, 1], [G4, 1], [F4, 2],
+  ];
+  private static readonly LEAD: [number, number][] = [
+    [R, 16],
+    ...LobbyAudioService.LEAD_THEME,
+    ...LobbyAudioService.LEAD_BRIDGE,
+    ...LobbyAudioService.LEAD_CLIMAX,
+  ];
+
+  // ── Brass: punctuation only — silent in intro/bridge, accents in theme,
+  // full fanfare in the climax ──
   private static readonly BRASS: [number, number][] = [
-    [440.0, 1], [523.25, 1], [587.33, 2], [0, 4],
-    [440.0, 1], [523.25, 1], [659.25, 2], [0, 4],
-    [493.88, 1], [440.0, 1], [392.0, 2], [0, 4],
+    [R, 16],
+    [A4, 1], [R, 3], [A4, 1], [R, 3], [D5, 1], [R, 3], [G4, 1], [R, 3],
+    [A4, 1], [R, 3], [A4, 1], [R, 3], [D5, 1], [R, 3], [G4, 1], [R, 3],
+    [R, 16],
+    [D5, 2], [F5, 2], [A4, 2], [D5, 2], [G5, 2], [F5, 2], [D5, 2], [A4, 2],
   ];
 
+  private static readonly STRINGS_LEN = LobbyAudioService.STRINGS.length; // eighth-note slots
+
+  // ── Persistent preference toggle ─────────────────────────────────────
   // Only updates the shared preference/gain — does NOT start or stop
   // scheduling itself, since that depends on whether the current route is
   // actually the lobby (the caller decides that, see app.component.ts).
@@ -78,6 +180,10 @@ export class LobbyAudioService {
     const t0 = ctx.currentTime + 0.15;
     this.stringTime = t0;
     this.stringIdx = 0;
+    this.bassTime = t0;
+    this.bassIdx = 0;
+    this.leadTime = t0;
+    this.leadIdx = 0;
     this.brassTime = t0;
     this.brassIdx = 0;
     this.percTime = t0;
@@ -106,10 +212,25 @@ export class LobbyAudioService {
     const ahead = 0.5;
 
     while (this.stringTime < ctx.currentTime + ahead) {
-      const freq = LobbyAudioService.STRINGS[this.stringIdx % LobbyAudioService.STRINGS.length];
-      this.string(freq, this.stringTime, this.stringTime + beat * 0.46);
+      const freq = LobbyAudioService.STRINGS[this.stringIdx % LobbyAudioService.STRINGS_LEN];
+      if (freq > 0) this.string(freq, this.stringTime, this.stringTime + beat * 0.46);
       this.stringTime += beat * 0.5;
       this.stringIdx++;
+    }
+
+    while (this.bassTime < ctx.currentTime + ahead) {
+      const [freq, beats] = LobbyAudioService.BASS[this.bassIdx % LobbyAudioService.BASS.length];
+      if (freq > 0) this.bass(freq, this.bassTime, this.bassTime + beats * beat * 0.92);
+      this.bassTime += beats * beat;
+      this.bassIdx++;
+    }
+
+    while (this.leadTime < ctx.currentTime + ahead) {
+      const [freq, beats] = LobbyAudioService.LEAD[this.leadIdx % LobbyAudioService.LEAD.length];
+      const dur = beats * beat;
+      if (freq > 0) this.lead(freq, this.leadTime, this.leadTime + dur * 0.85);
+      this.leadTime += dur;
+      this.leadIdx++;
     }
 
     while (this.brassTime < ctx.currentTime + ahead) {
@@ -124,9 +245,24 @@ export class LobbyAudioService {
     }
 
     while (this.percTime < ctx.currentTime + ahead) {
-      const b = this.percBeat % 4;
-      if (b === 0) this.kick(this.percTime);
-      else this.tick(this.percTime);
+      const cyclePos = this.percBeat % LobbyAudioService.CYCLE_BEATS;
+      const beatInBar = this.percBeat % 4;
+      if (cyclePos < LobbyAudioService.INTRO_END) {
+        // intro — soft downbeat only
+        if (beatInBar === 0) this.kick(this.percTime, 0.28);
+      } else if (cyclePos < LobbyAudioService.THEME_END) {
+        // theme — driving kick/tick
+        if (beatInBar === 0 || beatInBar === 2) this.kick(this.percTime, 0.5);
+        else this.tick(this.percTime);
+      } else if (cyclePos < LobbyAudioService.BRIDGE_END) {
+        // bridge — sparse, tick only
+        if (beatInBar === 0 || beatInBar === 2) this.tick(this.percTime);
+      } else {
+        // climax — full kick/tick plus shaker on every eighth
+        if (beatInBar === 0 || beatInBar === 2) this.kick(this.percTime, 0.6);
+        else this.tick(this.percTime);
+        this.shaker(this.percTime + beat * 0.5);
+      }
       this.percTime += beat;
       this.percBeat++;
     }
@@ -152,6 +288,62 @@ export class LobbyAudioService {
     o.connect(lp);
     lp.connect(g);
     g.connect(this.musicGain!);
+    o.start(t0);
+    o.stop(t1 + 0.05);
+  }
+
+  // Warm sine/triangle bass foundation, slow attack, sustained under the bar
+  private bass(freq: number, t0: number, t1: number) {
+    const ctx = this.ctx!;
+    const o = ctx.createOscillator();
+    o.type = 'triangle';
+    o.frequency.value = freq;
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = 500;
+    const g = ctx.createGain();
+    const atk = 0.05;
+    const rel = Math.min(0.2, (t1 - t0) * 0.15);
+    g.gain.setValueAtTime(0, t0);
+    g.gain.linearRampToValueAtTime(0.3, t0 + atk);
+    g.gain.setValueAtTime(0.3, Math.max(t0 + atk, t1 - rel));
+    g.gain.linearRampToValueAtTime(0, t1);
+    o.connect(lp);
+    lp.connect(g);
+    g.connect(this.musicGain!);
+    o.start(t0);
+    o.stop(t1 + 0.05);
+  }
+
+  // Solo horn-like lead voice — the memorable melodic hook, legato with vibrato
+  private lead(freq: number, t0: number, t1: number) {
+    const ctx = this.ctx!;
+    const o = ctx.createOscillator();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(freq, t0);
+    const lfo = ctx.createOscillator();
+    lfo.type = 'sine';
+    lfo.frequency.value = 5;
+    const lfoGain = ctx.createGain();
+    lfoGain.gain.value = freq * 0.01;
+    lfo.connect(lfoGain);
+    lfoGain.connect(o.frequency);
+    const bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = freq * 2.0;
+    bp.Q.value = 1.1;
+    const g = ctx.createGain();
+    const atk = 0.03;
+    const rel = Math.min(0.15, (t1 - t0) * 0.25);
+    g.gain.setValueAtTime(0, t0);
+    g.gain.linearRampToValueAtTime(0.3, t0 + atk);
+    g.gain.setValueAtTime(0.3, Math.max(t0 + atk, t1 - rel));
+    g.gain.linearRampToValueAtTime(0, t1);
+    o.connect(bp);
+    bp.connect(g);
+    g.connect(this.musicGain!);
+    lfo.start(t0);
+    lfo.stop(t1 + 0.05);
     o.start(t0);
     o.stop(t1 + 0.05);
   }
@@ -205,14 +397,14 @@ export class LobbyAudioService {
     src.stop(t1 + 0.05);
   }
 
-  private kick(t: number) {
+  private kick(t: number, vol = 0.5) {
     const ctx = this.ctx!;
     const o = ctx.createOscillator();
     o.type = 'sine';
     o.frequency.setValueAtTime(100, t);
     o.frequency.exponentialRampToValueAtTime(34, t + 0.13);
     const g = ctx.createGain();
-    g.gain.setValueAtTime(0.5, t);
+    g.gain.setValueAtTime(vol, t);
     g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
     o.connect(g);
     g.connect(this.musicGain!);
@@ -222,6 +414,10 @@ export class LobbyAudioService {
 
   private tick(t: number) {
     this.noise(t, t + 0.045, 0.13, 2500, 8000);
+  }
+
+  private shaker(t: number) {
+    this.noise(t, t + 0.03, 0.06, 4000, 11000);
   }
 
   destroy() {
