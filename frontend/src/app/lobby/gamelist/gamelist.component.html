@@ -20,6 +20,9 @@
                 <ion-col>
                   <b>Map</b>
                 </ion-col>
+                <ion-col>
+                  <b>Players</b>
+                </ion-col>
               </ion-row>
               <ion-row
                 class="gamelist-row"
@@ -29,6 +32,7 @@
               >
                 <ion-col>{{ game.gamename }}</ion-col>
                 <ion-col class="name">{{ game.mapinfo.mapname }}</ion-col>
+                <ion-col>{{ game.player_ids.length }}/{{ game.nmaxplayers }}</ion-col>
               </ion-row>
               <ion-row *ngIf="gameConfigs.length === 0">
                 <ion-col>No games available</ion-col>
