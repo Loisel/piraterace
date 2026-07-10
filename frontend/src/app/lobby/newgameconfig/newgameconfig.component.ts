@@ -35,7 +35,13 @@ export class NewGameConfigComponent {
     console.log('selectMapChange', e);
     this.data.selected_map = e.target.value.filename;
 
-    this.httpService.post_create_new_gameConfig(this.data).subscribe((response) => {
+    // Only send the fields the backend actually reads (create_new_gameconfig
+    // recomputes available_maps/map_info from disk itself). Echoing the full
+    // `this.data` blob back — including available_maps, which embeds every
+    // map's full tileset — made this POST multi-megabyte and prone to
+    // tripping nginx's client_max_body_size as more maps get added.
+    const payload = { selected_map: this.data.selected_map, gamename: this.data.gamename };
+    this.httpService.post_create_new_gameConfig(payload).subscribe((response) => {
       console.log('post post_create_new_gameConfig', response);
       this.data = response;
     });
@@ -44,7 +50,12 @@ export class NewGameConfigComponent {
   createGameConfig(event) {
     // create a GameConfig
     console.log('Create a gameConfig');
-    this.httpService.createGameConfig(this.data).subscribe(
+    const payload = {
+      selected_map: this.data.selected_map,
+      gamename: this.data.gamename,
+      Nmaxplayers: this.data.Nmaxplayers,
+    };
+    this.httpService.createGameConfig(payload).subscribe(
       (gameConfig) => {
         console.log('New GameConfig response:', gameConfig);
         this.router.navigate(['../view_gameconfig', gameConfig.id], {

@@ -40,7 +40,7 @@ export class HttpService {
   getMapInfo(mapfile: string) {
     return this.httpClient.get<MapInfo>(`${this.get_mapinfoURL}/${mapfile}`);
   }
-  createGameConfig(data: NewGameConfig) {
+  createGameConfig(data: Partial<NewGameConfig>) {
     return this.httpClient.post<GameConfig>(`${this.create_gameConfigURL}`, data);
   }
   createGame(game_id: number) {
@@ -84,7 +84,7 @@ export class HttpService {
   get_create_new_gameConfig() {
     return this.httpClient.get<NewGameConfig>(`${this.create_new_gameConfigURL}`);
   }
-  post_create_new_gameConfig(data: NewGameConfig) {
+  post_create_new_gameConfig(data: Partial<NewGameConfig>) {
     return this.httpClient.post<NewGameConfig>(`${this.create_new_gameConfigURL}`, data);
   }
   get_leaveGame() {
