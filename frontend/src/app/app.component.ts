@@ -26,7 +26,7 @@ export class AppComponent {
     private router: Router,
     private toastController: ToastController,
     private platform: Platform,
-    private lobbyAudio: LobbyAudioService
+    public lobbyAudio: LobbyAudioService
   ) {
     this.initializeApp();
 
@@ -37,6 +37,15 @@ export class AppComponent {
         this.lobbyAudio.stop();
       }
     });
+  }
+
+  toggleLobbyMusic() {
+    const val = !this.lobbyAudio.musicOn;
+    this.lobbyAudio.setMusicOn(val);
+    if (this.router.url.startsWith('/lobby')) {
+      if (val) this.lobbyAudio.start();
+      else this.lobbyAudio.stop();
+    }
   }
 
   openLeaveGameModal() {

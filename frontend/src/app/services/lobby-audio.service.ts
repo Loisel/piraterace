@@ -42,12 +42,13 @@ export class LobbyAudioService {
     [493.88, 1], [440.0, 1], [392.0, 2], [0, 4],
   ];
 
+  // Only updates the shared preference/gain — does NOT start or stop
+  // scheduling itself, since that depends on whether the current route is
+  // actually the lobby (the caller decides that, see app.component.ts).
   setMusicOn(val: boolean) {
     this.musicOn = val;
     localStorage.setItem('audio_music', val ? 'on' : 'off');
     if (this.musicGain && this.ctx) this.musicGain.gain.setTargetAtTime(val ? this.musicVolume : 0, this.ctx.currentTime, 0.15);
-    if (val) this.start();
-    else this.stop();
   }
 
   private ensure(): AudioContext {

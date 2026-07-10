@@ -50,7 +50,7 @@ export class ChatboxComponent implements OnInit, AfterViewInit, OnDestroy {
       this.httpService.post_chat(this.chatslug, this.message).subscribe(
         (ret) => {
           this.message = '';
-          this.chat = ret.chat.reverse();
+          this.chat = (ret.chat || []).reverse();
         },
         (error) => {
           console.log('failed post chat: ', error);
@@ -72,7 +72,7 @@ export class ChatboxComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.chatslug !== null) {
       this.httpService.get_chat(this.chatslug).subscribe(
         (ret) => {
-          let chat = ret.chat.reverse();
+          let chat = (ret.chat || []).reverse();
           this.activeUsers = ret.active_users;
           if (chat.length > 0) {
             if (this.chat) {

@@ -7,6 +7,12 @@
 
       <ion-title><img style="display: inline-block; padding-top: 8px; height: 5ex" src="assets/theme/logo.png" /></ion-title>
 
+      <ion-buttons slot="end">
+        <ion-button (click)="toggleLobbyMusic()">
+          <ion-icon [name]="lobbyAudio.musicOn ? 'musical-notes' : 'musical-notes-outline'" size="large"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+
       <ion-buttons id="usermenu-button" slot="end">
         <ion-icon *ngIf="authService.isAuthenticated | async" name="person-circle" size="large"></ion-icon>
         <ion-icon *ngIf="!(authService.isAuthenticated | async)" name="log-in-outline" size="large"></ion-icon>
