@@ -49,7 +49,7 @@ from pigame.game_logic import (
     is_player_cursed,
 )
 
-from pichat.views import gen_gameconfigchatslug, gen_gamechatslug
+from pichat.views import gen_gameconfigchatslug, gen_gamechatslug, add_message
 from pigame.bots import bot_submit_cards
 
 TIME_PER_ACTION = 0.6
@@ -559,6 +559,23 @@ def predict_path(request):
     return JsonResponse(path, safe=False)
 
 
+CFG_OPTIONS_LABELS = {
+    "ncardsavail": "Number of cards on hand",
+    "ncardslots": "Number of cards to be played",
+    "countdown": "Countdown duration (seconds)",
+    "path_highlighting": "Preview ship path",
+    "treasure_preview": "Show treasure contents",
+    "treasures_per_round": "Chests per round",
+    "percentage_repaircards": "Fraction of repaircards in deck",
+}
+
+
+def format_cfg_option_value(field, value):
+    if isinstance(value, bool):
+        return "on" if value else "off"
+    return value
+
+
 @api_view(["POST"])
 @permission_classes((IsAuthenticated,))
 def update_gamecfg_options(request, gameconfig_id, request_id):
@@ -592,6 +609,8 @@ def update_gamecfg_options(request, gameconfig_id, request_id):
     if data["treasures_per_round"] < 0:
         return JsonResponse(f"Treasures per round must be >= 0", status=404, safe=False)
 
+    old_values = {field: getattr(gamecfg, field) for field in CFG_OPTIONS_LABELS}
+
     gamecfg.request_id = request_id
     gamecfg.ncardsavail = data["ncardsavail"]
     gamecfg.ncardslots = data["ncardslots"]
@@ -604,6 +623,15 @@ def update_gamecfg_options(request, gameconfig_id, request_id):
     for i, pid in enumerate(gamecfg.player_ids):
         gamecfg.player_ready[i] = pid in bot_ids
     gamecfg.save()
+
+    slug = gen_gameconfigchatslug(gamecfg.pk)
+    for field, label in CFG_OPTIONS_LABELS.items():
+        old_value = old_values[field]
+        new_value = getattr(gamecfg, field)
+        if old_value != new_value:
+            old_str = format_cfg_option_value(field, old_value)
+            new_str = format_cfg_option_value(field, new_value)
+            add_message(slug, request.user, f"changed {label} from {old_str} to {new_str}", None)
 
     return redirect(reverse("pigame:view_gameconfig", kwargs={"gameconfig_id": gamecfg.pk}))
 
