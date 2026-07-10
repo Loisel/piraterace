@@ -332,10 +332,12 @@ def play_stack(game, initial_upgrades=None):
                 p.health -= 1
                 burn_actions.append(dict(key="burn_damage", target=pid, health=p.health))
                 if p.health <= 0:
-                    lost = kill_player(p, player_upgrades)
+                    lost, dropped = kill_player(p, player_upgrades, active_treasures)
                     burn_actions.append(dict(key="death", target=pid, type="burn"))
                     for upg in lost:
                         burn_actions.append(dict(key="upgrade_lost", target=pid, upgrade=upg))
+                    for treasure in dropped:
+                        burn_actions.append(dict(key="treasure_spawn", **treasure))
             on_fire_pids.clear()
             if burn_actions:
                 actionstack.append(burn_actions)
@@ -397,7 +399,10 @@ def play_stack(game, initial_upgrades=None):
 
         else:  # obviously a player card
             Nplayercardsplayedthisround += 1
-            actions = get_actions_for_card(game, initial_map, players, players[playerid], card, player_upgrades=player_upgrades)
+            actions = get_actions_for_card(
+                game, initial_map, players, players[playerid], card,
+                player_upgrades=player_upgrades, active_treasures=active_treasures,
+            )
             if len(actions) > 0:
                 cardid, cardrank = card_id_rank(card)
                 actionstack.append(
@@ -417,10 +422,14 @@ def play_stack(game, initial_upgrades=None):
             Nplayercardsplayedthisround = 0
 
             # board moves
-            board_moves_actions = board_moves(game, initial_map, players, player_upgrades=player_upgrades)
+            board_moves_actions = board_moves(
+                game, initial_map, players, player_upgrades=player_upgrades, active_treasures=active_treasures
+            )
             actionstack.append(board_moves_actions)
 
-            board_turret_actions = board_turrets(game, initial_map, players, player_upgrades=player_upgrades)
+            board_turret_actions = board_turrets(
+                game, initial_map, players, player_upgrades=player_upgrades, active_treasures=active_treasures
+            )
             actionstack.append(board_turret_actions)
 
             board_repair_actions = board_repair(game, initial_map, players)
@@ -432,7 +441,8 @@ def play_stack(game, initial_upgrades=None):
                 if p.health > 0 and not p.powered_down:
                     cannon_actions.extend(
                         shoot_player_cannon(game, initial_map, players, p,
-                                            player_upgrades=player_upgrades, on_fire_set=on_fire_pids)
+                                            player_upgrades=player_upgrades, on_fire_set=on_fire_pids,
+                                            active_treasures=active_treasures)
                     )
             actionstack.append(cannon_actions)
 
@@ -521,7 +531,7 @@ def play_one_round(players, initial_map, round_cards, ncardsavail, player_upgrad
                     continue
                 p.health -= 1
                 if p.health <= 0:
-                    kill_player(p, player_upgrades)
+                    kill_player(p, player_upgrades, active_treasures)
             on_fire_pids.clear()
 
             # carpenter / shipwright passive repair
@@ -557,32 +567,63 @@ def play_one_round(players, initial_map, round_cards, ncardsavail, player_upgrad
 
         else:
             Nplayercardsplayedthisround += 1
-            get_actions_for_card(_game, initial_map, players, players[playerid], card, player_upgrades=player_upgrades)
+            get_actions_for_card(
+                _game, initial_map, players, players[playerid], card,
+                player_upgrades=player_upgrades, active_treasures=active_treasures,
+            )
 
             if Nplayercardsplayedthisround == n_players:
                 Nplayercardsplayedthisround = 0
-                board_moves(_game, initial_map, players, player_upgrades=player_upgrades)
-                board_turrets(_game, initial_map, players, player_upgrades=player_upgrades)
+                board_moves(_game, initial_map, players, player_upgrades=player_upgrades, active_treasures=active_treasures)
+                board_turrets(_game, initial_map, players, player_upgrades=player_upgrades, active_treasures=active_treasures)
                 board_repair(_game, initial_map, players)
                 for p in players.values():
                     if p.health > 0 and not p.powered_down:
                         shoot_player_cannon(_game, initial_map, players, p,
-                                            player_upgrades=player_upgrades, on_fire_set=on_fire_pids)
+                                            player_upgrades=player_upgrades, on_fire_set=on_fire_pids,
+                                            active_treasures=active_treasures)
 
     return game_over
 
 
-def kill_player(p, player_upgrades=None):
+def kill_player(p, player_upgrades=None, active_treasures=None):
+    """Kill a player: zero health, move them off-board, clear carried upgrades.
+
+    If active_treasures is supplied, any upgrades the player was carrying are
+    dropped back onto the board as pickupable treasure chests at the tile
+    where they died, so other players can collect them.
+
+    Returns (lost, dropped):
+        lost:    list of upgrade-type strings the player was carrying.
+        dropped: list of the treasure dicts spawned onto active_treasures
+                 for those upgrades (empty if active_treasures was None or
+                 the player carried nothing).
+    """
+    death_x, death_y = p.xpos, p.ypos
     p.health = 0
     p.xpos = p.ypos = -99
+
+    lost = []
     if player_upgrades is not None:
         lost = list(player_upgrades.get(p.id, {}).keys())
         player_upgrades[p.id] = {}
-        return lost
-    return []
+
+    dropped = []
+    if active_treasures is not None and 0 <= death_x and 0 <= death_y:
+        for upg in lost:
+            treasure = {
+                "x": death_x,
+                "y": death_y,
+                "upgrade": upg,
+                "id": f"drop{p.id}_{death_x}_{death_y}_{upg}_{len(active_treasures)}",
+            }
+            active_treasures.append(treasure)
+            dropped.append(treasure)
+
+    return lost, dropped
 
 
-def board_turrets(game, gmap, players, player_upgrades=None):
+def board_turrets(game, gmap, players, player_upgrades=None, active_treasures=None):
     actions = []
     turret_pos = gmap.get("turret_positions")
     tile_pairs = turret_pos if turret_pos is not None else (
@@ -604,6 +645,7 @@ def board_turrets(game, gmap, players, player_upgrades=None):
                     collide_terrain=True,
                     collide_players=True,
                     player_upgrades=player_upgrades,
+                    active_treasures=active_treasures,
                 )
             )
         if tile_prop["turret_y"] != 0:
@@ -620,6 +662,7 @@ def board_turrets(game, gmap, players, player_upgrades=None):
                     collide_terrain=True,
                     collide_players=True,
                     player_upgrades=player_upgrades,
+                    active_treasures=active_treasures,
                 )
             )
     return actions
@@ -644,7 +687,7 @@ def board_repair(game, gmap, players):
     return actions
 
 
-def board_moves(game, gmap, players, fast_current=True, player_upgrades=None):
+def board_moves(game, gmap, players, fast_current=True, player_upgrades=None, active_treasures=None):
     # TODO: disable collisions for board_moves
     actions = []
     for pid, p in players.items():
@@ -663,7 +706,12 @@ def board_moves(game, gmap, players, fast_current=True, player_upgrades=None):
                 tile_prop = get_tile_properties(gmap, p.xpos, p.ypos)
                 if tile_prop["current_x"] != 0:
                     old_xpos = p.xpos
-                    actions.extend(move_player_x(game, gmap, players, p, tile_prop["current_x"], push_players=False, player_upgrades=player_upgrades))
+                    actions.extend(
+                        move_player_x(
+                            game, gmap, players, p, tile_prop["current_x"],
+                            push_players=False, player_upgrades=player_upgrades, active_treasures=active_treasures,
+                        )
+                    )
                     if p.xpos != old_xpos:
                         player_moved[pid] = True
                         next_tile_prop = get_tile_properties(gmap, p.xpos, p.ypos)
@@ -680,7 +728,12 @@ def board_moves(game, gmap, players, fast_current=True, player_upgrades=None):
 
                 if tile_prop["current_y"] != 0:
                     old_ypos = p.ypos
-                    actions.extend(move_player_y(game, gmap, players, p, tile_prop["current_y"], push_players=False, player_upgrades=player_upgrades))
+                    actions.extend(
+                        move_player_y(
+                            game, gmap, players, p, tile_prop["current_y"],
+                            push_players=False, player_upgrades=player_upgrades, active_treasures=active_treasures,
+                        )
+                    )
                     if p.ypos != old_ypos:
                         player_moved[pid] = True
                         next_tile_prop = get_tile_properties(gmap, p.xpos, p.ypos)
@@ -702,11 +755,15 @@ def board_moves(game, gmap, players, fast_current=True, player_upgrades=None):
             if tile_prop.get("fast_current", False) == True:
                 fb_players[pid] = p
         if len(fb_players) > 0:
-            actions.extend(board_moves(game, gmap, fb_players, fast_current=False, player_upgrades=player_upgrades))
+            actions.extend(
+                board_moves(
+                    game, gmap, fb_players, fast_current=False, player_upgrades=player_upgrades, active_treasures=active_treasures
+                )
+            )
     return actions
 
 
-def shoot_player_cannon(game, gmap, players, player, player_upgrades=None, on_fire_set=None):
+def shoot_player_cannon(game, gmap, players, player, player_upgrades=None, on_fire_set=None, active_treasures=None):
     has_compass_rose = player_upgrades is not None and "rose_cannons" in player_upgrades.get(player.id, {})
     directions = list(range(4)) if has_compass_rose else [(player.direction + player.cannon_direction) % 4]
     actions = []
@@ -724,13 +781,14 @@ def shoot_player_cannon(game, gmap, players, player, player_upgrades=None, on_fi
             collide_players=True,
             player_upgrades=player_upgrades,
             on_fire_set=on_fire_set,
+            active_treasures=active_treasures,
         ))
     return actions
 
 
 def shoot_cannon_ball(
     gmap, xstart, ystart, xinc, yinc, source_player, players, cannon_damage=1,
-    collide_terrain=True, collide_players=True, player_upgrades=None, on_fire_set=None
+    collide_terrain=True, collide_players=True, player_upgrades=None, on_fire_set=None, active_treasures=None
 ):
     actions = []
     x, y = xstart, ystart
@@ -780,10 +838,12 @@ def shoot_cannon_ball(
                 if is_fire_shot and other_player.health > 0:
                     actions.append(dict(key="set_on_fire", target=other_player.id))
                 if other_player.health <= 0:
-                    lost = kill_player(other_player, player_upgrades)
+                    lost, dropped = kill_player(other_player, player_upgrades, active_treasures)
                     actions.append(dict(key="death", source_player=source_player, target=other_player.id, type="cannon"))
                     for upg in lost:
                         actions.append(dict(key="upgrade_lost", target=other_player.id, upgrade=upg))
+                    for treasure in dropped:
+                        actions.append(dict(key="treasure_spawn", **treasure))
 
                 if collide_players:
                     return actions
@@ -853,7 +913,7 @@ def calc_stats(game):
     return liststats
 
 
-def get_actions_for_card(game, gmap, players, player, card, player_upgrades=None):
+def get_actions_for_card(game, gmap, players, player, card, player_upgrades=None, active_treasures=None):
     actions = []
     if player.powered_down or player.health <= 0:
         return actions
@@ -873,9 +933,13 @@ def get_actions_for_card(game, gmap, players, player, card, player_upgrades=None
         yinc = DIRID2MOVE[player.direction][1] * inc
 
         if xinc != 0:
-            actions.append(move_player_x(game, gmap, players, player, xinc, player_upgrades=player_upgrades))
+            actions.append(
+                move_player_x(game, gmap, players, player, xinc, player_upgrades=player_upgrades, active_treasures=active_treasures)
+            )
         if yinc != 0:
-            actions.append(move_player_y(game, gmap, players, player, yinc, player_upgrades=player_upgrades))
+            actions.append(
+                move_player_y(game, gmap, players, player, yinc, player_upgrades=player_upgrades, active_treasures=active_treasures)
+            )
 
     if CARDS[cardid]["repair"] != 0:
         maxhealth = game.config.ncardsavail + FREE_HEALTH_OFFSET
@@ -897,7 +961,7 @@ def get_actions_for_card(game, gmap, players, player, card, player_upgrades=None
     return actions
 
 
-def move_player_x(game, gmap, players, player, inc, push_players=True, player_upgrades=None):
+def move_player_x(game, gmap, players, player, inc, push_players=True, player_upgrades=None, active_treasures=None):
     actions = []
     tile_prop = get_tile_properties(gmap, player.xpos + inc, player.ypos)
     if tile_prop["collision"]:
@@ -905,10 +969,12 @@ def move_player_x(game, gmap, players, player, inc, push_players=True, player_up
         player.health -= damage
         actions.append(dict(key="collision_x", target=player.id, val=inc, health=player.health))
         if player.health <= 0:
-            lost = kill_player(player, player_upgrades)
+            lost, dropped = kill_player(player, player_upgrades, active_treasures)
             actions.append(dict(key="death", target=player.id, type="collision"))
             for upg in lost:
                 actions.append(dict(key="upgrade_lost", target=player.id, upgrade=upg))
+            for treasure in dropped:
+                actions.append(dict(key="treasure_spawn", **treasure))
         return actions
 
     ghost = player_upgrades and "ghost_ship" in player_upgrades.get(player.id, {})
@@ -924,10 +990,12 @@ def move_player_x(game, gmap, players, player, inc, push_players=True, player_up
                 "target_pos": (player.xpos + inc, player.ypos),
             }
         )
-        lost = kill_player(player, player_upgrades)
+        lost, dropped = kill_player(player, player_upgrades, active_treasures)
         actions.append(dict(key="death", target=player.id, type="void"))
         for upg in lost:
             actions.append(dict(key="upgrade_lost", target=player.id, upgrade=upg))
+        for treasure in dropped:
+            actions.append(dict(key="treasure_spawn", **treasure))
         return actions
 
     if (player.xpos + inc < 0) or (player.xpos + inc >= gmap["width"]):
@@ -941,10 +1009,12 @@ def move_player_x(game, gmap, players, player, inc, push_players=True, player_up
                 "target_pos": (player.xpos + inc, player.ypos),
             }
         )
-        lost = kill_player(player, player_upgrades)
+        lost, dropped = kill_player(player, player_upgrades, active_treasures)
         actions.append(dict(key="death", target=player.id, type="void"))
         for upg in lost:
             actions.append(dict(key="upgrade_lost", target=player.id, upgrade=upg))
+        for treasure in dropped:
+            actions.append(dict(key="treasure_spawn", **treasure))
         return actions
 
     for pid, p2 in players.items():
@@ -952,7 +1022,9 @@ def move_player_x(game, gmap, players, player, inc, push_players=True, player_up
             if push_players:
                 if player_upgrades and "solid_rock" in player_upgrades.get(p2.id, {}):
                     return actions  # rock ship blocks the pusher
-                actions.extend(move_player_x(game, gmap, players, p2, inc, player_upgrades=player_upgrades))
+                actions.extend(
+                    move_player_x(game, gmap, players, p2, inc, player_upgrades=player_upgrades, active_treasures=active_treasures)
+                )
                 if (p2.xpos == player.xpos + inc) and (p2.ypos == player.ypos):
                     return actions
                 break
@@ -971,7 +1043,7 @@ def move_player_x(game, gmap, players, player, inc, push_players=True, player_up
     return actions
 
 
-def move_player_y(game, gmap, players, player, inc, push_players=True, player_upgrades=None):
+def move_player_y(game, gmap, players, player, inc, push_players=True, player_upgrades=None, active_treasures=None):
     actions = []
     tile_prop = get_tile_properties(gmap, player.xpos, player.ypos + inc)
     if tile_prop["collision"]:
@@ -979,10 +1051,12 @@ def move_player_y(game, gmap, players, player, inc, push_players=True, player_up
         player.health -= damage
         actions.append(dict(key="collision_y", target=player.id, val=inc, health=player.health))
         if player.health <= 0:
-            lost = kill_player(player, player_upgrades)
+            lost, dropped = kill_player(player, player_upgrades, active_treasures)
             actions.append(dict(key="death", target=player.id, type="collision"))
             for upg in lost:
                 actions.append(dict(key="upgrade_lost", target=player.id, upgrade=upg))
+            for treasure in dropped:
+                actions.append(dict(key="treasure_spawn", **treasure))
         return actions
 
     ghost = player_upgrades and "ghost_ship" in player_upgrades.get(player.id, {})
@@ -998,10 +1072,12 @@ def move_player_y(game, gmap, players, player, inc, push_players=True, player_up
                 "target_pos": (player.xpos, player.ypos + inc),
             }
         )
-        lost = kill_player(player, player_upgrades)
+        lost, dropped = kill_player(player, player_upgrades, active_treasures)
         actions.append(dict(key="death", target=player.id, type="void"))
         for upg in lost:
             actions.append(dict(key="upgrade_lost", target=player.id, upgrade=upg))
+        for treasure in dropped:
+            actions.append(dict(key="treasure_spawn", **treasure))
         return actions
 
     if (player.ypos + inc < 0) or (player.ypos + inc >= gmap["height"]):
@@ -1015,10 +1091,12 @@ def move_player_y(game, gmap, players, player, inc, push_players=True, player_up
                 "target_pos": (player.xpos, player.ypos + inc),
             }
         )
-        lost = kill_player(player, player_upgrades)
+        lost, dropped = kill_player(player, player_upgrades, active_treasures)
         actions.append(dict(key="death", target=player.id, type="void"))
         for upg in lost:
             actions.append(dict(key="upgrade_lost", target=player.id, upgrade=upg))
+        for treasure in dropped:
+            actions.append(dict(key="treasure_spawn", **treasure))
         return actions
 
     for pid, p2 in players.items():
@@ -1026,7 +1104,9 @@ def move_player_y(game, gmap, players, player, inc, push_players=True, player_up
             if push_players:
                 if player_upgrades and "solid_rock" in player_upgrades.get(p2.id, {}):
                     return actions  # rock ship blocks the pusher
-                actions.extend(move_player_y(game, gmap, players, p2, inc, player_upgrades=player_upgrades))
+                actions.extend(
+                    move_player_y(game, gmap, players, p2, inc, player_upgrades=player_upgrades, active_treasures=active_treasures)
+                )
                 if (p2.xpos == player.xpos) and (p2.ypos == player.ypos + inc):
                     return actions
                 break
