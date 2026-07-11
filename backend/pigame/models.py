@@ -3,6 +3,7 @@ from enum import Enum
 from polymorphic.models import PolymorphicModel
 from django.contrib.postgres.fields import ArrayField
 import matplotlib.colors as mcolors
+import colorsys
 import random
 
 from piraterace.settings import CARDSURL
@@ -158,7 +159,25 @@ CHOICE_MODES = [
     ("s", "Count from second to last finished"),
 ]
 
+
+def _generate_extra_colors(n):
+    """Golden-angle hue stepping keeps n colors visually well-spread even as
+    n grows, unlike evenly-dividing 360/n which clusters badly for odd n."""
+    golden_angle = 0.618033988749895
+    colors = {}
+    for i in range(n):
+        hue = (i * golden_angle) % 1.0
+        r, g, b = colorsys.hsv_to_rgb(hue, 0.65, 0.85)
+        colors[f"gen{i}"] = "#{:02x}{:02x}{:02x}".format(round(r * 255), round(g * 255), round(b * 255))
+    return colors
+
+
+# Tableau's 10 named colors, extended with generated ones. GameConfig.add_player()
+# and the add_bot view both pick a random unused color from here per player, so
+# this must have at least as many entries as the largest supported player count
+# (the biggest current map holds 32) or they crash with an empty random.choice().
 COLORS = {k.replace("tab:", ""): v for k, v in mcolors.TABLEAU_COLORS.items()}
+COLORS.update(_generate_extra_colors(40))
 FREE_HEALTH_OFFSET = 3
 
 
